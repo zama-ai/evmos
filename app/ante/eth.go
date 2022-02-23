@@ -2,7 +2,9 @@ package ante
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -15,6 +17,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
+	vestingtypes "github.com/tharsis/evmos/x/vesting/types"
 )
 
 // EthSigVerificationDecorator validates an ethereum signatures
@@ -506,6 +510,69 @@ func (mfd EthMempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulat
 				if sdk.NewDecFromBigInt(feeAmt).LT(requiredFee) {
 					return ctx, sdkerrors.Wrapf(sdkerrors.ErrInsufficientFee, "insufficient fees; got: %s required: %s", feeAmt, requiredFee)
 				}
+			}
+		}
+	}
+
+	return next(ctx, tx, simulate)
+}
+
+type EthVestingTransactionDecorator struct {
+	ak evmtypes.AccountKeeper
+}
+
+func NewEthVestingTransactionDecorator(ak evmtypes.AccountKeeper) VestingDelegationDecorator {
+	return VestingDelegationDecorator{
+		ak: ak,
+	}
+}
+
+// AnteHandle ensures that a clawback vesting account cannot perform Ethereum Tx
+// if:
+//   - before surpassing all lockup periods (with no locked coins).
+//   -  Cannot perform Ethereum tx before surpassing all lockup periods (with no locked coins).
+func (vtd EthVestingTransactionDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bool, next sdk.AnteHandler) (newCtx sdk.Context, err error) {
+	for _, msg := range tx.GetMsgs() {
+		_, ok := msg.(*evmtypes.MsgEthereumTx)
+		if !ok {
+			return ctx, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "invalid message type %T, expected %T", msg, (*evmtypes.MsgEthereumTx)(nil))
+		}
+
+		fmt.Println("ETHEREUM TX AnteHandle")
+		// TODO use ethMsg.From instead?
+		for _, addr := range msg.GetSigners() {
+			acc := vtd.ak.GetAccount(ctx, addr)
+			if acc == nil {
+				return ctx, err
+			}
+
+			// Check that this decorator only applies to clawback vesting accounts
+			clawbackAccount, isClawback := acc.(*vestingtypes.ClawbackVestingAccount)
+			if !isClawback {
+				return next(ctx, tx, simulate)
+			}
+
+			// Error if vesting cliff has not passed (with zero vested coins). This
+			// rule does not apply for existing clawback accounts that receive a new
+			// grant while there are already vested coins on the account.
+			vested := clawbackAccount.GetVestedCoins(ctx.BlockTime())
+			if vested == nil {
+				return ctx, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest,
+					"cannot perform Ethereum tx with clawback vesting account, that has no vested coins: %x", vested,
+				)
+			}
+
+			// Error if account has locked coins (before surpassing all lockup periods)
+			// TODO move to a HasLockedCoins() bool method
+			unlockingTime := time.Unix(clawbackAccount.StartTime, 0)
+			for _, lp := range clawbackAccount.LockupPeriods {
+				unlockingTime.Add(time.Duration(lp.Length))
+			}
+			islocked := ctx.BlockTime().Before(unlockingTime)
+			if islocked {
+				return ctx, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest,
+					"cannot perform Ethereum tx with clawback vesting account, that is locked coins: %x", vested,
+				)
 			}
 		}
 	}

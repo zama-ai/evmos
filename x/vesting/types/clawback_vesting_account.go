@@ -65,8 +65,9 @@ func (va ClawbackVestingAccount) GetVestingCoins(blockTime time.Time) sdk.Coins 
 	return va.OriginalVesting.Sub(va.GetVestedCoins(blockTime))
 }
 
+// TODO change LockedCoins to apply to unvested and unvested coins
 // LockedCoins returns the set of coins that are not spendable (i.e. locked),
-// defined as the vesting coins that are not delegated.
+// defined as the unvested coins that are not delegated.
 func (va ClawbackVestingAccount) LockedCoins(blockTime time.Time) sdk.Coins {
 	return va.BaseVestingAccount.LockedCoinsFromVesting(va.GetVestingCoins(blockTime))
 }

@@ -214,8 +214,8 @@ var _ = Describe("Clawback Vesting Accounts", Ordered, func() {
 		It("cannot perform Ethereum tx", func() {
 			_, err := s.DeployContract("vestcoin", "VESTCOIN", erc20Decimals)
 			// TODO EVM Hook?
-			// Expect(err).ToNot(BeNil())
-			Expect(err).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			// Expect(err).To(BeNil())
 		})
 	})
 
