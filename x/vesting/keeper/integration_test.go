@@ -1,20 +1,25 @@
 package keeper_test
 
 import (
+	"encoding/json"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"github.com/tharsis/ethermint/tests"
 	"github.com/tharsis/evmos/testutil"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	sdkvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
-
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/tharsis/ethermint/server/config"
+	evmtypes "github.com/tharsis/ethermint/x/evm/types"
 
+	"github.com/tharsis/evmos/contracts"
 	"github.com/tharsis/evmos/x/vesting/types"
 )
 
@@ -83,7 +88,8 @@ var _ = Describe("Clawback Vesting Accounts", Ordered, func() {
 		)
 		err := testutil.FundAccount(s.app.BankKeeper, s.ctx, addr, vestingAmtTotal)
 		s.Require().NoError(err)
-		s.app.AccountKeeper.SetAccount(s.ctx, clawbackAccount)
+		acc := s.app.AccountKeeper.NewAccount(s.ctx, clawbackAccount)
+		s.app.AccountKeeper.SetAccount(s.ctx, acc)
 
 		// Check if all tokens are unvested at vestingStart
 		unvested = clawbackAccount.GetVestingCoins(s.ctx.BlockTime())
@@ -145,10 +151,31 @@ var _ = Describe("Clawback Vesting Accounts", Ordered, func() {
 		})
 
 		It("cannot perform Ethereum tx", func() {
-			_, err := s.DeployContract("vestcoin", "VESTCOIN", erc20Decimals)
-			// TODO EVM Hook?
-			// Expect(err).ToNot(BeNil())
-			Expect(err).To(BeNil())
+			// Deploy contract to interact with
+			contract, err := s.DeployContract("vestcoin", "VESTCOIN", erc20Decimals)
+			s.Require().NoError(err)
+
+			abi := contracts.ERC20MinterBurnerDecimalsContract.ABI
+
+			// Send Tx to contract
+			data, err := abi.Pack("mint", s.address, sdk.OneDec().BigInt())
+			s.Require().NoError(err)
+
+			txArgs, err := json.Marshal(evmtypes.TransactionArgs{
+				From: &s.address,
+				To:   &contract,
+				Data: (*hexutil.Bytes)(&data),
+			})
+			s.Require().NoError(err)
+
+			_, err = s.queryClientEvm.EthCall(sdk.WrapSDKContext(s.ctx), &evmtypes.EthCallRequest{
+				Args:   txArgs,
+				GasCap: uint64(config.DefaultGasCap),
+			})
+
+			// TODO Eth Antehandler
+			Expect(err).ToNot(BeNil())
+			// Expect(err).To(BeNil())
 		})
 	})
 
@@ -214,8 +241,8 @@ var _ = Describe("Clawback Vesting Accounts", Ordered, func() {
 		It("cannot perform Ethereum tx", func() {
 			_, err := s.DeployContract("vestcoin", "VESTCOIN", erc20Decimals)
 			// TODO EVM Hook?
-			Expect(err).ToNot(BeNil())
-			// Expect(err).To(BeNil())
+			// Expect(err).ToNot(BeNil())
+			Expect(err).To(BeNil())
 		})
 	})
 

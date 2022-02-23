@@ -204,3 +204,14 @@ func (va ClawbackVestingAccount) UpdateDelegation(encumbered, toClawBack, bonded
 	va.DelegatedFree = newDelegated.Sub(va.DelegatedVesting)
 	return va, toClawBack
 }
+
+// HasLockedCoins returns true if the blocktime has not passed all clawback
+// account's lockup periods
+func (va ClawbackVestingAccount) HasLockedCoins(blockTime time.Time) bool {
+	unlockingTime := time.Unix(va.StartTime, 0)
+	for _, lp := range va.LockupPeriods {
+		unlockingTime.Add(time.Duration(lp.Length))
+	}
+	return blockTime.Before(unlockingTime)
+
+}
