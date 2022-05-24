@@ -131,6 +131,10 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		panic(err)
 	}
 
+	// if err := cmdcfg.EnableObservability(); err != nil {
+	// 	panic(err)
+	// }
+
 	// add rosetta
 	rootCmd.AddCommand(sdkserver.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Marshaler))
 
