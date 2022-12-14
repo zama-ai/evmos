@@ -37,8 +37,9 @@ cat $HOME/.evmosd/config/genesis.json | jq '.app_state["gov"]["deposit_params"][
 cat $HOME/.evmosd/config/genesis.json | jq '.app_state["evm"]["params"]["evm_denom"]="aevmos"' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
 cat $HOME/.evmosd/config/genesis.json | jq '.app_state["inflation"]["params"]["mint_denom"]="aevmos"' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
 
-# Set gas limit in genesis
-cat $HOME/.evmosd/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="10000000"' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
+# Set gas and txn limit in genesis
+cat $HOME/.evmosd/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="9999999999999999"' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
+cat $HOME/.evmosd/config/genesis.json | jq '.consensus_params["block"]["max_bytes"]="104857600"' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
 
 # Set claims start time
 node_address=$(evmosd keys list | grep  "address: " | cut -c12-)
@@ -57,11 +58,16 @@ cat $HOME/.evmosd/config/genesis.json | jq '.app_state["claims"]["params"]["dura
 # 0xA61808Fe40fEb8B3433778BBC2ecECCAA47c8c47 || evmos15cvq3ljql6utxseh0zau9m8ve2j8erz89m5wkz
 cat $HOME/.evmosd/config/genesis.json | jq -r --arg amount_to_claim "$amount_to_claim" '.app_state["bank"]["balances"] += [{"address":"evmos15cvq3ljql6utxseh0zau9m8ve2j8erz89m5wkz","coins":[{"denom":"aevmos", "amount":$amount_to_claim}]}]' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
 
-# disable produce empty block
+# Disable production of empty blocks.
+# Increase transaction and HTTP server body sizes.
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' 's/create_empty_blocks = true/create_empty_blocks = false/g' $HOME/.evmosd/config/config.toml
+    sed -i '' 's/max_body_bytes = 1000000/max_body_bytes = 1000000000/g' $HOME/.evmosd/config/config.toml
+    sed -i '' 's/max_tx_bytes = 1048576/max_tx_bytes = 100000000/g' $HOME/.evmosd/config/config.toml
   else
     sed -i 's/create_empty_blocks = true/create_empty_blocks = false/g' $HOME/.evmosd/config/config.toml
+    sed -i 's/max_body_bytes = 1000000/max_body_bytes = 1000000000/g' $HOME/.evmosd/config/config.toml
+    sed -i 's/max_tx_bytes = 1048576/max_tx_bytes = 100000000/g' $HOME/.evmosd/config/config.toml
 fi
 
 if [[ $1 == "pending" ]]; then
@@ -117,5 +123,5 @@ if [[ $1 == "pending" ]]; then
   echo "pending mode is on, please wait for the first block committed."
 fi
 
-# Start the node (remove the --pruning=nothing flag if historical queries are not needed)
-evmosd start --pruning=nothing $TRACE --log_level $LOGLEVEL --minimum-gas-prices=0.0001aevmos --json-rpc.api eth,txpool,personal,net,debug,web3
+echo "Your private key:"
+./dump_private_key.sh
