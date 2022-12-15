@@ -44,6 +44,40 @@ interoperable with Ethereum. It's built using the [Cosmos SDK](https://github.co
 
 **Note**: Requires [Go 1.18+](https://golang.org/dl/)
 
+## Instructions for Zama block chain
+
+1. [MANDATORY] In order to use our custom EVM, please use the branch [__1.10.19-zama__](https://github.com/zama-ai/go-ethereum/tree/1.10.19-zama) in Zama go-ethereum repository.
+2. [CHECK] Please check that go.mod in this repository root folder points to the custom go-ethereum repository (end of the file).
+3. [MANDATORY] For pre-compiled contracts, we need to add to go_ethereum the C API dynamic library. The [install_tfhe_rs_script](https://github.com/zama-ai/go-ethereum/blob/1.10.19-zama/install_thfe_rs_api.sh) scripts allows to install it directly to the right place. To be more precise, the libray files are built and copied into __core/vm/lib__ folder and the tfhe C header file is placed in __core/vm__ folder. 
+4. [HELP_IF_ERROR] If the library is not found when the node is run  consider updating some env variable as __LD_LIBRARY_PATH__ with the path of go-ethereum/core/vm/lib. 
+4. [HELP_IF_ERROR_IN_DEBUG] If the library is not found in the DEBUG mode, please consider to add the env variable as for the point 4 for the launch.json file. Here is an example launch.json file. 
+```bash
+{
+    "configurations": [
+        {
+            "name": "evmosd",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "/home/ldemir/go/bin/evmosd",
+            "env": {
+                "LD_LIBRARY_PATH": "/home/ldemir/Documents/dev/blockchain/go-ethereum/core/vm/lib/"
+            },
+            "args": [
+                "start",
+                "--pruning=nothing",
+                "--log_level=info",
+                "--minimum-gas-prices=0.0001aevmos",
+                "--json-rpc.api=eth,txpool,personal,net,debug,web3"
+            ]
+        }
+    ]
+}
+```
+
+Now you can continue to Installation session. 
+
+
 ## Installation
 
 For prerequisites and detailed build instructions please read the [Installation](https://evmos.dev/validators/quickstart/installation.html) instructions. Once the dependencies are installed, run:
