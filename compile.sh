@@ -1,1 +1,1 @@
-make install
+COSMOS_BUILD_OPTIONS=nostrip make install

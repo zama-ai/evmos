@@ -2,7 +2,7 @@ TRACE=""
 LOGLEVEL="info"
 
 # Recompile, if needed.
-make install
+COSMOS_BUILD_OPTIONS=nostrip make install
 
 # Start the node (remove the --pruning=nothing flag if historical queries are not needed)
 evmosd start --pruning=nothing $TRACE --log_level $LOGLEVEL \
