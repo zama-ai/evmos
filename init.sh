@@ -1,4 +1,5 @@
-KEY="mykey"
+KEY1="mykey1"
+KEY2="mykey2"
 CHAINID="evmos_9000-1"
 MONIKER="localtestnet"
 KEYRING="test" # remember to change to other types of keyring like 'file' in-case exposing to outside world, otherwise your balance will be wiped quickly. The keyring test does not require private key to steal tokens from you
@@ -18,14 +19,14 @@ set -e
 rm -rf ~/.evmosd*
 
 # Reinstall daemon
-make install
+COSMOS_BUILD_OPTIONS=nostrip make install
 
 # Set client config
 evmosd config keyring-backend $KEYRING
 evmosd config chain-id $CHAINID
 
-# if $KEY exists it should be deleted
-evmosd keys add $KEY --keyring-backend $KEYRING --algo $KEYALGO
+# if keys exist, they should be deleted
+evmosd keys add $KEY1 --keyring-backend $KEYRING --algo $KEYALGO
 
 # Set moniker and chain-id for Evmos (Moniker can be anything, chain-id must be an integer)
 evmosd init $MONIKER --chain-id $CHAINID
@@ -95,7 +96,7 @@ if [[ $1 == "pending" ]]; then
 fi
 
 # Allocate genesis accounts (cosmos formatted addresses)
-evmosd add-genesis-account $KEY 100000000000000000000000000aevmos --keyring-backend $KEYRING
+evmosd add-genesis-account $KEY1 100000000000000000000000000aevmos --keyring-backend $KEYRING
 
 # Update total supply with claim values
 validators_supply=$(cat $HOME/.evmosd/config/genesis.json | jq -r '.app_state["bank"]["supply"][0]["amount"]')
@@ -105,7 +106,7 @@ total_supply=100000000000000000000010000
 cat $HOME/.evmosd/config/genesis.json | jq -r --arg total_supply "$total_supply" '.app_state["bank"]["supply"][0]["amount"]=$total_supply' > $HOME/.evmosd/config/tmp_genesis.json && mv $HOME/.evmosd/config/tmp_genesis.json $HOME/.evmosd/config/genesis.json
 
 # Sign genesis transaction
-evmosd gentx $KEY 1000000000000000000000aevmos --keyring-backend $KEYRING --chain-id $CHAINID
+evmosd gentx $KEY1 1000000000000000000000aevmos --keyring-backend $KEYRING --chain-id $CHAINID
 ## In case you want to create multiple validators at genesis
 ## 1. Back to `evmosd keys add` step, init more keys
 ## 2. Back to `evmosd add-genesis-account` step, add balance for those
@@ -123,5 +124,8 @@ if [[ $1 == "pending" ]]; then
   echo "pending mode is on, please wait for the first block committed."
 fi
 
-echo "Your private key:"
-./dump_private_key.sh
+# Create a second account.
+evmosd keys add $KEY2 --keyring-backend $KEYRING --algo $KEYALGO
+
+echo "Your private keys:"
+./dump_private_keys.sh
