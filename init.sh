@@ -127,5 +127,14 @@ fi
 # Create a second account.
 evmosd keys add $KEY2 --keyring-backend $KEYRING --algo $KEYALGO
 
+# Create Zama-specific directories and files.
+mkdir -p $HOME/.evmosd/zama/keys/users-fhe-keys
+mkdir -p $HOME/.evmosd/zama/keys/network-fhe-keys
+mkdir -p $HOME/.evmosd/zama/keys/signature-keys
+mkdir -p $HOME/.evmosd/zama/config
+cp ./zama_config.toml $HOME/.evmosd/zama/config/
+cp ./private.ed25519 $HOME/.evmosd/zama/keys/signature-keys
+cp ./public.ed25519 $HOME/.evmosd/zama/keys/signature-keys
+
 echo "Your private keys:"
 ./dump_private_keys.sh
