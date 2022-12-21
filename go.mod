@@ -175,4 +175,4 @@ replace github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8
 // TODO: Remove once our forks are public.
 replace github.com/ethereum/go-ethereum v1.10.19 => ../go-ethereum
 
-replace github.com/evmos/ethermint v1.10.19 => ../ethermint
+replace github.com/evmos/ethermint v0.19.3 => ../ethermint
