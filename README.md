@@ -88,9 +88,26 @@ make install
 
 Or check out the latest [release](https://github.com/evmos/evmos/releases).
 
-## Quick Start
+### Quick Start
 
 To learn how the Evmos works from a high-level perspective, go to the [Introduction](https://evmos.dev/about/intro/overview.html) section from the documentation. You can also check the instructions to [Run a Node](https://evmos.dev/validators/quickstart/run_node.html).
+
+## ZBC Testnet
+
+The Zama Blockchain testnet is live. The validator node is located at `13.38.123.182` and the full node is at `13.36.38.238`. 
+Whitelisted IPs can trigger the full node's RPC endpoints at `http://13.36.38.238:8545`. 
+From this connection, users can interact with encrypted smart contracts.
+
+### Running a testnet
+
+To setup a several node network, one must follow the following steps in order:
+1. On each device, clone the following repos: [evmos](https://github.com/zama-ai/evmos), [go-ethereum](https://github.com/zama-ai/go-ethereum) and [ethermint](https://github.com/zama-ai/ethermint) and checkout the zama branches on each repo.
+2. On each device, run the `install_thfe_rs_api.sh` script in the `go-ethereum` folder. This will download and build the TFHE-rs C API necessary to perform FHE operations. 
+3. On each device, run the `init.sh` script in the `evmos` folder. This will setup a basic inital configuration for the evmos node software.
+4. Retrieve the `~/.evmosd/config/genesis.json` from the validator node and distribute it at the same location on all the other nodes. This will overwrite the other nodes' initial configuration, it's ok. 
+5. On the validator device, run the `start.sh` in the `evmos` folder. This will start the node. 
+6. On the validator device, while the node is running, run the command `evmosd tendermint show-node-id` and save the result of this command. 
+7. On each device except the validator, we need to add the validator as the seed node. To do so, edit line 212 of file `~/.evmosd/config/config.toml` and in the `seed` field, add `<VALIDATOR_NODE_ID>@<VALIDATOR_IP_ADDRESS>:26656` where the validator node ID is the result of the last step.
 
 ## Community
 
