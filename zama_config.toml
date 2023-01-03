@@ -1,3 +1,7 @@
 [oracle]
 mode = "oracle"
 oracle_db_address = "http://127.0.0.1:8001"
+
+[zk]
+verify = false
+verify_rpc_address = "http://127.0.0.1:23042/verify"

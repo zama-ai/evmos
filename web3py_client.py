@@ -2,6 +2,8 @@ from web3 import Web3
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
 from web3.middleware import construct_sign_and_send_raw_middleware
+import msgpack
+import requests
 import secrets
 
 import time
@@ -34,8 +36,10 @@ w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545', request_kwargs={'timeout': 
 # }
 #
 # 3. Change below address and key to match yours:
-contract_address = '0x5194EFcc5066577cbEfDAA893531Fe439808C259'
-private_key = '0x' + '5f9b483c977b57f1a539fcf8a4a889b300ab3be0b4f90888aad437f5a68ae076'
+contract_address = '0xD298EbF6D5e5C3be3A24851c1AeB365545914ddb'
+private_key = '0x' + 'B721F82B0D5677938E8FC9D7E82CC89B57A05C661BD97B6846EEAC7AFDF0C686'
+
+with_proofs = False
 
 # ABI matches contract above.
 abi = """
@@ -106,8 +110,19 @@ contract = w3.eth.contract(address=contract_address, abi=abi)
 account: LocalAccount = Account.from_key(private_key)
 w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
 
-# Generate input.
-input = secrets.token_bytes(1024 * 1024 * 20)
+if with_proofs == True:
+	url_enc = "http://127.0.0.1:23042/encrypt_and_prove"
+	packed = msgpack.packb(1)
+
+	headers = {"Content-Type": "application/msgpack"}
+
+	enc_response = requests.post(url_enc, data=packed, headers=headers)
+	if enc_response.status_code != 200:
+		raise SystemError()
+	input = enc_response.content
+else:
+	input = secrets.token_bytes(1024 * 1024 * 20)
+
 print('Input len =', len(input))
 print('\n')
 
