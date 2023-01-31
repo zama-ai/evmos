@@ -5,3 +5,7 @@ oracle_db_address = "http://127.0.0.1:8001"
 [zk]
 verify = true
 verify_rpc_address = "http://127.0.0.1:23042/verify"
+
+[tfhe]
+ciphertexts_to_garbage_collect = 250000
+ciphertexts_garbage_collect_interval_secs = 5
