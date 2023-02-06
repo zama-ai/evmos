@@ -10,11 +10,11 @@ LOGLEVEL="info"
 # to trace evm
 #TRACE="--trace"
 TRACE=""
-#HOME_EVMOSD="/$HOME/.evmosd"
-HOME_EVMOSD="/node/.evmosd"
+HOME_EVMOSD="/$HOME/.evmosd"
+#HOME_EVMOSD="/node/.evmosd"
 
-#EVMOSD="evmosd"
-EVMOSD="evmosd --home /node/.evmosd"
+EVMOSD="evmosd"
+#EVMOSD="evmosd --home /node/.evmosd"
 
 # validate dependencies are installed
 command -v jq > /dev/null 2>&1 || { echo >&2 "jq not installed. More info: https://stedolan.github.io/jq/download/"; exit 1; }
