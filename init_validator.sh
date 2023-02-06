@@ -1,3 +1,4 @@
+#!/bin/bash
 # Clear everything of previous installation
 rm -rf ~/.evmosd*
 
