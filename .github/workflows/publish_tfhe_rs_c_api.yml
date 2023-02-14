@@ -15,7 +15,6 @@ jobs:
         with:
           repository: zama-ai/tfhe-rs
           ref: blockchain-demo-deterministic-fft
-          path: tfhe-rs
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
@@ -24,10 +23,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
+      - run: echo "the context is ${{  }}"
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: tfhe-rs
+          context: .
           file: docker/Dockerfile.local.dev
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
