@@ -23,7 +23,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - run: echo "the context is ${{  }}"
+      - run: echo "the context is "
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
