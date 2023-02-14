@@ -1,2 +1,3 @@
 name: Publish tfhe-rs C api
 
+on: workflow_dispatch
