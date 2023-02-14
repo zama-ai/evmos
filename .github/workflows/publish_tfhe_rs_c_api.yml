@@ -10,11 +10,18 @@ jobs:
     name: Push Docker image to GitHub Container Registry
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      - name: Check out tfhe-rs
         uses: actions/checkout@v3
         with:
           repository: zama-ai/tfhe-rs
           ref: blockchain-demo-deterministic-fft
+          path: tfhe-rs
+
+      - name: Check out evmos
+        uses: actions/checkout@v3
+        with:
+          ref: v9.1.0-zama
+          path: evmos
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
@@ -31,8 +38,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: .
-          file: docker/Dockerfile.local.dev
+          context: tfhe-rs
+          file: evmos/docker/Dockerfile.tfhe-rs.testnet
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
           labels: tfhe-rs-c-api
