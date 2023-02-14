@@ -12,18 +12,22 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+        with:
+          repository: zama-ai/tfhe-rs
+          ref: blockchain-demo-deterministic-fft
+          path: tfhe-rs
       
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: .
+          context: tfhe-rs
           file: docker/Dockerfile.tfhe-rs.testnet
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
