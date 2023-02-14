@@ -1,9 +1,6 @@
-name: Push to Docker Hub
+name: Push to Github packages
 
-on:
-  push:
-    tags:
-      - "v*.*.*"
+on: workflow_dispatch
 
 jobs:
   docker:
