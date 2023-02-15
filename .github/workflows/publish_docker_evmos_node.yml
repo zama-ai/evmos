@@ -1,0 +1,46 @@
+name: Publish Evmos node
+
+on: workflow_dispatch
+
+env:
+  DOCKER_IMAGE: ghcr.io/zama-ai/evmos-node
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmos
+          ref: feature/CI
+
+      - name: PrepareGoEthereum
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/go-ethereum
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: go-ethereum
+          ref: petar/extensive-log
+
+      - name: PrepareEthermint
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/ethermint
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ethermint
+          ref: v0.19.3-zama
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          file: evmos/docker/Dockerfile.evmos-node.testnet
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:latest
+          labels: evmos_node
+
