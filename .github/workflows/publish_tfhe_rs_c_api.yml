@@ -20,7 +20,7 @@ jobs:
       - name: Check out evmos
         uses: actions/checkout@v3
         with:
-          ref: v9.1.0-zama
+          ref: feature/CI
           path: evmos
       
       - name: Login to GitHub Container Registry
