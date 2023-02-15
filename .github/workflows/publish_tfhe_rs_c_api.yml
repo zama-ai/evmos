@@ -4,6 +4,7 @@ on: workflow_dispatch
 
 env:
   DOCKER_IMAGE: ghcr.io/zama-ai/tfhe-rs-c-api
+  
 
 jobs:
   push_to_registry:
@@ -44,5 +45,6 @@ jobs:
           context: tfhe-rs
           file: evmos/docker/Dockerfile.tfhe-rs.testnet
           push: true
+          pull: true
           tags: ${{ env.DOCKER_IMAGE }}:latest
           labels: tfhe-rs-c-api
