@@ -1,0 +1,3 @@
+name: Publish Evmos node
+
+on: workflow_dispatch
