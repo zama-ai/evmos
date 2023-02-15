@@ -2,39 +2,45 @@ name: Push to Github packages
 
 on: workflow_dispatch
 
+env:
+  DOCKER_IMAGE: ghcr.io/zama-ai/evmos-node
+
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3
-      -
-        name: Git fetch everything
-        run: git fetch --prune --unshallow
-      -
-        name: Get Github tag
-        id: meta
-        run: |
-          echo "::set-output name=tag::$(git describe --always --tags --match='v*')"
-      -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      -
-        name: Login to DockerHub
-        uses: docker/login-action@v2
         with:
-          registry: docker.io
-          username: tharsishq
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Build and push
-        uses: docker/build-push-action@v3
+          path: evmos
+          ref: feature/CI
+
+      - name: PrepareGoEthereum
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/go-ethereum
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: go-ethereum
+          ref: petar/extensive-log
+
+      - name: PrepareEthermint
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/ethermint
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ethermint
+          ref: v0.19.3-zama
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
+          file: evmos/docker/Dockerfile.evmos-node.testnet
           push: true
-          platforms: linux/amd64, linux/386, linux/arm64
-          tags: tharsishq/evmos:latest, tharsishq/evmos:${{ steps.meta.outputs.tag }}
+          tags: ${{ env.DOCKER_IMAGE }}:latest
+          labels: evmos_node
+

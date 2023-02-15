@@ -1,0 +1,43 @@
+FROM ghcr.io/zama-ai/tfhe-rs-c-api:latest AS tfhe-rs
+FROM golang:bullseye AS build-env
+
+RUN apt-get update -y
+RUN apt-get install git -y
+RUN apt-get install build-essential -y
+RUN apt-get install libc6 -y
+RUN apt-get install jq -y
+
+ADD ethermint /src/ethermint
+ADD go-ethereum /src/go-ethereum
+ADD evmos /src/evmos
+
+
+WORKDIR /src/evmos
+
+RUN mkdir -p /src/go-ethereum/core/vm/lib
+COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /src/go-ethereum/core/vm/lib/
+COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /usr/lib
+COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib/tfhe.h /src/go-ethereum/core/vm/
+
+RUN make build
+
+FROM golang:bullseye
+
+RUN apt-get update -y
+RUN apt-get install ca-certificates jq -y
+ENV LD_LIBRARY_PATH=/usr/lib/
+
+
+COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
+COPY --from=build-env /usr/lib /usr/lib
+
+WORKDIR /config
+ADD evmos/setup.sh .
+RUN chmod +x /config/setup.sh
+ADD evmos/zama_config.toml .
+RUN mkdir -p /root/.evmosd/zama
+RUN touch /root/.evmosd/zama/vm.log
+
+EXPOSE 26656 26657 1317 9090 8545 8546
+
+CMD ["/usr/bin/evmosd", "start", "--home", "/root/.evmosd"]
