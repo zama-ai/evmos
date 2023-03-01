@@ -46,10 +46,21 @@ jobs:
           cp ../evmos/private.ed25519 node/evmos 
           cp ../evmos/public.ed25519 node/evmos 
           touch vm.log
+          ls node/evmos
 
-      - name: List files in the repository
+      - name: List files in volumes
         working-directory: ./zbc-development
         run: |
-          ls .
-          ls node/evmos
           ls volumes
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Start containers
+        working-directory: ./zbc-development
+        run: |
+          docker compose -f docker-compose.testnet.yml run validator bash /config/setup.sh
