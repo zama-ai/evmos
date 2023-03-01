@@ -17,6 +17,7 @@ jobs:
         with:
           repository: zama-ai/zbc-development
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: zbc-development
           ref: testnet-from-CI-images
 
       - name: List files in the repository
