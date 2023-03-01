@@ -39,6 +39,17 @@ jobs:
           aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
           ./prepare_volumes_ci.sh
 
-      - name: List files in the repository
+      - name: Prepare files for node setup
+        working-directory: ./zbc-development
         run: |
-          ls ${{ github.workspace }}
+          mkdir -p node/evmos
+          cp ../evmos/private.ed25519 node/evmos 
+          cp ../evmos/public.ed25519 node/evmos 
+          touch vm.log
+
+      - name: List files in the repository
+        working-directory: ./zbc-development
+        run: |
+          ls .
+          ls node/evmos
+          ls volumes
