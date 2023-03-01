@@ -35,10 +35,9 @@ jobs:
         working-directory: ./zbc-development
         env:
           AWS_S3_BUCKET: zbc-testnet
-          PROFILE_NAME_AWS: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
-          ./prepare_volumes.sh
+          ./prepare_volumes_ci.sh
 
       - name: List files in the repository
         run: |
