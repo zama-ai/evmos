@@ -11,6 +11,13 @@ jobs:
         with:
           path: evmos
           ref: feature/CI
+      
+      - name: Checkout zbc-dev
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-development
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          ref: testnet-from-CI-images
 
       - name: List files in the repository
         run: |
@@ -26,5 +33,11 @@ jobs:
       - name: Download keys from S3
         env:
           AWS_S3_BUCKET: zbc-testnet
+          PROFILE_NAME_AWS: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
+          ./prepare_volumes.sh
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
