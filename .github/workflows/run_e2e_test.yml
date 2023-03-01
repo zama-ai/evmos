@@ -32,6 +32,7 @@ jobs:
           aws-region: eu-west-3
 
       - name: Download keys from S3
+        working-directory: ./zbc-development
         env:
           AWS_S3_BUCKET: zbc-testnet
           PROFILE_NAME_AWS: ${{ secrets.AWS_ACCESS_KEY_ID }}
