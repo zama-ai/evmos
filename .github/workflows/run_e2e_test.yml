@@ -90,6 +90,14 @@ jobs:
         run: |
           docker compose  -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml  up --detach
 
+      - name: Check running docker
+        run: |
+          docker ps
+
+      - name: Sleep for 10 seconds to ensure validtor is running
+        run: |
+          sleep 30s
+
       - name: Set dummy mode
         working-directory: ./zbc-development
         run: |
