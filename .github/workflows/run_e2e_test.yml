@@ -111,7 +111,7 @@ jobs:
       - name: Run e2e test from zbc-solidty
         working-directory: ./zbc-solidity
         run: |
-          ./run_ci_test.sh
+          ./run_ci_test.sh mykey1
 
       - name: Stop whole testnet
         working-directory: ./zbc-development
