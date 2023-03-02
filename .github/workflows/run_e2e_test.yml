@@ -85,7 +85,7 @@ jobs:
       - name: Set dummy mode
         working-directory: ./zbc-development
         run: |
-          curl http://localhost:23042/configure/mode/dummy
+          docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
           
       - name: Stop whole testnet
         working-directory: ./zbc-development
