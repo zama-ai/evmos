@@ -94,15 +94,20 @@ jobs:
         run: |
           docker ps
 
-      - name: Sleep for 10 seconds to ensure validtor is running
+      - name: Sleep for 3 seconds to ensure validtor is running
         run: |
-          sleep 30s
+          sleep 3s
 
       - name: Set dummy mode
         working-directory: ./zbc-development
         run: |
           docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
           
+      - name: List files in volumes
+        working-directory: ./zbc-solidty
+        run: |
+          ls
+
       - name: Run e2e test from zbc-solidty
         working-directory: ./zbc-solidty
         run: |
