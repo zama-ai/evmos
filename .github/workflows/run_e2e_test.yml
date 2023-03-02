@@ -20,6 +20,14 @@ jobs:
           path: zbc-development
           ref: testnet-from-CI-images
 
+      - name: Checkout zbc-solidity
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-solidity
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: zbc-solidity
+          ref: feature/CI-testing
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
@@ -87,6 +95,11 @@ jobs:
         run: |
           docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
           
+      - name: Run e2e test from zbc-solidty
+        working-directory: ./zbc-solidty
+        run: |
+          ./run_ci_test.sh
+
       - name: Stop whole testnet
         working-directory: ./zbc-development
         run: |
