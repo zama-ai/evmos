@@ -76,18 +76,11 @@ jobs:
         working-directory: ./zbc-development
         run: |
           ./prepare_demo_testnet_ci.sh
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Start whole testnet
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml up
+          docker compose -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml -d up
 
       - name: Set dummy mode
         working-directory: ./zbc-development
