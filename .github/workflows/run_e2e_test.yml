@@ -66,10 +66,11 @@ jobs:
           docker compose -f docker-compose.testnet.yml run validator bash /config/setup.sh
       
 
-      - name: Check running node owner 
+      - name: Check running node owner and change it 
         working-directory: ./zbc-development
         run: |
           ls -all .
+          sudo chown -R runner:docker running_node/
 
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
