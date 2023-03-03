@@ -1,7 +1,8 @@
 name: Run e2e test
 
-on: workflow_dispatch
-  inputs:
+on:
+  workflow_dispatch:
+    inputs:
       evmos_node_tag:
         description: 'Evmos node image tag (default: latest)'
         type: string
