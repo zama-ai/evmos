@@ -1,10 +1,27 @@
 name: Run e2e test
 
 on: workflow_dispatch
+  inputs:
+      evmos_node_tag:
+        description: 'Evmos node image tag (default: latest)'
+        type: string
+        required: false
+      zkpok_service_tag:
+        description: 'Zkpok service image tag (default: latest)'
+        type: string
+        required: false
+      oracle_db_service_tag:
+        description: 'Oracle Db service image tag (default: latest)'
+        type: string
+        required: false
 
 jobs:
   docker:
     runs-on: ubuntu-latest
+    env:
+      EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag || "latest" }}
+      ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag || "latest" }}
+      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag || "latest" }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -103,7 +120,7 @@ jobs:
         run: |
           docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
           
-      - name: List files in volumes
+      - name: List files in zbc-solidity
         working-directory: ./zbc-solidity
         run: |
           ls
