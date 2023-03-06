@@ -3,6 +3,11 @@ name: Publish Evmos node
 on:
   workflow_dispatch:
     inputs:
+      refToGetDockerfile:
+        description: 'Branch, tag or commit SHA1 to checkout Evmos (only to get right Dockerfile)'
+        required: true
+        default: "feature/CI"
+        type: string
       refToBuildEvmos:
         description: 'Branch, tag or commit SHA1 to checkout Evmos'
         required: true
@@ -31,6 +36,12 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmosDockerfile
+          ref: ${{ inputs.refToGetDockerfile }}
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -68,8 +79,8 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: evmos/docker/Dockerfile.evmos-node.testnet
+          file: evmosDockerfile/docker/Dockerfile.evmos-node.testnet
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }}
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }},${{ env.DOCKER_IMAGE }}:latest
           labels: evmos_node
 

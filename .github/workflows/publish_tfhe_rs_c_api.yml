@@ -62,5 +62,5 @@ jobs:
           file: evmos/docker/Dockerfile.tfhe-rs.testnet
           push: true
           pull: true
-          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.refToBuild }}
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.tfhe_rs_c_api_tag }},${{ env.DOCKER_IMAGE }}:latest
           labels: tfhe-rs-c-api
