@@ -1,6 +1,18 @@
 name: Publish tfhe-rs C api
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      refToBuild:
+        description: 'Branch, tag or commit SHA1 to checkout tfhe-rs'
+        required: true
+        default: "blockchain-demo-deterministic-fft"
+        type: string
+      tfhe_rs_c_api_tag:
+        description: 'Tfhe-rs c Api tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
 
 env:
   DOCKER_IMAGE: ghcr.io/zama-ai/tfhe-rs-c-api
@@ -15,13 +27,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: zama-ai/tfhe-rs
-          ref: blockchain-demo-deterministic-fft
+          ref: ${{ inputs.refToBuild }}
           path: tfhe-rs
 
       - name: Check out evmos
         uses: actions/checkout@v3
-        with:
-          ref: feature/CI
           path: evmos
       
       - name: Login to GitHub Container Registry
@@ -46,5 +56,5 @@ jobs:
           file: evmos/docker/Dockerfile.tfhe-rs.testnet
           push: true
           pull: true
-          tags: ${{ env.DOCKER_IMAGE }}:latest
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.refToBuild }}
           labels: tfhe-rs-c-api
