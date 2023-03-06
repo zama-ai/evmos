@@ -8,6 +8,11 @@ on:
         required: true
         default: "blockchain-demo-deterministic-fft"
         type: string
+      refToEvmos:
+        description: 'Branch, tag or commit SHA1 to checkout Evmos with the right Dockerfile'
+        required: true
+        default: "feature/CI"
+        type: string
       tfhe_rs_c_api_tag:
         description: 'Tfhe-rs c Api tag (default: latest)'
         default: "latest"
@@ -32,6 +37,7 @@ jobs:
 
       - name: Check out evmos
         uses: actions/checkout@v3
+          ref: ${{ inputs.refToEvmos }}
           path: evmos
       
       - name: Login to GitHub Container Registry
