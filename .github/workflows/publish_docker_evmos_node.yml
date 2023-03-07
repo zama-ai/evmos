@@ -74,6 +74,10 @@ jobs:
         run: |
           ls ${{ github.workspace }}
 
+      - name: Check tfhe-rs-c-api docker tag
+        run: |
+          echo ${{ inputs.tfheRsCApiTag }}
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
         with:
