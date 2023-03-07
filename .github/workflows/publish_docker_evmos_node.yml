@@ -41,7 +41,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     env:
-    TFHE_RS_C_API_TAG: ${{ inputs.tfheRsCApiTag }}
+      TFHE_RS_C_API_TAG: ${{ inputs.tfheRsCApiTag }}
     steps:
       - name: Echo user parameters 
         run: |
