@@ -28,6 +28,8 @@ jobs:
     name: Push Docker image to GitHub Container Registry
     runs-on: ubuntu-latest
     steps:
+
+
       - name: Check out tfhe-rs
         uses: actions/checkout@v3
         with:
@@ -48,7 +50,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - run: echo "the context is "
+      
+      - name: Check OS
+        run: |
+          uname -r
+          lsb_release -a
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
