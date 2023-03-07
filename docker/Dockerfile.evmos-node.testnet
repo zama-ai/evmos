@@ -1,46 +1,47 @@
 FROM golang:bullseye AS build-env
+# https://docs.docker.com/engine/reference/builder/#arg
 ARG TFHE_RS_C_API_TAG
 RUN echo $TFHE_RS_C_API_TAG
-FROM ghcr.io/zama-ai/tfhe-rs-c-api:$TFHE_RS_C_API_TAG AS tfhe-rs
+# FROM ghcr.io/zama-ai/tfhe-rs-c-api:$TFHE_RS_C_API_TAG AS tfhe-rs
 
-FROM build-env
-RUN apt-get update -y
-RUN apt-get install git -y
-RUN apt-get install build-essential -y
-RUN apt-get install libc6 -y
-RUN apt-get install jq -y
+# FROM build-env
+# RUN apt-get update -y
+# RUN apt-get install git -y
+# RUN apt-get install build-essential -y
+# RUN apt-get install libc6 -y
+# RUN apt-get install jq -y
 
-ADD ethermint /src/ethermint
-ADD go-ethereum /src/go-ethereum
-ADD evmos /src/evmos
-
-
-WORKDIR /src/evmos
-
-RUN mkdir -p /src/go-ethereum/core/vm/lib
-COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /src/go-ethereum/core/vm/lib/
-COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /usr/lib
-COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib/tfhe.h /src/go-ethereum/core/vm/
-
-RUN make build
-
-FROM golang:bullseye
-
-RUN apt-get update -y
-RUN apt-get install ca-certificates jq -y
-ENV LD_LIBRARY_PATH=/usr/lib/
+# ADD ethermint /src/ethermint
+# ADD go-ethereum /src/go-ethereum
+# ADD evmos /src/evmos
 
 
-COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
-COPY --from=build-env /usr/lib /usr/lib
+# WORKDIR /src/evmos
 
-WORKDIR /config
-ADD evmos/setup.sh .
-RUN chmod +x /config/setup.sh
-ADD evmos/zama_config.toml .
-RUN mkdir -p /root/.evmosd/zama
-RUN touch /root/.evmosd/zama/vm.log
+# RUN mkdir -p /src/go-ethereum/core/vm/lib
+# COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /src/go-ethereum/core/vm/lib/
+# COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /usr/lib
+# COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib/tfhe.h /src/go-ethereum/core/vm/
 
-EXPOSE 26656 26657 1317 9090 8545 8546
+# RUN make build
 
-CMD ["/usr/bin/evmosd", "start", "--home", "/root/.evmosd"]
+# FROM golang:bullseye
+
+# RUN apt-get update -y
+# RUN apt-get install ca-certificates jq -y
+# ENV LD_LIBRARY_PATH=/usr/lib/
+
+
+# COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
+# COPY --from=build-env /usr/lib /usr/lib
+
+# WORKDIR /config
+# ADD evmos/setup.sh .
+# RUN chmod +x /config/setup.sh
+# ADD evmos/zama_config.toml .
+# RUN mkdir -p /root/.evmosd/zama
+# RUN touch /root/.evmosd/zama/vm.log
+
+# EXPOSE 26656 26657 1317 9090 8545 8546
+
+# CMD ["/usr/bin/evmosd", "start", "--home", "/root/.evmosd"]
