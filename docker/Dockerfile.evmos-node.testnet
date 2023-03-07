@@ -1,10 +1,8 @@
 # https://docs.docker.com/engine/reference/builder/#arg
 ARG TFHE_RS_C_API_TAG
 FROM ghcr.io/zama-ai/tfhe-rs-c-api:$TFHE_RS_C_API_TAG AS tfhe-rs
-FROM golang:bullseye AS build-env
-RUN echo $TFHE_RS_C_API_TAG
 
-FROM build-env
+FROM golang:bullseye AS build-env
 RUN apt-get update -y
 RUN apt-get install git -y
 RUN apt-get install build-essential -y
