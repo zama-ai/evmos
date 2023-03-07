@@ -40,8 +40,6 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    env:
-      TFHE_RS_C_API_TAG: ${{ inputs.tfheRsCApiTag }}
     steps:
       - name: Echo user parameters 
         run: |
@@ -96,7 +94,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dcn
+        env:
+          TFHE_RS_C_API_TAG: ${{ inputs.tfheRsCApiTag }}
         with:
           context: .
           file: evmosDockerfile/docker/Dockerfile.evmos-node.testnet
