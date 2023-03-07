@@ -42,6 +42,15 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Echo user parameters 
+        run: |
+          echo "refToGetDockerfile: ${{ inputs.refToGetDockerfile }}"
+          echo "refToBuildEvmos: ${{ inputs.refToBuildEvmos }}"
+          echo "refToBuildGoEthereum: ${{ inputs.refToBuildGoEthereum }}"
+          echo "refToBuildEthermint: ${{ inputs.refToBuildEthermint }}"
+          echo "tfheRsCApiTag: ${{ inputs.tfheRsCApiTag }}"
+          echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
