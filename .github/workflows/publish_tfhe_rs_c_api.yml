@@ -53,6 +53,7 @@ jobs:
       
       - name: Check OS
         run: |
+          lscpu
           uname -r
           lsb_release -a
 
