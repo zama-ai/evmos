@@ -95,8 +95,8 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dcn
-        env:
-          TFHE_RS_C_API_TAG: ${{ inputs.tfheRsCApiTag }}
+        build-args: |
+          "TFHE_RS_C_API_TAG=${{ inputs.tfheRsCApiTag }}"
         with:
           context: .
           file: evmosDockerfile/docker/Dockerfile.evmos-node.testnet
