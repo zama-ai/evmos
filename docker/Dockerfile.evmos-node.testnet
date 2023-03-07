@@ -1,8 +1,8 @@
-FROM golang:bullseye AS build-env
 ARG TFHE_RS_C_API_TAG
 ENV TFHE_RS_C_API_TAG ${TFHE_RS_C_API_TAG}
 RUN echo $TFHE_RS_C_API_TAG
 FROM ghcr.io/zama-ai/tfhe-rs-c-api:$TFHE_RS_C_API_TAG AS tfhe-rs
+FROM golang:bullseye AS build-env
 
 RUN apt-get update -y
 RUN apt-get install git -y
