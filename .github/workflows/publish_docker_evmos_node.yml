@@ -23,6 +23,11 @@ on:
         required: true
         default: "v0.19.3-zama"
         type: string
+      tfheRsCApiTag:
+        description: 'Tag for tfhe-rs-c-api docker image (defaul:latest)'
+        required: true
+        default: "latest"
+        type: string
       evmos_node_tag:
         description: 'Evmos node tag (default: latest)'
         default: "latest"
@@ -31,6 +36,7 @@ on:
 
 env:
   DOCKER_IMAGE: ghcr.io/zama-ai/evmos-node
+  TFHE_RS_C_API_TAG: ${{ inputs.tfheRsCApiTag }}
 
 jobs:
   docker:

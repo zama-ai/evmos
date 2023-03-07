@@ -1,4 +1,4 @@
-FROM ghcr.io/zama-ai/tfhe-rs-c-api:latest AS tfhe-rs
+FROM ghcr.io/zama-ai/tfhe-rs-c-api:$TFHE_RS_C_API_TAG AS tfhe-rs
 FROM golang:bullseye AS build-env
 
 RUN apt-get update -y
