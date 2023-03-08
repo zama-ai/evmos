@@ -13,15 +13,16 @@ WORKDIR /src/tfhe-rs
 RUN ls 
 RUN make build_c_api
 RUN ls target/release
+RUN cat /etc/os-release 
 
 WORKDIR /src/evmos
 
 RUN mkdir -p /src/go-ethereum/core/vm/lib
 
 RUN cp /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
-RUN cp /src/tfhe-rs/target/release/tfhe.h /usr/include
+# RUN cp /src/tfhe-rs/target/release/tfhe.h /usr/include
 RUN cp /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
-RUN cp /src/tfhe-rs/target/release/libtfhe.* /usr/lib/
+# RUN cp /src/tfhe-rs/target/release/libtfhe.* /usr/lib/
 
 
 RUN make build
