@@ -10,6 +10,7 @@ ADD go-ethereum /src/go-ethereum
 ADD evmos /src/evmos
 
 WORKDIR /src/tfhe-rs
+RUN ls 
 RUN make build_c_api
 RUN ls target/release
 
