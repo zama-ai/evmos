@@ -47,7 +47,7 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: evmos/docker/Dockerfile.zbc.build
+          file: docker/Dockerfile.zbc.build
           push: true
           pull: true
           tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.zama_zbc_tag }},${{ env.DOCKER_IMAGE }}:latest
