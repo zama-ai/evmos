@@ -2,7 +2,7 @@
 ARG ZBC_BUILD_IMAGE_TAG
 FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG AS build-env
 
-
+ENV LD_LIBRARY_PATH=/usr/lib/
 
 ADD tfhe-rs /src/tfhe-rs
 ADD ethermint /src/ethermint
@@ -19,7 +19,10 @@ WORKDIR /src/evmos
 RUN mkdir -p /src/go-ethereum/core/vm/lib
 
 RUN cp /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
+RUN cp /src/tfhe-rs/target/release/tfhe.h /usr/include
 RUN cp /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
+RUN cp /src/tfhe-rs/target/release/libtfhe.* /usr/lib/
+
 
 RUN make build
 

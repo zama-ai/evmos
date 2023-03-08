@@ -56,6 +56,12 @@ jobs:
           echo "zbcBuildImageTag: ${{ inputs.zbcBuildImageTag }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
 
+      - name: Check OS
+        run: |
+          lscpu
+          uname -r
+          lsb_release -a
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
