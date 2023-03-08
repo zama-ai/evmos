@@ -8,6 +8,11 @@ on:
         required: true
         default: "feature/CI"
         type: string
+      refToBuildTfheRsCApi:
+        description: 'Branch, tag or commit SHA1 to checkout tfhe-rs'
+        required: true
+        default: "blockchain-demo-deterministic-fft"
+        type: string
       refToBuildEvmos:
         description: 'Branch, tag or commit SHA1 to checkout Evmos'
         required: true
@@ -44,6 +49,7 @@ jobs:
       - name: Echo user parameters 
         run: |
           echo "refToGetDockerfile: ${{ inputs.refToGetDockerfile }}"
+          echo "refToBuildTfheRsCApi: ${{ inputs.refToBuildTfheRsCApi }}"
           echo "refToBuildEvmos: ${{ inputs.refToBuildEvmos }}"
           echo "refToBuildGoEthereum: ${{ inputs.refToBuildGoEthereum }}"
           echo "refToBuildEthermint: ${{ inputs.refToBuildEthermint }}"
@@ -55,6 +61,13 @@ jobs:
         with:
           path: evmosDockerfile
           ref: ${{ inputs.refToGetDockerfile }}
+
+      - name: Check out tfhe-rs
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/tfhe-rs
+          ref: ${{ inputs.refToBuild }}
+          path: tfhe-rs
 
       - name: Checkout
         uses: actions/checkout@v3

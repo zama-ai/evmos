@@ -3,16 +3,22 @@ ARG ZBC_BUILD_IMAGE_TAG
 FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG AS build-env
 
 
+
+ADD tfhe-rs /src/tfhe-rs
 ADD ethermint /src/ethermint
 ADD go-ethereum /src/go-ethereum
 ADD evmos /src/evmos
 
+WORKDIR /src/tfhe-rs
+RUN make build_c_api
+RUN ls /usr/local/app/target/release
+
 WORKDIR /src/evmos
 
 RUN mkdir -p /src/go-ethereum/core/vm/lib
-COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /src/go-ethereum/core/vm/lib/
-COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib /usr/lib
-COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib/tfhe.h /src/go-ethereum/core/vm/
+
+COPY /usr/local/app/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
+COPY /usr/local/app/target/release/tfhe.h /src/go-ethereum/core/vm/
 
 RUN make build
 
@@ -25,7 +31,8 @@ ENV LD_LIBRARY_PATH=/usr/lib/
 
 
 COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
-COPY --from=build-env /usr/lib /usr/lib
+COPY --from=build-env /src/go-ethereum/core/vm/lib/libtfhe.* /usr/lib
+COPY --from=build-env /src/go-ethereum/core/vm/tfhe.h /usr/include
 
 WORKDIR /config
 ADD evmos/setup.sh .
