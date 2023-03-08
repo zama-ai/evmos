@@ -1,0 +1,11 @@
+name: Publish zbc build image
+
+on:
+  workflow_dispatch:
+    inputs:
+      zama_zbc_tag:
+        description: 'Zama zbc build image tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
+
