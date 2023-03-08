@@ -11,14 +11,14 @@ ADD evmos /src/evmos
 
 WORKDIR /src/tfhe-rs
 RUN make build_c_api
-RUN ls /usr/local/app/target/release
+RUN ls target/release
 
 WORKDIR /src/evmos
 
 RUN mkdir -p /src/go-ethereum/core/vm/lib
 
-COPY /usr/local/app/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
-COPY /usr/local/app/target/release/tfhe.h /src/go-ethereum/core/vm/
+COPY /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
+COPY /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
 
 RUN make build
 
