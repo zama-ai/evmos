@@ -20,9 +20,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     env:
-      EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag || "latest" }}
-      ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag || "latest" }}
-      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag || "latest" }}
+      EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
+      ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
+      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
