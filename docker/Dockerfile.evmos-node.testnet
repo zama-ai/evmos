@@ -1,13 +1,7 @@
 # https://docs.docker.com/engine/reference/builder/#arg
-ARG TFHE_RS_C_API_TAG
-FROM ghcr.io/zama-ai/tfhe-rs-c-api:$TFHE_RS_C_API_TAG AS tfhe-rs
+ARG ZBC_BUILD_IMAGE_TAG
+FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG AS build-env
 
-FROM golang:bullseye AS build-env
-RUN apt-get update -y
-RUN apt-get install git -y
-RUN apt-get install build-essential -y
-RUN apt-get install libc6 -y
-RUN apt-get install jq -y
 
 ADD ethermint /src/ethermint
 ADD go-ethereum /src/go-ethereum
@@ -22,7 +16,8 @@ COPY --from=tfhe-rs /usr/local/app/tfhe-rs/lib/tfhe.h /src/go-ethereum/core/vm/
 
 RUN make build
 
-FROM golang:bullseye
+ARG ZBC_BUILD_IMAGE_TAG
+FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG
 
 RUN apt-get update -y
 RUN apt-get install ca-certificates jq -y

@@ -23,8 +23,8 @@ on:
         required: true
         default: "v0.19.3-zama"
         type: string
-      tfheRsCApiTag:
-        description: 'Tag for tfhe-rs-c-api docker image (defaul:latest)'
+      zbcBuildImageTag:
+        description: 'Tag for zbc build docker image (defaul:latest)'
         required: true
         default: "latest"
         type: string
@@ -47,7 +47,7 @@ jobs:
           echo "refToBuildEvmos: ${{ inputs.refToBuildEvmos }}"
           echo "refToBuildGoEthereum: ${{ inputs.refToBuildGoEthereum }}"
           echo "refToBuildEthermint: ${{ inputs.refToBuildEthermint }}"
-          echo "tfheRsCApiTag: ${{ inputs.tfheRsCApiTag }}"
+          echo "zbcBuildImageTag: ${{ inputs.zbcBuildImageTag }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
 
       - name: Checkout
@@ -82,9 +82,9 @@ jobs:
         run: |
           ls ${{ github.workspace }}
 
-      - name: Check tfhe-rs-c-api docker tag
+      - name: Check zbc build image docker tag
         run: |
-          echo ${{ inputs.tfheRsCApiTag }}
+          echo ${{ inputs.zbcBuildImageTag }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
@@ -97,7 +97,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           build-args: |
-            TFHE_RS_C_API_TAG=${{ inputs.tfheRsCApiTag }}
+            ZBC_BUILD_IMAGE_TAG=${{ inputs.zbcBuildImageTag }}
           context: .
           file: evmosDockerfile/docker/Dockerfile.evmos-node.testnet
           push: true
