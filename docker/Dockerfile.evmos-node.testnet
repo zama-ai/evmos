@@ -18,8 +18,8 @@ WORKDIR /src/evmos
 
 RUN mkdir -p /src/go-ethereum/core/vm/lib
 
-COPY /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
-COPY /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
+RUN cp /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
+RUN cp /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
 
 RUN make build
 
@@ -32,7 +32,7 @@ ENV LD_LIBRARY_PATH=/usr/lib/
 
 
 COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
-COPY --from=build-env /src/go-ethereum/core/vm/lib/libtfhe.* /usr/lib
+COPY --from=build-env /src/go-ethereum/core/vm/lib/libtfhe.* /usr/lib/
 COPY --from=build-env /src/go-ethereum/core/vm/tfhe.h /usr/include
 
 WORKDIR /config
