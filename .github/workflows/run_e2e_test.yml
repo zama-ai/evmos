@@ -114,7 +114,7 @@ jobs:
 
       - name: Sleep for 3 seconds to ensure validtor is running
         run: |
-          sleep 3s
+          sleep 10s
 
       - name: Set dummy mode
         working-directory: ./zbc-development
