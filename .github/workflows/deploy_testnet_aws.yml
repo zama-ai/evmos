@@ -1,3 +1,71 @@
 name: Deploy testnet on Aws
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      evmos_node_tag:
+        description: 'Evmos node image tag (default: latest)'
+        default: 'latest'
+        type: string
+        required: false
+      zkpok_service_tag:
+        description: 'Zkpok service image tag (default: latest)'
+        default: 'latest'
+        type: string
+        required: false
+      oracle_db_service_tag:
+        description: 'Oracle Db service image tag (default: latest)'
+        default: 'latest'
+        type: string
+        required: false
+
+
+jobs:
+  push_to_registry:
+    name: Deploy new version of zbc testnet
+    runs-on: zbc-testnet
+    env:
+      EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
+      ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
+      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmos
+          ref: feature/zbc-testnet-deployment
+      
+      - name: Checkout zbc-dev
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-development
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: zbc-development
+          ref: testnet-from-CI-images
+
+      - name: Checkout zbc-solidity
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-solidity
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: zbc-solidity
+          ref: feature/CI-testing
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-3
+
+      - name: Download keys from S3
+        working-directory: ./zbc-development
+        env:
+          AWS_S3_BUCKET: zbc-testnet
+        run: |
+          aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
+          ./prepare_volumes_ci.sh
