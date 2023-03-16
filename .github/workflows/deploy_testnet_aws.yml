@@ -69,3 +69,69 @@ jobs:
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
           ./prepare_volumes_ci.sh
+
+      - name: Prepare files for node setup
+        working-directory: ./zbc-development
+        run: |
+          mkdir -p node/evmos
+          cp ../evmos/private.ed25519 node/evmos 
+          cp ../evmos/public.ed25519 node/evmos 
+          touch vm.log
+          ls node/evmos
+
+      - name: List files in volumes
+        working-directory: ./zbc-development
+        run: |
+          ls volumes
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Prepare evmos node aka run setup.sh
+        working-directory: ./zbc-development
+        run: |
+          docker compose -f docker-compose.testnet.yml run validator bash /config/setup.sh
+      
+
+      - name: Check running node owner and change it 
+        working-directory: ./zbc-development
+        run: |
+          ls -all .
+          sudo chown -R runner:docker running_node/
+
+      - name: Prepare test (called demo)
+        working-directory: ./zbc-development
+        run: |
+          ./prepare_demo_testnet_ci.sh
+      
+      - name: Start whole testnet
+        working-directory: ./zbc-development
+        run: |
+          docker compose  -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml  up --detach
+
+      - name: Check running docker
+        run: |
+          docker ps
+
+      - name: Sleep for 3 seconds to ensure validtor is running
+        run: |
+          sleep 10s
+
+      - name: Set dummy mode
+        working-directory: ./zbc-development
+        run: |
+          docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
+          
+      - name: List files in zbc-solidity
+        working-directory: ./zbc-solidity
+        run: |
+          ls
+
+      - name: Run e2e test from zbc-solidty
+        working-directory: ./zbc-solidity
+        run: |
+          ./run_ci_test.sh mykey1
