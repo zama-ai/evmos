@@ -104,7 +104,7 @@ jobs:
         working-directory: ./zbc-development
         run: |
           ls -all .
-          sudo chown -R runner:docker running_node/
+          sudo chown -R $USER:$USER running_node/
 
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
