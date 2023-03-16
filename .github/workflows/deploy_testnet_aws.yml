@@ -29,6 +29,9 @@ jobs:
       ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
       ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
     steps:
+      - name: Clean Workspace
+        uses: AutoModality/action-clean@v1.1.0
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
