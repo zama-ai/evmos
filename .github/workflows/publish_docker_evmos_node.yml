@@ -1,0 +1,125 @@
+name: Publish Evmos node
+
+on:
+  workflow_dispatch:
+    inputs:
+      refToGetDockerfile:
+        description: 'Branch, tag or commit SHA1 to checkout Evmos (only to get right Dockerfile)'
+        required: true
+        default: "feature/CI"
+        type: string
+      refToBuildTfheRsCApi:
+        description: 'Branch, tag or commit SHA1 to checkout tfhe-rs'
+        required: true
+        default: "blockchain-demo-deterministic-fft"
+        type: string
+      refToBuildEvmos:
+        description: 'Branch, tag or commit SHA1 to checkout Evmos'
+        required: true
+        default: "feature/CI"
+        type: string
+      refToBuildGoEthereum:
+        description: 'Branch, tag or commit SHA1 to checkout go-ethereum'
+        required: true
+        default: "petar/extensive-log"
+        type: string
+      refToBuildEthermint:
+        description: 'Branch, tag or commit SHA1 to checkout Ethermint'
+        required: true
+        default: "v0.19.3-zama"
+        type: string
+      zbcBuildImageTag:
+        description: 'Tag for zbc build docker image (defaul:latest)'
+        required: true
+        default: "latest"
+        type: string
+      evmos_node_tag:
+        description: 'Evmos node tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
+
+env:
+  DOCKER_IMAGE: ghcr.io/zama-ai/evmos-node
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo user parameters 
+        run: |
+          echo "refToGetDockerfile: ${{ inputs.refToGetDockerfile }}"
+          echo "refToBuildTfheRsCApi: ${{ inputs.refToBuildTfheRsCApi }}"
+          echo "refToBuildEvmos: ${{ inputs.refToBuildEvmos }}"
+          echo "refToBuildGoEthereum: ${{ inputs.refToBuildGoEthereum }}"
+          echo "refToBuildEthermint: ${{ inputs.refToBuildEthermint }}"
+          echo "zbcBuildImageTag: ${{ inputs.zbcBuildImageTag }}"
+          echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
+
+      - name: Check OS
+        run: |
+          lscpu
+          uname -r
+          lsb_release -a
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmosDockerfile
+          ref: ${{ inputs.refToGetDockerfile }}
+
+      - name: Check out tfhe-rs
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/tfhe-rs
+          ref: ${{ inputs.refToBuildTfheRsCApi }}
+          path: tfhe-rs
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmos
+          ref: ${{ inputs.refToBuildEvmos }}
+
+      - name: PrepareGoEthereum
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/go-ethereum
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: go-ethereum
+          ref: ${{ inputs.refToBuildGoEthereum }}
+
+      - name: PrepareEthermint
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/ethermint
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ethermint
+          ref: ${{ inputs.refToBuildEthermint }}
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Check zbc build image docker tag
+        run: |
+          echo ${{ inputs.zbcBuildImageTag }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          build-args: |
+            ZBC_BUILD_IMAGE_TAG=${{ inputs.zbcBuildImageTag }}
+          context: .
+          file: evmosDockerfile/docker/Dockerfile.evmos-node.testnet
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }},${{ env.DOCKER_IMAGE }}:latest
+          labels: evmos_node
+

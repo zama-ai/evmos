@@ -1,0 +1,51 @@
+# https://docs.docker.com/engine/reference/builder/#arg
+ARG ZBC_BUILD_IMAGE_TAG
+FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG AS build-env
+
+ENV LD_LIBRARY_PATH=/usr/lib/
+
+ADD tfhe-rs /src/tfhe-rs
+ADD ethermint /src/ethermint
+ADD go-ethereum /src/go-ethereum
+ADD evmos /src/evmos
+
+WORKDIR /src/tfhe-rs
+RUN ls 
+RUN RUSTFLAGS="" make build_c_api
+RUN ls target/release
+RUN cat /etc/os-release 
+
+WORKDIR /src/evmos
+
+RUN mkdir -p /src/go-ethereum/core/vm/lib
+
+RUN cp /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
+# RUN cp /src/tfhe-rs/target/release/tfhe.h /usr/include
+RUN cp /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
+# RUN cp /src/tfhe-rs/target/release/libtfhe.* /usr/lib/
+
+
+RUN make build
+
+ARG ZBC_BUILD_IMAGE_TAG
+FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG
+
+RUN apt-get update -y
+RUN apt-get install ca-certificates jq -y
+ENV LD_LIBRARY_PATH=/usr/lib/
+
+
+COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
+COPY --from=build-env /src/go-ethereum/core/vm/lib/libtfhe.* /usr/lib/
+COPY --from=build-env /src/go-ethereum/core/vm/tfhe.h /usr/include
+
+WORKDIR /config
+ADD evmos/setup.sh .
+RUN chmod +x /config/setup.sh
+ADD evmos/zama_config.toml .
+RUN mkdir -p /root/.evmosd/zama
+RUN touch /root/.evmosd/zama/vm.log
+
+EXPOSE 26656 26657 1317 9090 8545 8546
+
+CMD ["/usr/bin/evmosd", "start", "--home", "/root/.evmosd"]

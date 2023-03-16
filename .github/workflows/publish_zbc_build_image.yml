@@ -1,0 +1,54 @@
+name: Publish zbc build image
+
+on:
+  workflow_dispatch:
+    inputs:
+      zama_zbc_tag:
+        description: 'Zama zbc build image tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
+
+env:
+  DOCKER_IMAGE: ghcr.io/zama-ai/zama-zbc-build
+  
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Container Registry
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check out evmos
+        uses: actions/checkout@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      
+      - name: Check OS
+        run: |
+          lscpu
+          uname -r
+          lsb_release -a
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - name: List files in evmos
+        run: |
+          ls docker
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          file: docker/Dockerfile.zbc.build
+          push: true
+          pull: true
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.zama_zbc_tag }},${{ env.DOCKER_IMAGE }}:latest
+          labels: zbc-build

@@ -1,0 +1,75 @@
+name: Publish tfhe-rs C api
+
+on:
+  workflow_dispatch:
+    inputs:
+      refToBuild:
+        description: 'Branch, tag or commit SHA1 to checkout tfhe-rs'
+        required: true
+        default: "blockchain-demo-deterministic-fft"
+        type: string
+      refToEvmos:
+        description: 'Branch, tag or commit SHA1 to checkout Evmos with the right Dockerfile'
+        required: true
+        default: "feature/CI"
+        type: string
+      tfhe_rs_c_api_tag:
+        description: 'Tfhe-rs c Api tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
+
+env:
+  DOCKER_IMAGE: ghcr.io/zama-ai/tfhe-rs-c-api
+  
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Container Registry
+    runs-on: ubuntu-latest
+    steps:
+
+
+      - name: Check out tfhe-rs
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/tfhe-rs
+          ref: ${{ inputs.refToBuild }}
+          path: tfhe-rs
+
+      - name: Check out evmos
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.refToEvmos }}
+          path: evmos
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      
+      - name: Check OS
+        run: |
+          lscpu
+          uname -r
+          lsb_release -a
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - name: List files in evmos
+        run: |
+          ls evmos
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: tfhe-rs
+          file: evmos/docker/Dockerfile.tfhe-rs.testnet
+          push: true
+          pull: true
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.tfhe_rs_c_api_tag }},${{ env.DOCKER_IMAGE }}:latest
+          labels: tfhe-rs-c-api
