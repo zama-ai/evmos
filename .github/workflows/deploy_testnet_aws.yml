@@ -1,0 +1,3 @@
+name: Deploy testnet on Aws
+
+on: workflow_dispatch
