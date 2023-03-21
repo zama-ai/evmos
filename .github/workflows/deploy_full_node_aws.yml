@@ -1,0 +1,3 @@
+name: Deploy full node on Aws
+
+on: workflow_dispatch
