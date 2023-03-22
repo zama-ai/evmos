@@ -91,7 +91,7 @@ jobs:
       - name: Prepare evmos node aka run setup.sh
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml run validator bash /config/setup.sh
+          docker compose -f docker-compose.fullnode.yml run validator bash /config/setup.sh
       
 
       - name: Check running node owner and change it 
