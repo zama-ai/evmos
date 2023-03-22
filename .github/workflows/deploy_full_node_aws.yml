@@ -114,3 +114,20 @@ jobs:
         run: |
           ./prepare_demo_full_node_ci.sh
       
+       - name: Start whole testnet
+        working-directory: ./zbc-development
+        run: |
+          docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  up --detach
+
+      - name: Check running docker
+        run: |
+          docker ps
+
+      - name: Sleep for 10 seconds to ensure validtor is running
+        run: |
+          sleep 10s
+
+      - name: Set dummy mode
+        working-directory: ./zbc-development
+        run: |
+          docker compose -f docker-compose.fullnode.yml exec validator curl http://zkpok:23042/configure/mode/dummy
