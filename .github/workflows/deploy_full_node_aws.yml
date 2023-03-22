@@ -114,7 +114,7 @@ jobs:
         run: |
           ./prepare_demo_full_node_ci.sh
       
-      - name: Start whole testnet
+      - name: Start zkpok service
         working-directory: ./zbc-development
         run: |
           docker compose  -f docker-compose.fullnode.yml start zkpok
@@ -135,4 +135,4 @@ jobs:
       - name: Start full node
         working-directory: ./zbc-development
         run: |
-          docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  start validator
+          docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  up --detach

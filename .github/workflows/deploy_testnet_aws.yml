@@ -134,6 +134,14 @@ jobs:
         run: |
           ls
 
+      - name: Upload genesis and node_id to S3 bucket to allow other nodes to sync
+        working-directory: ./zbc-development
+        env:
+          AWS_S3_BUCKET: zbc-testnet
+        run: |
+          aws s3 ls s3://${AWS_S3_BUCKET}/
+          ./upload_genesis.sh
+
       - name: Run e2e test from zbc-solidty
         working-directory: ./zbc-solidity
         run: |
