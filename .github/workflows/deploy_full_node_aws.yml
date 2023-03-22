@@ -1,8 +1,5 @@
 name: Deploy full node on Aws
 
-on: workflow_dispatch
-
-
 on:
   workflow_dispatch:
     inputs:
