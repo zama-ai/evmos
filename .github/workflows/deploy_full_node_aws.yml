@@ -117,17 +117,22 @@ jobs:
       - name: Start whole testnet
         working-directory: ./zbc-development
         run: |
-          docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  up --detach
+          docker compose  -f docker-compose.fullnode.yml start zkpok
 
       - name: Check running docker
         run: |
           docker ps
 
-      - name: Sleep for 10 seconds to ensure validtor is running
+      - name: Sleep for 3 seconds to ensure zkpok is running
         run: |
-          sleep 10s
+          sleep 3s
 
       - name: Set dummy mode
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.fullnode.yml exec validator curl http://zkpok:23042/configure/mode/dummy
+          curl http://localhost:23042/configure/mode/dummy
+
+      - name: Start full node
+        working-directory: ./zbc-development
+        run: |
+          docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  start validator
