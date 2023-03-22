@@ -114,7 +114,7 @@ jobs:
         run: |
           ./prepare_demo_full_node_ci.sh
       
-       - name: Start whole testnet
+      - name: Start whole testnet
         working-directory: ./zbc-development
         run: |
           docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  up --detach
