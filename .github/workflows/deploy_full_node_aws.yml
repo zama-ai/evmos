@@ -112,5 +112,5 @@ jobs:
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
         run: |
-          ./prepare_demo_testnet_ci.sh
+          ./prepare_demo_full_node_ci.sh
       
