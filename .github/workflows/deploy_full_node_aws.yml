@@ -67,7 +67,7 @@ jobs:
         env:
           AWS_S3_BUCKET: zbc-testnet
         run: |
-          aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
+          aws s3 ls s3://${AWS_S3_BUCKET}
           ./prepare_volumes_full_node_ci.sh
 
       - name: Prepare files for node setup
@@ -102,6 +102,15 @@ jobs:
         run: |
           ls -all .
           sudo chown -R $USER:$USER running_node/
+
+
+      - name: Download genesis and node_id
+        working-directory: ./zbc-development
+        env:
+          AWS_S3_BUCKET: zbc-testnet
+        run: |
+          aws s3 ls s3://${AWS_S3_BUCKET}/
+          ./download_genesis.sh
 
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
