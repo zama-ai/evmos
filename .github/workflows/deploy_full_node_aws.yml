@@ -13,7 +13,7 @@ on:
         default: 'latest'
         type: string
         required: false
-      clean_instance:
+      clean:
         description: 'Clean docker related components  (default: true, false only for first deployment)'
         default: true
         type: boolean
@@ -23,7 +23,7 @@ on:
 jobs:
   clean_instance:
     name: Clean docker related components
-    if: ${{ inputs.clean_instance }}
+    if: ${{ inputs.clean }}
     runs-on: zbc-testnet-fn
     steps:
       - name: Stop docker compose
@@ -37,6 +37,7 @@ jobs:
           docker system prune -f
 
   push_to_registry:
+    needs: clean_instance
     name: Deploy new version of zbc full node
     runs-on: zbc-testnet-fn
     env:
