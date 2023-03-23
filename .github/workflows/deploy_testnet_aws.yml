@@ -34,7 +34,7 @@ jobs:
       - name: Stop docker compose
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.fullnode.yml  down
+          docker compose -f docker-compose.testnet.yml  down
 
       - name: Clean all docker related image, cache, container ...
         working-directory: ./zbc-development
