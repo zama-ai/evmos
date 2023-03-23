@@ -13,9 +13,29 @@ on:
         default: 'latest'
         type: string
         required: false
+      clean_instance:
+        description: 'Clean docker related components  (default: true, false only for first deployment)'
+        default: true
+        type: boolean
+        required: false
 
 
 jobs:
+  clean_instance:
+  name: Clean docker related components
+  if: ${{ inputs.clean_instance == 'true' }}
+    runs-on: zbc-testnet-fn
+    steps:
+      - name: Stop docker compose
+        working-directory: ./zbc-development
+        run: |
+          docker compose -f docker-compose.fullnode.yml  down
+
+      - name: Clean all docker related image, cache, container ...
+        working-directory: ./zbc-development
+        run: |
+          docker system prune -f
+
   push_to_registry:
     name: Deploy new version of zbc full node
     runs-on: zbc-testnet-fn
