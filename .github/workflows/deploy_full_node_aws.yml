@@ -23,7 +23,7 @@ on:
 jobs:
   clean_instance:
     name: Clean docker related components
-    if: ${{ inputs.clean_instance == 'true' }}
+    if: ${{ inputs.clean_instance }}
     runs-on: zbc-testnet-fn
     steps:
       - name: Stop docker compose
