@@ -41,10 +41,9 @@ jobs:
         run: |
           docker system prune -af
 
-
-jobs:
   push_to_registry:
     name: Deploy new version of zbc testnet
+    needs: clean_instance
     runs-on: zbc-testnet
     env:
       EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
