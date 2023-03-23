@@ -34,7 +34,7 @@ jobs:
       - name: Clean all docker related image, cache, container ...
         working-directory: ./zbc-development
         run: |
-          docker system prune -f
+          docker system prune -af
 
   push_to_registry:
     needs: clean_instance
@@ -138,6 +138,7 @@ jobs:
       - name: Start zkpok service
         working-directory: ./zbc-development
         run: |
+          docker compose  -f docker-compose.fullnode.yml create
           docker compose  -f docker-compose.fullnode.yml start zkpok
 
       - name: Check running docker
