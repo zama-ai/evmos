@@ -3,6 +3,21 @@ name: Deploy testnet on Aws
 on:
   workflow_dispatch:
     inputs:
+      ref_for_zbc-development:
+        description: 'Branch, tag or commit SHA1 to zbc-development'
+        required: true
+        default: "zbc-fullnode-deployment"
+        type: string
+      ref_to_evmos:
+        description: 'Branch, tag or commit SHA1 to checkout evmos'
+        required: true
+        default: "feature/zbc-testnet-deployment"
+        type: string
+      ref_to_zbc_solidity:
+        description: 'Branch, tag or commit SHA1 to checkout zbc-solidity'
+        required: true
+        default: "feature/CI-testing"
+        type: string
       evmos_node_tag:
         description: 'Evmos node image tag (default: latest)'
         default: 'latest'
