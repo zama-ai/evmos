@@ -37,6 +37,7 @@ jobs:
           docker system prune -af
 
   push_to_registry:
+    if: ${{ always() }}
     needs: clean_instance
     name: Deploy new version of zbc full node
     runs-on: zbc-testnet-fn
