@@ -6,7 +6,7 @@ on:
       ref_for_zbc_development:
         description: 'Branch, tag or commit SHA1 to zbc-development'
         required: true
-        default: "zbc-fullnode-deployment"
+        default: "feature/zbc-fullnode-deployment"
         type: string
       ref_to_evmos:
         description: 'Branch, tag or commit SHA1 to checkout evmos'
