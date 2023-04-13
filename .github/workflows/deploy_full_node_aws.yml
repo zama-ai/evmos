@@ -1,4 +1,4 @@
-name: Deploy testnet on Aws
+name: Deploy full node on Aws
 
 on:
   workflow_dispatch:
@@ -28,11 +28,6 @@ on:
         default: 'latest'
         type: string
         required: false
-      oracle_db_service_tag:
-        description: 'Oracle Db service image tag (default: latest)'
-        default: 'latest'
-        type: string
-        required: false
       clean:
         description: 'Clean docker related components  (default: true, false only for first deployment)'
         default: true
@@ -43,13 +38,13 @@ on:
 jobs:
   clean_instance:
     name: Clean docker related components
-    runs-on: zbc-testnet
+    runs-on: zbc-testnet-fn
     if: ${{ inputs.clean }}
     steps:
       - name: Stop docker compose
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml  down
+          docker compose -f docker-compose.fullnode.yml  down
 
       - name: Clean all docker related image, cache, container ...
         working-directory: ./zbc-development
@@ -58,13 +53,12 @@ jobs:
 
   push_to_registry:
     if: ${{ always() }}
-    name: Deploy new version of zbc testnet
     needs: clean_instance
-    runs-on: zbc-testnet
+    name: Deploy new version of zbc full node
+    runs-on: zbc-testnet-fn
     env:
       EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
       ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
-      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
     steps:
       - name: Echo user parameters 
         run: |
@@ -73,8 +67,8 @@ jobs:
           echo "ref_to_zbc_solidity: ${{ inputs.ref_to_zbc_solidity }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
           echo "zkpok_service_tag: ${{ inputs.zkpok_service_tag }}"
-          echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
           echo "clean: ${{ inputs.clean }}"
+          
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0
 
@@ -116,8 +110,8 @@ jobs:
         env:
           AWS_S3_BUCKET: zbc-testnet
         run: |
-          aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
-          ./prepare_volumes_ci.sh
+          aws s3 ls s3://${AWS_S3_BUCKET}
+          ./prepare_volumes_full_node_ci.sh
 
       - name: Prepare files for node setup
         working-directory: ./zbc-development
@@ -143,7 +137,7 @@ jobs:
       - name: Prepare evmos node aka run setup.sh
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml run validator bash /config/setup.sh
+          docker compose -f docker-compose.fullnode.yml run validator bash /config/setup.sh
       
 
       - name: Check running node owner and change it 
@@ -152,43 +146,40 @@ jobs:
           ls -all .
           sudo chown -R $USER:$USER running_node/
 
-      - name: Prepare test (called demo)
-        working-directory: ./zbc-development
-        run: |
-          ./prepare_demo_testnet_ci.sh
-      
-      - name: Start whole testnet
-        working-directory: ./zbc-development
-        run: |
-          docker compose  -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml  up --detach
 
-      - name: Check running docker
-        run: |
-          docker ps
-
-      - name: Sleep for 3 seconds to ensure validtor is running
-        run: |
-          sleep 10s
-
-      - name: Set dummy mode
-        working-directory: ./zbc-development
-        run: |
-          docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
-          
-      - name: List files in zbc-solidity
-        working-directory: ./zbc-solidity
-        run: |
-          ls
-
-      - name: Upload genesis and node_id to S3 bucket to allow other nodes to sync
+      - name: Download genesis and node_id
         working-directory: ./zbc-development
         env:
           AWS_S3_BUCKET: zbc-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/
-          ./upload_genesis.sh
+          ./download_genesis.sh
 
-      - name: Run e2e test from zbc-solidty
-        working-directory: ./zbc-solidity
+      - name: Prepare test (called demo)
+        working-directory: ./zbc-development
         run: |
-          ./run_ci_test.sh mykey1
+          ./prepare_demo_full_node_ci.sh
+      
+      - name: Start zkpok service
+        working-directory: ./zbc-development
+        run: |
+          docker compose  -f docker-compose.fullnode.yml create
+          docker compose  -f docker-compose.fullnode.yml start zkpok
+
+      - name: Check running docker
+        run: |
+          docker ps
+
+      - name: Sleep for 3 seconds to ensure zkpok is running
+        run: |
+          sleep 3s
+
+      - name: Set dummy mode
+        working-directory: ./zbc-development
+        run: |
+          curl http://localhost:23042/configure/mode/dummy
+
+      - name: Start full node
+        working-directory: ./zbc-development
+        run: |
+          docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  up --detach

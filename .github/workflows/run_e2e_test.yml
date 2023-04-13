@@ -24,6 +24,12 @@ jobs:
       ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
       ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
     steps:
+      - name: Echo user parameters 
+        run: |
+          echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
+          echo "zkpok_service_tag: ${{ inputs.zkpok_service_tag }}"
+          echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
