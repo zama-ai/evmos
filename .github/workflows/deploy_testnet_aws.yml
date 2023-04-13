@@ -6,12 +6,12 @@ on:
       ref_for_zbc_development:
         description: 'Branch, tag or commit SHA1 to zbc-development'
         required: true
-        default: "feature/zbc-fullnode-deployment"
+        default: "main"
         type: string
       ref_to_evmos:
         description: 'Branch, tag or commit SHA1 to checkout evmos'
         required: true
-        default: "feature/zbc-testnet-deployment"
+        default: "v9.1.0-zama"
         type: string
       ref_to_zbc_solidity:
         description: 'Branch, tag or commit SHA1 to checkout zbc-solidity'
@@ -66,6 +66,15 @@ jobs:
       ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
       ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
     steps:
+      - name: Echo user parameters 
+        run: |
+          echo "ref_for_zbc_development: ${{ inputs.ref_for_zbc_development }}"
+          echo "ref_to_evmos: ${{ inputs.ref_to_evmos }}"
+          echo "ref_to_zbc_solidity: ${{ inputs.ref_to_zbc_solidity }}"
+          echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
+          echo "zkpok_service_tag: ${{ inputs.zkpok_service_tag }}"
+          echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
+          echo "clean: ${{ inputs.clean }}"
       - name: Clean Workspace
         uses: AutoModality/action-clean@v1.1.0
 
