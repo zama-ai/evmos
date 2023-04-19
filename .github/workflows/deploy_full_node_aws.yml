@@ -23,11 +23,6 @@ on:
         default: 'latest'
         type: string
         required: false
-      zkpok_service_tag:
-        description: 'Zkpok service image tag (default: latest)'
-        default: 'latest'
-        type: string
-        required: false
       clean:
         description: 'Clean docker related components  (default: true, false only for first deployment)'
         default: true
@@ -58,7 +53,6 @@ jobs:
     runs-on: zbc-testnet-fn
     env:
       EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
-      ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
     steps:
       - name: Echo user parameters 
         run: |
@@ -66,7 +60,6 @@ jobs:
           echo "ref_to_evmos: ${{ inputs.ref_to_evmos }}"
           echo "ref_to_zbc_solidity: ${{ inputs.ref_to_zbc_solidity }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
-          echo "zkpok_service_tag: ${{ inputs.zkpok_service_tag }}"
           echo "clean: ${{ inputs.clean }}"
           
       - name: Clean Workspace
@@ -139,13 +132,11 @@ jobs:
         run: |
           docker compose -f docker-compose.fullnode.yml run validator bash /config/setup.sh
       
-
       - name: Check running node owner and change it 
         working-directory: ./zbc-development
         run: |
           ls -all .
           sudo chown -R $USER:$USER running_node/
-
 
       - name: Download genesis and node_id
         working-directory: ./zbc-development
@@ -159,25 +150,10 @@ jobs:
         working-directory: ./zbc-development
         run: |
           ./prepare_demo_full_node_ci.sh
-      
-      - name: Start zkpok service
-        working-directory: ./zbc-development
-        run: |
-          docker compose  -f docker-compose.fullnode.yml create
-          docker compose  -f docker-compose.fullnode.yml start zkpok
 
       - name: Check running docker
         run: |
           docker ps
-
-      - name: Sleep for 3 seconds to ensure zkpok is running
-        run: |
-          sleep 3s
-
-      - name: Set dummy mode
-        working-directory: ./zbc-development
-        run: |
-          curl http://localhost:23042/configure/mode/dummy
 
       - name: Start full node
         working-directory: ./zbc-development
