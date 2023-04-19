@@ -23,6 +23,11 @@ on:
         default: 'latest'
         type: string
         required: false
+      validator_ip_address:
+        description: 'The ip of the validator to be synced on (default: 13.37.31.214)'
+        default: '13.37.31.214'
+        type: string
+        required: false
       clean:
         description: 'Clean docker related components  (default: true, false only for first deployment)'
         default: true
@@ -144,7 +149,7 @@ jobs:
           AWS_S3_BUCKET: zbc-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/
-          ./download_genesis.sh
+          ./download_genesis.sh ${{ inputs.validator_ip_address }}
 
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
