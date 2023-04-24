@@ -63,7 +63,7 @@ jobs:
           AWS_S3_BUCKET: zbc-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
-          ./prepare_volumes_ci.sh
+          ./prepare_volumes_validator_ci.sh
 
       - name: Prepare files for node setup
         working-directory: ./zbc-development
@@ -115,12 +115,7 @@ jobs:
       - name: Sleep for 3 seconds to ensure validtor is running
         run: |
           sleep 10s
-
-      - name: Set dummy mode
-        working-directory: ./zbc-development
-        run: |
-          docker compose -f docker-compose.validator.yml exec validator curl http://zkpok:23042/configure/mode/dummy
-          
+      
       - name: List files in zbc-solidity
         working-directory: ./zbc-solidity
         run: |
