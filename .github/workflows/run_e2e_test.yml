@@ -7,10 +7,6 @@ on:
         description: 'Evmos node image tag (default: latest)'
         type: string
         required: false
-      zkpok_service_tag:
-        description: 'Zkpok service image tag (default: latest)'
-        type: string
-        required: false
       oracle_db_service_tag:
         description: 'Oracle Db service image tag (default: latest)'
         type: string
@@ -21,13 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
-      ZKPOK_SERVICE_TAG: ${{ inputs.zkpok_service_tag }}
       ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
     steps:
       - name: Echo user parameters 
         run: |
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
-          echo "zkpok_service_tag: ${{ inputs.zkpok_service_tag }}"
           echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
 
       - name: Checkout
@@ -95,7 +89,7 @@ jobs:
       - name: Prepare evmos node aka run setup.sh
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml run validator bash /config/setup.sh
+          docker compose -f docker-compose.validator.yml run validator bash /config/setup.sh
       
 
       - name: Check running node owner and change it 
@@ -112,7 +106,7 @@ jobs:
       - name: Start whole testnet
         working-directory: ./zbc-development
         run: |
-          docker compose  -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml  up --detach
+          docker compose  -f docker-compose.validator.yml -f docker-compose.validator.override.yml  up --detach
 
       - name: Check running docker
         run: |
@@ -125,7 +119,7 @@ jobs:
       - name: Set dummy mode
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml exec validator curl http://zkpok:23042/configure/mode/dummy
+          docker compose -f docker-compose.validator.yml exec validator curl http://zkpok:23042/configure/mode/dummy
           
       - name: List files in zbc-solidity
         working-directory: ./zbc-solidity
@@ -140,4 +134,4 @@ jobs:
       - name: Stop whole testnet
         working-directory: ./zbc-development
         run: |
-          docker compose -f docker-compose.testnet.yml -f docker-compose.testnet.override.yml down
+          docker compose -f docker-compose.validator.yml -f docker-compose.validator.override.yml down
