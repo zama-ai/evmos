@@ -149,7 +149,7 @@ jobs:
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
         run: |
-          ./prepare_demo_testnet_ci.sh
+          ./prepare_validator_ci.sh
       
       - name: Start whole testnet
         working-directory: ./zbc-development
