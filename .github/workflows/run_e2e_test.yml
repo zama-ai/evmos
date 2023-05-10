@@ -122,14 +122,16 @@ jobs:
         run: |
           docker ps
 
-      - name: Sleep for 3 seconds to ensure validtor is running
+      - name: Prepare/download fhe keys
+        working-directory: ./zbc-solidity
         run: |
-          sleep 10s
+          ./prepare_fhe_keys_ci.sh
       
       - name: List files in zbc-solidity
         working-directory: ./zbc-solidity
         run: |
           ls
+          ls keys
 
       - name: Run e2e test from zbc-solidty
         working-directory: ./zbc-solidity

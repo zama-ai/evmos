@@ -177,6 +177,11 @@ jobs:
           aws s3 ls s3://${AWS_S3_BUCKET}/
           ./upload_genesis.sh
 
+      - name: Prepare/download fhe keys
+        working-directory: ./zbc-solidity
+        run: |
+          ./prepare_fhe_keys_ci.sh
+
       - name: Run e2e test from zbc-solidty
         working-directory: ./zbc-solidity
         run: |
