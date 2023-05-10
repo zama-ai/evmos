@@ -16,6 +16,11 @@ on:
         required: true
         default: "feature/delete-zkpok"
         type: string
+      ref_for_zbc_development:
+        description: 'Branch, tag or commit SHA1 to zbc-development'
+        required: true
+        default: "feature/delete-zkpok"
+        type: string
 
 jobs:
   docker:
@@ -41,7 +46,7 @@ jobs:
           repository: zama-ai/zbc-development
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
           path: zbc-development
-          ref: testnet-from-CI-images
+          ref: ${{ inputs.ref_for_zbc_development }}
 
       - name: Checkout zbc-solidity
         uses: actions/checkout@v3
@@ -106,7 +111,7 @@ jobs:
       - name: Prepare test (called demo)
         working-directory: ./zbc-development
         run: |
-          ./prepare_demo_testnet_ci.sh
+          ./prepare_validator_ci.sh
       
       - name: Start whole testnet
         working-directory: ./zbc-development
