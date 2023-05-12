@@ -101,6 +101,11 @@ jobs:
         run: |
           ls ${{ github.workspace }}
 
+      - name: Add determinism flag to Makefile
+        working-directory: ./tfhe-rs
+        run: |
+          sed -i 's/high-level-c-api/high-level-c-api,experimental-force_fft_algo_dif4/g' Makefile
+
       - name: Check zbc build image docker tag
         run: |
           echo ${{ inputs.zbc_build_image_tag }}
