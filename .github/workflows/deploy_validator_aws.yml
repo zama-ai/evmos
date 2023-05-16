@@ -33,6 +33,11 @@ on:
         default: true
         type: boolean
         required: false
+      run_test:
+        description: 'Run e2e test after deployment  (default: true)'
+        default: true
+        type: boolean
+        required: false
 
 
 jobs:
@@ -182,7 +187,8 @@ jobs:
         run: |
           ./prepare_fhe_keys_ci.sh
 
-      - name: Run e2e test from zbc-solidty
-        working-directory: ./zbc-solidity
-        run: |
-          ./run_ci_test.sh mykey1
+      if: ${{ inputs.run_test }}
+        - name: Run e2e test from zbc-solidty
+          working-directory: ./zbc-solidity
+          run: |
+            ./run_ci_test.sh mykey1
