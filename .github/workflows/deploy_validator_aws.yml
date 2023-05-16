@@ -187,8 +187,8 @@ jobs:
         run: |
           ./prepare_fhe_keys_ci.sh
 
-      if: ${{ inputs.run_test }}
-        - name: Run e2e test from zbc-solidty
-          working-directory: ./zbc-solidity
-          run: |
-            ./run_ci_test.sh mykey1
+      - name: Run e2e test from zbc-solidty
+        if: ${{ inputs.run_test }}
+        working-directory: ./zbc-solidity
+        run: |
+          ./run_ci_test.sh mykey1
