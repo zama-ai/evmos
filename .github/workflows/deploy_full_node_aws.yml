@@ -63,7 +63,7 @@ jobs:
           echo "clean: ${{ inputs.clean }}"
           
       - name: Clean Workspace
-        uses: AutoModality/action-clean@v1.1.0
+        uses: AutoModality/action-clean@v1.1.1
 
       - name: Checkout
         uses: actions/checkout@v3
