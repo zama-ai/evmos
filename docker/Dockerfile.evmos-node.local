@@ -1,4 +1,4 @@
-FROM zama-zbc-build:latest as build-env
+FROM zama-zbc-build:latest AS build-env
 
 ENV LD_LIBRARY_PATH=/usr/lib/
 
