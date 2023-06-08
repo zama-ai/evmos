@@ -227,19 +227,35 @@ $(BUILDDIR)/:
 
 build-local-docker: prepare-build-docker
 	
-
-e2e-test-local:
-	@docker compose -f docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
+init_evmos_node:
+	@echo 'init_evmos_node'
+	@docker compose -f docker-compose/docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
 	@$(SUDO) chown -R $(USER):$(USER) running_node/
-# Generate fhe global keys and copy into volumes
-	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh $(ZBC_DEVELOPMENT_PATH)/target/release
+
+generate_fhe_keys:
+	@echo 'generate_fhe_keys'
+	# Generate fhe global keys and copy into volumes
+	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh $(ZBC_FHE_TOOL_PATH)/target/release
 	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_demo_local.sh
-	@bash docker compose  -f docker-compose.local.yml -f docker-compose.local.override.yml  up --detach
-	@bash sleep 5
-# TODO replace hard-coded path to evmos 
-	@bash cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh ../evmos/volumes/network-public-fhe-keys
-	@bash cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
-	@docker compose  -f docker-compose.local.yml down
+
+run_evmos:
+	@docker compose  -f docker-compose/docker-compose.local.yml -f docker-compose/docker-compose.local.override.yml  up --detach
+	@sleep 5
+
+stop_evmos:
+	@docker compose  -f docker-compose/docker-compose.local.yml down
+
+run_e2e_test:
+	# TODO replace hard-coded path to evmos 
+	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh ../evmos/volumes/network-public-fhe-keys
+	@cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
+	@sleep 5
+
+e2e-test-local: init_evmos_node generate_fhe_keys run_evmos run_e2e_test stop_evmos
+	
+
+	
+	
 
 
 build-reproducible: go.sum
