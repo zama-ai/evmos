@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+include .env
+
 PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
 PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
 DIFF_TAG=$(shell git rev-list --tags="v*" --max-count=1 --not $(shell git rev-list --tags="v*" "HEAD..origin"))
@@ -15,12 +17,33 @@ BUILDDIR ?= $(CURDIR)/build
 SIMAPP = ./app
 HTTPS_GIT := https://github.com/evmos/evmos.git
 DOCKER := $(shell which docker)
+SUDO := $(shell which sudo)
+ifneq ($(shell grep docker /proc/1/cgroup -qa),)
+	SUDO :=
+endif
+
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
 NAMESPACE := tharsishq
 PROJECT := evmos
 DOCKER_IMAGE := $(NAMESPACE)/$(PROJECT)
 COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)
 DOCKER_TAG := $(COMMIT_HASH)
+WORKDIR ?= $(CURDIR)/work_dir
+# Needed as long as go-ethereum and ethermint are private repositories
+GOPRIVATE=github.com/zama-ai/*
+
+TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
+TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
+TFHE_RS_VERSION ?= 0.2.4
+
+
+ZBC_DEVELOPMENT_PATH ?= ../zbc-development
+ZBC_FHE_TOOL_PATH ?= ../zbc-fhe-tool
+ZBC_SOLIDITY_PATH ?= ../zbc-solidity
+
+ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
+GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
+UPDATE_GO_MOD = go.mod.updated
 
 export GO111MODULE = on
 
@@ -115,15 +138,109 @@ endif
 
 BUILD_TARGETS := build install
 
-build: BUILD_ARGS=-o $(BUILDDIR)/
+
+build_c_api_tfhe:
+	$(info build tfhe-rs C API)
+	mkdir -p $(WORKDIR)/
+	$(info tfhe-rs path $(TFHE_RS_PATH))
+	$(info sudo_bin $(SUDO_BIN))
+	cd $(TFHE_RS_PATH) && RUSTFLAGS="" make build_c_api
+	ls $(TFHE_RS_PATH)/target/release
+# In tfhe.go the library path is specified as following : #cgo LDFLAGS: -L/usr/lib/tfhe -ltfhe
+# Magic to make this command work locally and in a docker where sudo is not defined
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/tfhe.h /usr/include/
+	$(SUDO) mkdir -p /usr/lib/tfhe
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/libtfhe.* /usr/lib/tfhe/
+
+build: 
+	BUILD_ARGS=-o $(BUILDDIR)
+	$(info build)
+	
 build-linux:
+	$(info build-linux)
 	GOOS=linux GOARCH=amd64 LEDGER_ENABLED=false $(MAKE) build
 
-$(BUILD_TARGETS): go.sum $(BUILDDIR)/
-	go $@ $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+build-local: check-tfhe-rs go.sum build_c_api_tfhe $(BUILDDIR)/
+	$(info build-local)
+	go build $(BUILD_FLAGS) -o build $(BUILD_ARGS) ./...
+	@echo 'evmosd binary is ready in build folder'
+
+
+# $(BUILD_TARGETS): go.sum $(BUILDDIR)/
+$(BUILD_TARGETS): go.sum build_c_api_tfhe $(BUILDDIR)/
+	$(info BUILD_TARGETS)
+	go $@ $(BUILD_FLAGS) -o build $(BUILD_ARGS) ./...
+
+check-tfhe-rs: $(WORKDIR)/
+	$(info check-tfhe-rs)
+ifeq ($(TFHE_RS_EXISTS), true)
+	@echo "Tfhe-rs exists in $(TFHE_RS_PATH)"
+	@if [ ! -d $(WORKDIR)/tfhe-rs ]; then \
+        echo 'tfhe-rs is not available in $(WORKDIR)'; \
+        echo "TFHE_RS_PATH is set to a custom value"; \
+        echo 'Copy local version located in $(TFHE_RS_PATH) into  $(WORKDIR)'; \
+        cp -r $(TFHE_RS_PATH) $(WORKDIR)/; \
+    else \
+        echo 'tfhe-rs is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "Tfhe-rs does not exist"
+	echo "If you want your own version please update TFHE_RS_PATH pointing to your tfhe-rs folder!"
+	echo "We clone it for you!"
+	$(MAKE) clone_tfhe_rs
+endif
+
+install-tfhe-rs: clone_tfhe_rs
+
+clone_tfhe_rs: $(WORKDIR)/
+	$(info Cloning tfhe-rs version $(TFHE_RS_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/tfhe-rs.git
+	cd $(WORKDIR)/tfhe-rs && git checkout $(TFHE_RS_VERSION)
+
+clone_go_ethereum: $(WORKDIR)/
+	$(info Cloning Go-ethereum version $(GO_ETHEREUM_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/go-ethereum.git
+	cd $(WORKDIR)/go-ethereum && git checkout $(GO_ETHEREUM_VERSION)
+
+clone_ethermint: $(WORKDIR)/
+	$(info Cloning Ethermint version $(ETHERMINT_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/ethermint.git
+	cd $(WORKDIR)/ethermint && git checkout $(ETHERMINT_VERSION)
+
+$(WORKDIR)/:
+	$(info WORKDIR)
+	mkdir -p $(WORKDIR)
+
+
+prepare-build-docker: $(WORKDIR)/ clone_go_ethereum clone_ethermint	check-tfhe-rs update-go-mod
+
+
+update-go-mod:
+	@cp go.mod $(UPDATE_GO_MOD)
+	@bash scripts/replace_go_mod.sh $(UPDATE_GO_MOD) go-ethereum
+	@bash scripts/replace_go_mod.sh $(UPDATE_GO_MOD) ethermint
+
 
 $(BUILDDIR)/:
-	mkdir -p $(BUILDDIR)/
+	$(info BUILDDIR)
+	mkdir -p $(BUILDDIR)
+
+build-local-docker: prepare-build-docker
+	
+
+e2e-test-local:
+	@docker compose -f docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
+	@$(SUDO) chown -R $(USER):$(USER) running_node/
+# Generate fhe global keys and copy into volumes
+	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh $(ZBC_DEVELOPMENT_PATH)/target/release
+	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_demo_local.sh
+	@bash docker compose  -f docker-compose.local.yml -f docker-compose.local.override.yml  up --detach
+	@bash sleep 5
+# TODO replace hard-coded path to evmos 
+	@bash cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh ../evmos/volumes/network-public-fhe-keys
+	@bash cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
+	@docker compose  -f docker-compose.local.yml down
+
 
 build-reproducible: go.sum
 	$(DOCKER) rm latest-build || true
@@ -164,7 +281,10 @@ clean:
 	rm -rf \
     $(BUILDDIR)/ \
     artifacts/ \
-    tmp-swagger-gen/
+    tmp-swagger-gen/ \
+	$(WORKDIR)/ \
+	build
+	rm -f $(UPDATE_GO_MOD)
 
 all: build
 
