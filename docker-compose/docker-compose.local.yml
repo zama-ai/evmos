@@ -11,12 +11,12 @@ services:
       - "26656-26657:26656-26657"
       - "8545:8545"
     volumes:
-      - $PWD/running_node/node1:/root:Z
-      - $PWD/private.ed25519:/config/private.ed25519:Z
-      - $PWD/public.ed25519:/config/public.ed25519:Z
-      - $PWD/node/scripts/setup.sh:/config/setup.sh:Z
-      - $PWD/node/zama_config/zama_config_local_testnet.toml:/config/zama_config.toml:Z
-      - $PWD/vm.log:/root/.evmosd/zama/vm.log:Z
+      - ../running_node/node1:/root:Z
+      - ../private.ed25519:/config/private.ed25519:Z
+      - ../public.ed25519:/config/public.ed25519:Z
+      - ../node/init_scripts/setup.sh:/config/setup.sh:Z
+      - ../node/zama_config/zama_config_local_testnet.toml:/config/zama_config.toml:Z
+      - ../vm.log:/root/.evmosd/zama/vm.log:Z
     networks:
       localnet:
         ipv4_address: 192.167.10.2
