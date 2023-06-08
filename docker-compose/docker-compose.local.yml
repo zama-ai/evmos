@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  evmosnodelocal:
+    image: evmosnodelocal
+    container_name: evmosnodelocal0
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.evmos-node.local
+    ports:
+      - "26656-26657:26656-26657"
+      - "8545:8545"
+    volumes:
+      - $PWD/running_node/node1:/root:Z
+      - $PWD/private.ed25519:/config/private.ed25519:Z
+      - $PWD/public.ed25519:/config/public.ed25519:Z
+      - $PWD/node/scripts/setup.sh:/config/setup.sh:Z
+      - $PWD/node/zama_config/zama_config_local_testnet.toml:/config/zama_config.toml:Z
+      - $PWD/vm.log:/root/.evmosd/zama/vm.log:Z
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.2
+
+  oracledb:
+    image: ghcr.io/zama-ai/oracle-db-service:latest
+    container_name: zbcoracledb
+    ports:
+      - "8001:8001"
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.12
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.167.10.0/16
