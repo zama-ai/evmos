@@ -76,7 +76,11 @@ golang           bullseye   342faadef914   5 days ago       777MB
 ### Check wich version/tag/commit has been used 
 
 ```bash
-make build-local-docker
+make print-info
+GO_ETHEREUM_TAG: v1.0.1-test ---extracted from go.mod
+ETHERMINT_TAG: v1.0.0-test ---extracted from go.mod
+...
+
 ```
 
 
