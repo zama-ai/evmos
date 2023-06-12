@@ -309,6 +309,8 @@ check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity check-zbc-development
 
 prepare-build-docker: $(WORKDIR)/ clone_go_ethereum clone_ethermint	update-go-mod check-tfhe-rs
 
+copy_zbc_fhe_binary:
+	cp -v $(ZBC_FHE_TOOL_PATH)/target/release/zbc-fhe $(ZBC_SOLIDITY_PATH)
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)

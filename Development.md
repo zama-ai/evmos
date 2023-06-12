@@ -56,6 +56,24 @@ Here are the steps executed automatically:
 make build-local-docker
 ```
 
+If everything work correctly you should have:
+
+```bash
+ls work_dir/
+ethermint  go-ethereum  tfhe-rs
+```
+
+And the following images:
+
+```bash
+docker images
+REPOSITORY       TAG        IMAGE ID       CREATED          SIZE
+evmosnodelocal   latest     04a5b55c8d9c   10 minutes ago   2.22GB
+zama-zbc-build   latest     c280fb388ab5   12 minutes ago   1.99GB
+golang           bullseye   342faadef914   5 days ago       777MB
+```
+
+
 <br />
 <details>
   <summary>Troubleshoot ghcr.io</summary>
@@ -97,5 +115,20 @@ Then
 ```bash
 make e2e-test-local
 ```
+Every repositories are cloned into **work_dir**.
 
+This test will:
+- check you have all the needed repositories
+  - zbc-fhe-tool
+  - zbc-solidity
+  - zbc-development
+- init evmos node by calling /config/setup.sh file
+- generate fhe keys using zbc-fhe-tool based on $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh script
+- copy them at the right folder using $(ZBC_DEVELOPMENT_PATH)/prepare_demo_local.sh script
+- start validator and oracle db using docker-compose/docker-compose.local.yml file
+- run the e2e test 
+  - copy pks to encrypt user input using $(ZBC_SOLIDITY_PATH)/prepare_fhe_keys_from_fhe_tool script
+  - start the test using $(ZBC_SOLIDITY_PATH)/run_local_test_from_evmos.sh
+    - Get the private key of main account 
+    - Give it to the python test script $(ZBC_SOLIDITY_PATH)/demo_test_high_level_fhe_tool
 
