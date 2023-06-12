@@ -36,10 +36,17 @@ TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
 TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
 TFHE_RS_VERSION ?= 0.2.4
 
+ZBC_DEVELOPMENT_PATH ?= $(WORKDIR)/zbc-development
+ZBC_DEVELOPMENT_PATH_EXISTS := $(shell test -d $(ZBC_DEVELOPMENT_PATH)/.git && echo "true" || echo "false")
+ZBC_DEVELOPMENT_VERSION ?= feature/delete-zkpok
 
-ZBC_DEVELOPMENT_PATH ?= ../zbc-development
-ZBC_FHE_TOOL_PATH ?= ../zbc-fhe-tool
-ZBC_SOLIDITY_PATH ?= ../zbc-solidity
+ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
+ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
+ZBC_FHE_TOOL_VERSION ?= main
+
+ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
+ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
+ZBC_SOLIDITY_VERSION ?= feature/new-output-mechanism
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -193,12 +200,91 @@ ifeq ($(TFHE_RS_EXISTS), true)
     fi
 else
 	@echo "Tfhe-rs does not exist"
-	echo "If you want your own version please update TFHE_RS_PATH pointing to your tfhe-rs folder!"
 	echo "We clone it for you!"
+	echo "If you want your own version please update TFHE_RS_PATH pointing to your tfhe-rs folder!"
 	$(MAKE) clone_tfhe_rs
 endif
 
+check-zbc-solidity: $(WORKDIR)/
+	$(info check-zbc-solidity)
+ifeq ($(ZBC_SOLIDITY_PATH), true)
+	@echo "zbc-solidity exists in $(ZBC_SOLIDITY_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-solidity ]; then \
+        echo 'zbc-solidity is not available in $(WORKDIR)'; \
+        echo "ZBC_SOLIDITY_PATH is set to a custom value"; \
+        echo 'Copy local version located in $(ZBC_SOLIDITY_PATH) into  $(WORKDIR)'; \
+        cp -r $(ZBC_SOLIDITY_PATH) $(WORKDIR)/; \
+    else \
+        echo 'zbc-solidity is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-solidity does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_SOLIDITY_PATH pointing to your zbc-solidity folder!"
+	$(MAKE) clone_zbc_solidty
+endif
+
+check-zbc-development: $(WORKDIR)/
+	$(info check-zbc-development)
+ifeq ($(ZBC_DEVELOPMENT_PATH), true)
+	@echo "zbc-development exists in $(ZBC_DEVELOPMENT_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-development ]; then \
+        echo 'zbc-development is not available in $(WORKDIR)'; \
+        echo "ZBC_DEVELOPMENT_PATH is set to a custom value"; \
+        echo 'Copy local version located in $(ZBC_DEVELOPMENT_PATH) into  $(WORKDIR)'; \
+        cp -r $(ZBC_DEVELOPMENT_PATH) $(WORKDIR)/; \
+    else \
+        echo 'zbc-development is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-development does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_DEVELOPMENT_PATH pointing to your zbc-development folder!"
+	$(MAKE) clone_zbc_development
+endif
+
+check-zbc-fhe-tool: $(WORKDIR)/
+	$(info check-zbc-fhe-tool)
+ifeq ($(ZBC_FHE_TOOL_PATH), true)
+	@echo "zbc-fhe-tool exists in $(ZBC_FHE_TOOL_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-fhe_tool ]; then \
+        echo 'zbc-fhe-tool is not available in $(WORKDIR)'; \
+        echo "ZBC_FHE_TOOL_PATH is set to a custom value"; \
+        echo 'Copy local version located in $(ZBC_FHE_TOOL_PATH) into  $(WORKDIR)'; \
+        cp -r $(ZBC_FHE_TOOL_PATH) $(WORKDIR)/; \
+    else \
+        echo 'zbc-fhe-tool is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-fhe-tool does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your zbc-fhe-tool folder!"
+	$(MAKE) clone_zbc_fhe_tool
+	$(MAKE) build_zbc_fhe_tool
+endif
+
+
+
 install-tfhe-rs: clone_tfhe_rs
+
+build_zbc_fhe_tool:
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && echo "Arch is $${ARCH_TO_BUIL_ZBC_FHE_TOOL}"
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && cd work_dir/zbc-fhe-tool && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+
+clone_zbc_development: $(WORKDIR)/
+	$(info Cloning zbc-development version $(ZBC_DEVELOPMENT_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-development.git
+	cd $(WORKDIR)/zbc-development && git checkout $(ZBC_DEVELOPMENT_VERSION)
+
+clone_zbc_fhe_tool: $(WORKDIR)/
+	$(info Cloning zbc-fhe-tool version $(ZBC_FHE_TOOL_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-fhe-tool.git
+	cd $(WORKDIR)/zbc-fhe-tool && git checkout $(ZBC_FHE_TOOL_VERSION)
+	
+clone_zbc_solidty: $(WORKDIR)/
+	$(info Cloning zbc-solidity version $(ZBC_SOLIDITY_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-solidity.git
+	cd $(WORKDIR)/zbc-solidity && git checkout $(ZBC_SOLIDITY_VERSION)
 
 clone_tfhe_rs: $(WORKDIR)/
 	$(info Cloning tfhe-rs version $(TFHE_RS_VERSION))
@@ -219,8 +305,9 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
+check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity check-zbc-development
 
-prepare-build-docker: $(WORKDIR)/ clone_go_ethereum clone_ethermint	check-tfhe-rs update-go-mod
+prepare-build-docker: $(WORKDIR)/ clone_go_ethereum clone_ethermint	update-go-mod check-tfhe-rs
 
 
 update-go-mod:
@@ -261,11 +348,11 @@ stop_evmos:
 
 run_e2e_test:
 	# TODO replace hard-coded path to evmos 
-	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh ../evmos/volumes/network-public-fhe-keys
+	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh ../../volumes/network-public-fhe-keys
 	@cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
 	@sleep 5
 
-e2e-test-local: init_evmos_node generate_fhe_keys run_evmos run_e2e_test stop_evmos
+e2e-test-local: check-all-test-repo  init_evmos_node generate_fhe_keys run_evmos run_e2e_test stop_evmos
 
 build-reproducible: go.sum
 	$(DOCKER) rm latest-build || true
