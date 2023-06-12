@@ -42,8 +42,16 @@ make build-local
 
 ## Using docker
 
+Here are the steps:
+- Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__
+- Check tfhe-rs is available in TFHE_RS_PATH (default is work_dir/tfhe-rs)
+- In any case the custom version or the cloned (TFHE_RS_VERSION) one is copied into work_dir/tfhe-rs
+- Clone go-ethereum and ethermint to work_dir (version are parsed from go.mod to avoid handling ssh keys inside docker because those repositories are private)
+- Update go.mod to make it use local repositories (related to the just above change)
+- Build a docker called __evmosnodelocal__.
+
 ```bash
-make build
+make build-local-docker
 ```
 
 <br />
@@ -63,7 +71,7 @@ Because evmos depends on private [go-ethereum](https://github.com/zama-ai/go-eth
 <br />
 
 
-### Build with docker
+<!-- ### Build with docker
 
-In order to have a clean dev machine, one can build evmosd through docker.
+In order to have a clean dev machine, one can build evmosd through docker. -->
 
