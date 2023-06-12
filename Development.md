@@ -73,6 +73,12 @@ zama-zbc-build   latest     c280fb388ab5   12 minutes ago   1.99GB
 golang           bullseye   342faadef914   5 days ago       777MB
 ```
 
+### Check wich version/tag/commit has been used 
+
+```bash
+make build-local-docker
+```
+
 
 <br />
 <details>
