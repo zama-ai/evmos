@@ -42,8 +42,10 @@ make build-local
 
 ## Using docker
 
-Here are the steps:
-- Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__
+Here are the steps executed automatically:
+- Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__.
+  
+
 - Check tfhe-rs is available in TFHE_RS_PATH (default is work_dir/tfhe-rs)
 - In any case the custom version or the cloned (TFHE_RS_VERSION) one is copied into work_dir/tfhe-rs
 - Clone go-ethereum and ethermint to work_dir (version are parsed from go.mod to avoid handling ssh keys inside docker because those repositories are private)
@@ -55,6 +57,17 @@ make build-local-docker
 ```
 
 <br />
+<details>
+  <summary>Troubleshoot ghcr.io</summary>
+
+Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/zbc-fhe-tool#using-the-published-image-easiest-way).
+
+  If you get trouble to pull image from ghcri.io, one can build it locally with
+  ```bash
+  docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
+  ```
+</details>
+
 <details>
   <summary>Troubleshoot go modules</summary>
 
@@ -71,7 +84,18 @@ Because evmos depends on private [go-ethereum](https://github.com/zama-ai/go-eth
 <br />
 
 
-<!-- ### Build with docker
+## Run e2e test
 
-In order to have a clean dev machine, one can build evmosd through docker. -->
+To be able to run the e2e, first build the evmos local node image explained in the first part. 
+
+```bash
+make build-local-docker
+```
+
+Then
+
+```bash
+make e2e-test-local
+```
+
 
