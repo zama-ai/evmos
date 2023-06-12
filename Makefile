@@ -233,7 +233,12 @@ $(BUILDDIR)/:
 	$(info BUILDDIR)
 	mkdir -p $(BUILDDIR)
 
-build-local-docker: prepare-build-docker
+build-base-image:
+	@echo 'Build base image with go and rust tools'
+	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build
+
+build-local-docker: build-base-image prepare-build-docker
+	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 	
 init_evmos_node:
 	@echo 'init_evmos_node'
@@ -248,7 +253,8 @@ generate_fhe_keys:
 
 run_evmos:
 	@docker compose  -f docker-compose/docker-compose.local.yml -f docker-compose/docker-compose.local.override.yml  up --detach
-	@sleep 5
+	@echo 'sleep a bit to let the docker starts...'
+	sleep 10
 
 stop_evmos:
 	@docker compose  -f docker-compose/docker-compose.local.yml down
@@ -260,11 +266,6 @@ run_e2e_test:
 	@sleep 5
 
 e2e-test-local: init_evmos_node generate_fhe_keys run_evmos run_e2e_test stop_evmos
-	
-
-	
-	
-
 
 build-reproducible: go.sum
 	$(DOCKER) rm latest-build || true
@@ -301,7 +302,11 @@ $(MOCKS_DIR):
 
 distclean: clean tools-clean
 
-clean:
+clean-node-storage:
+	@echo 'clean node storage'
+	sudo rm -rf running_node
+
+clean: clean-node-storage
 	rm -rf \
     $(BUILDDIR)/ \
     artifacts/ \
@@ -309,6 +314,7 @@ clean:
 	$(WORKDIR)/ \
 	build
 	rm -f $(UPDATE_GO_MOD)
+	
 
 all: build
 
