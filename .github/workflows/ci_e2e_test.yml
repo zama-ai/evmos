@@ -1,0 +1,126 @@
+name: Run ci e2e test
+
+on:
+  workflow_dispatch:
+    inputs:
+      oracle_db_service_tag:
+        description: 'Oracle Db service image tag (default: latest)'
+        type: string
+        required: false
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    env:
+      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
+    steps:
+      - name: Echo user parameters 
+        run: |
+          echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmos
+
+      - name: Get version for all needed repositories
+        working-directory: ./evmos
+        run: |
+          echo "ZBC_DEVELOPMENT_VERSION=$(./scripts/get_variable.sh ZBC_DEVELOPMENT_VERSION)" >> $GITHUB_ENV
+          echo "TFHE_RS_VERSION=$(./scripts/get_variable.sh TFHE_RS_VERSION)" >> $GITHUB_ENV
+          echo "ZBC_FHE_TOOL_VERSION=$(./scripts/get_variable.sh ZBC_FHE_TOOL_VERSION)" >> $GITHUB_ENV
+          echo "ZBC_SOLIDITY_VERSION=$(./scripts/get_variable.sh ZBC_SOLIDITY_VERSION)" >> $GITHUB_ENV
+          echo "ETHERMINT_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/ethermint)" >> $GITHUB_ENV
+          echo "GO_ETHEREUM_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)" >> $GITHUB_ENV
+          
+      - name: Echo versions parsed from Makefile and go.mod
+        run: |
+          echo "ZBC_DEVELOPMENT_VERSION: $ZBC_DEVELOPMENT_VERSION"
+          echo "TFHE_RS_VERSION: $TFHE_RS_VERSION"
+          echo "ZBC_FHE_TOOL_VERSION: $ZBC_FHE_TOOL_VERSION"
+          echo "ZBC_SOLIDITY_VERSION: $ZBC_SOLIDITY_VERSION"
+          echo "ETHERMINT_VERSION: $ETHERMINT_VERSION"
+          echo "GO_ETHEREUM_VERSION: $GO_ETHEREUM_VERSION"
+      
+      - name: Checkout zbc-dev
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-development
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/zbc-development
+          ref: $ZBC_DEVELOPMENT_VERSION
+
+      - name: Checkout zbc-solidity
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-solidity
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/zbc-solidity
+          ref: $ZBC_SOLIDITY_VERSION
+
+      - name: Checkout tfhe-rs
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/tfhe-rs
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/tfhe-rs
+          ref: $TFHE_RS_VERSION
+
+      - name: Checkout zbc-fhe-tool
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/zbc-fhe-tool
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/zbc-fhe-tool
+          ref: $ZBC_FHE_TOOL_VERSION
+
+      - name: Checkout go-ethereum
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/go-ethereum
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/go-ethereum
+          ref: $GO_ETHEREUM_VERSION
+
+      - name: Checkout ethermint
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/ethermint
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/ethermint
+          ref: $GO_ETHEREUM_VERSION
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Prepare files for node setup
+        working-directory: ./zbc-development
+        run: |
+          mkdir -p node/evmos
+          cp ../evmos/private.ed25519 node/evmos 
+          cp ../evmos/public.ed25519 node/evmos 
+          touch vm.log
+          ls node/evmos
+
+      - name: List files in volumes
+        working-directory: ./zbc-development
+        run: |
+          ls volumes
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build local docker 
+        working-directory: ./evmos
+        run: |
+          make build-local-docker
+
+      - name: Check docker iamges
+        working-directory: ./evmos
+        run: |
+          docker images
