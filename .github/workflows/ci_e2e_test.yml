@@ -98,8 +98,8 @@ jobs:
         working-directory: evmos/work_dir/zbc-development
         run: |
           mkdir -p node/evmos
-          cp ../evmos/private.ed25519 node/evmos 
-          cp ../evmos/public.ed25519 node/evmos 
+          cp ../../evmos/private.ed25519 node/evmos 
+          cp ../../evmos/public.ed25519 node/evmos 
           touch vm.log
           ls node/evmos
 
