@@ -46,7 +46,7 @@ ZBC_FHE_TOOL_VERSION ?= main
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= feature/new-output-mechanism
+ZBC_SOLIDITY_VERSION ?= feature/new-ci-m1
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -269,7 +269,7 @@ install-tfhe-rs: clone_tfhe_rs
 
 build_zbc_fhe_tool:
 	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && echo "Arch is $${ARCH_TO_BUIL_ZBC_FHE_TOOL}"
-	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && cd work_dir/zbc-fhe-tool && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && cd work_dir/zbc-fhe-tool && cargo +nightly  build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
 
 clone_zbc_development: $(WORKDIR)/
 	$(info Cloning zbc-development version $(ZBC_DEVELOPMENT_VERSION))
@@ -332,7 +332,7 @@ build-local-docker: build-base-image prepare-build-docker
 init_evmos_node:
 	@echo 'init_evmos_node'
 	@docker compose -f docker-compose/docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
-	@$(SUDO) chown -R $(USER):$(USER) running_node/
+	@$(SUDO) chown -R $(USER): running_node/
 
 generate_fhe_keys:
 	@echo 'generate_fhe_keys'
