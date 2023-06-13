@@ -309,6 +309,8 @@ check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity check-zbc-development
 
 prepare-build-docker: $(WORKDIR)/ clone_go_ethereum clone_ethermint	update-go-mod check-tfhe-rs
 
+prepare-build-docker-ci: $(WORKDIR)/ update-go-mod check-tfhe-rs
+
 copy_zbc_fhe_binary:
 	cp -v $(ZBC_FHE_TOOL_PATH)/target/release/zbc-fhe $(ZBC_SOLIDITY_PATH)
 
@@ -326,13 +328,28 @@ build-base-image:
 	@echo 'Build base image with go and rust tools'
 	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build
 
-build-local-docker: build-base-image prepare-build-docker
+build-local-docker:
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running in a GitHub Actions workflow)
+	$(MAKE) prepare-build-docker-ci 
+else
+	$(info Not running in a GitHub Actions workflow)
+	@$(MAKE) build-base-image
+	@$(MAKE) prepare-build-docker
+endif
 	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 	
 init_evmos_node:
 	@echo 'init_evmos_node'
 	@docker compose -f docker-compose/docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
-	@$(SUDO) chown -R $(USER):$(USER) running_node/
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running in a GitHub Actions workflow)
+	sudo chown -R runner:docker running_node/
+else
+	$(info Not running in a GitHub Actions workflow)
+	@$(SUDO) chown -R $(USER): running_node/
+endif
+	
 
 generate_fhe_keys:
 	@echo 'generate_fhe_keys'
