@@ -1,0 +1,9 @@
+name: Run ci e2e test
+
+on:
+  workflow_dispatch:
+    inputs:
+      oracle_db_service_tag:
+        description: 'Oracle Db service image tag (default: latest)'
+        type: string
+        required: false
