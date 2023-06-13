@@ -88,7 +88,7 @@ jobs:
           repository: zama-ai/ethermint
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
           path: ./evmos/work_dir/ethermint
-          ref: ${{ env.GO_ETHEREUM_VERSION }}
+          ref: ${{ env.ETHERMINT_VERSION }}
 
       - name: List files in the repository
         run: |
