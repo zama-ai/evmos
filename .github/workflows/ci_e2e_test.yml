@@ -95,7 +95,7 @@ jobs:
           ls ${{ github.workspace }}
 
       - name: Prepare files for node setup
-        working-directory: ./zbc-development
+        working-directory: evmos/work_dir/zbc-development
         run: |
           mkdir -p node/evmos
           cp ../evmos/private.ed25519 node/evmos 
@@ -103,10 +103,15 @@ jobs:
           touch vm.log
           ls node/evmos
 
-      - name: List files in volumes
-        working-directory: ./zbc-development
+      - name: List files in work_dir
+        working-directory: evmos/work_dir
         run: |
-          ls volumes
+          ls 
+
+      - name: List files in work_dir 2
+        working-directory: work_dir
+        run: |
+          ls 
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
