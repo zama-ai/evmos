@@ -245,6 +245,7 @@ endif
 
 check-zbc-fhe-tool: $(WORKDIR)/
 	$(info check-zbc-fhe-tool)
+	@echo "ZBC_FHE_TOOL_PATH_EXISTS  $(ZBC_FHE_TOOL_PATH_EXISTS)"
 ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
 	@echo "zbc-fhe-tool exists in $(ZBC_FHE_TOOL_PATH)"
 	@if [ ! -d $(WORKDIR)/zbc-fhe_tool ]; then \
