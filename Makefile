@@ -261,8 +261,8 @@ else
 	echo "We clone it for you!"
 	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your zbc-fhe-tool folder!"
 	$(MAKE) clone_zbc_fhe_tool
-	
 endif
+	echo 'Call build zbc fhe'
 	$(MAKE) build_zbc_fhe_tool
 
 
