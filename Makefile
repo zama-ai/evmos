@@ -328,17 +328,22 @@ build-base-image:
 	@echo 'Build base image with go and rust tools'
 	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build
 
+build-evmosnodelocal:
+	@echo 'Build evmosnodelocal'
+	@docker build . -f docker/Dockerfile.evmos-node.local -t evmosnodelocal
+
 build-local-docker:
 ifeq ($(GITHUB_ACTIONS),true)
 	$(info Running in a GitHub Actions workflow)
 	$(MAKE) prepare-build-docker-ci 
-	docker compose -f docker-compose/docker-compose.local.yml pull
+	$(MAKE) build-evmosnodelocal
 else
 	$(info Not running in a GitHub Actions workflow)
 	@$(MAKE) build-base-image
 	@$(MAKE) prepare-build-docker
-endif
 	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
+endif
+	
 	
 init_evmos_node:
 	@echo 'init_evmos_node'
