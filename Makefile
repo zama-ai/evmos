@@ -256,7 +256,7 @@ ifeq ($(ZBC_FHE_TOOL_PATH), true)
         echo 'zbc-fhe-tool is already available in $(WORKDIR)'; \
     fi
 else
-	@echo "zbc-fhe-tool does not exist"
+	@echo "zbc-fhe-tool does not exist in $(ZBC_FHE_TOOL_PATH)"
 	echo "We clone it for you!"
 	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your zbc-fhe-tool folder!"
 	$(MAKE) clone_zbc_fhe_tool
