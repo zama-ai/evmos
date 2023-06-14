@@ -1,4 +1,4 @@
-FROM zama-zbc-build:latest AS build-env
+FROM ghcr.io/zama-ai/zama-zbc-build:latest AS build-env
 
 ENV LD_LIBRARY_PATH=/usr/lib/tfhe
 
