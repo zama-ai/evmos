@@ -270,9 +270,16 @@ endif
 install-tfhe-rs: clone_tfhe_rs
 
 build_zbc_fhe_tool:
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running in a GitHub Actions workflow for build_zbc_fhe_tool)
+	@cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/x86_64-unix
+else
+	$(info Not running in a GitHub Actions workflow for build_zbc_fhe_tool)
 	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && echo "Arch is $${ARCH_TO_BUIL_ZBC_FHE_TOOL}"
 	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && cd work_dir/zbc-fhe-tool && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
 
+endif
+	
 clone_zbc_development: $(WORKDIR)/
 	$(info Cloning zbc-development version $(ZBC_DEVELOPMENT_VERSION))
 	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-development.git
