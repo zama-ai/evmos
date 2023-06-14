@@ -121,6 +121,7 @@ jobs:
           ls ${{ github.workspace }}
           ls work_dir
           ls work_dir/zbc-fhe-tool
+          ls work_dir/zbc-fhe-tool/.git
           make e2e-test-local
       
       - name: Build local docker 
