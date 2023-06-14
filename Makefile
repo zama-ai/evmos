@@ -332,7 +332,7 @@ build-local-docker:
 ifeq ($(GITHUB_ACTIONS),true)
 	$(info Running in a GitHub Actions workflow)
 	$(MAKE) prepare-build-docker-ci 
-	@docker compose  pull
+	@docker compose -f docker-compose/docker-compose.local.yml pull
 else
 	$(info Not running in a GitHub Actions workflow)
 	@$(MAKE) build-base-image
