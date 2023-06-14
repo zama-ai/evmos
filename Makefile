@@ -270,8 +270,9 @@ endif
 install-tfhe-rs: clone_tfhe_rs
 
 build_zbc_fhe_tool:
+	echo 'build with x86_64'
 ifeq ($(GITHUB_ACTIONS),true)
-	@echo 'build with x86_64'
+	echo 'build with x86'
 	$(info Running in a GitHub Actions workflow for build_zbc_fhe_tool)
 	@cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/x86_64-unix
 else
