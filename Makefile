@@ -354,6 +354,10 @@ stop_evmos:
 
 run_e2e_test:
 	# TODO replace hard-coded path to evmos 
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running in a GitHub Actions workflow)
+	$(MAKE) copy_zbc_fhe_binary
+endif
 	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh $(WORKDIR)/../volumes/network-public-fhe-keys
 	@cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
 	@sleep 5
