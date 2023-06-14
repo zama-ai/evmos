@@ -263,7 +263,7 @@ else
 	$(MAKE) clone_zbc_fhe_tool
 	
 endif
-	(MAKE) build_zbc_fhe_tool
+	$(MAKE) build_zbc_fhe_tool
 
 
 
