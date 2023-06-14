@@ -207,7 +207,7 @@ endif
 
 check-zbc-solidity: $(WORKDIR)/
 	$(info check-zbc-solidity)
-ifeq ($(ZBC_SOLIDITY_PATH), true)
+ifeq ($(ZBC_SOLIDITY_PATH_EXISTS), true)
 	@echo "zbc-solidity exists in $(ZBC_SOLIDITY_PATH)"
 	@if [ ! -d $(WORKDIR)/zbc-solidity ]; then \
         echo 'zbc-solidity is not available in $(WORKDIR)'; \
@@ -226,7 +226,7 @@ endif
 
 check-zbc-development: $(WORKDIR)/
 	$(info check-zbc-development)
-ifeq ($(ZBC_DEVELOPMENT_PATH), true)
+ifeq ($(ZBC_DEVELOPMENT_PATH_EXISTS), true)
 	@echo "zbc-development exists in $(ZBC_DEVELOPMENT_PATH)"
 	@if [ ! -d $(WORKDIR)/zbc-development ]; then \
         echo 'zbc-development is not available in $(WORKDIR)'; \
@@ -245,7 +245,7 @@ endif
 
 check-zbc-fhe-tool: $(WORKDIR)/
 	$(info check-zbc-fhe-tool)
-ifeq ($(ZBC_FHE_TOOL_PATH), true)
+ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
 	@echo "zbc-fhe-tool exists in $(ZBC_FHE_TOOL_PATH)"
 	@if [ ! -d $(WORKDIR)/zbc-fhe_tool ]; then \
         echo 'zbc-fhe-tool is not available in $(WORKDIR)'; \
