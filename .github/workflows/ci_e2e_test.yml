@@ -120,7 +120,12 @@ jobs:
         run: |
           make build-local-docker
 
-      - name: Check docker iamges
+      - name: Check docker images
         working-directory: ./evmos
         run: |
           docker images
+
+      - name: Run e2e test
+        working-directory: ./evmos
+        run: |
+          make e2e-test-local
