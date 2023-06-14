@@ -248,7 +248,7 @@ check-zbc-fhe-tool: $(WORKDIR)/
 	@echo "ZBC_FHE_TOOL_PATH_EXISTS  $(ZBC_FHE_TOOL_PATH_EXISTS)"
 ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
 	@echo "zbc-fhe-tool exists in $(ZBC_FHE_TOOL_PATH)"
-	@if [ ! -d $(WORKDIR)/zbc-fhe_tool ]; then \
+	@if [ ! -d $(WORKDIR)/zbc-fhe-tool ]; then \
         echo 'zbc-fhe-tool is not available in $(WORKDIR)'; \
         echo "ZBC_FHE_TOOL_PATH is set to a custom value"; \
         echo 'Copy local version located in $(ZBC_FHE_TOOL_PATH) into  $(WORKDIR)'; \

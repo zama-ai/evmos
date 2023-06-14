@@ -114,15 +114,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run e2e test
-        working-directory: ./evmos
-        run: |
-          ls ${{ github.workspace }}
-          ls work_dir
-          ls work_dir/zbc-fhe-tool
-          ls work_dir/zbc-fhe-tool/.git
-          make e2e-test-local
       
       - name: Build local docker 
         working-directory: ./evmos
@@ -134,10 +125,12 @@ jobs:
         run: |
           docker images
 
+
       - name: Run e2e test
         working-directory: ./evmos
         run: |
           ls ${{ github.workspace }}
           ls work_dir
           ls work_dir/zbc-fhe-tool
+          ls work_dir/zbc-fhe-tool/.git
           make e2e-test-local
