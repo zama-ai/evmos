@@ -118,7 +118,7 @@ jobs:
       - name: Build local docker 
         working-directory: ./evmos
         run: |
-          make build-local-docker
+          make build_zbc_fhe_tool
 
       - name: Check docker images
         working-directory: ./evmos
