@@ -38,7 +38,7 @@ ENV LD_LIBRARY_PATH=/usr/lib/tfhe
 
 
 COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
-COPY --from=build-env /usr/lib/tfhe/libtfhe.* /usr/lib/
+COPY --from=build-env /usr/lib/libtfhe.* /usr/lib/
 COPY --from=build-env /usr/include/tfhe.h /usr/include
 
 WORKDIR /config

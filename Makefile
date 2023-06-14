@@ -34,19 +34,16 @@ GOPRIVATE = github.com/zama-ai/*
 
 TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
 TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
-TFHE_RS_VERSION ?= 0.2.4
+TFHE_RS_VERSION ?= 189f02b696acad96ac18e6549714d64e4031a795 
 
-ZBC_DEVELOPMENT_PATH ?= $(WORKDIR)/zbc-development
-ZBC_DEVELOPMENT_PATH_EXISTS := $(shell test -d $(ZBC_DEVELOPMENT_PATH)/.git && echo "true" || echo "false")
-ZBC_DEVELOPMENT_VERSION ?= feature/delete-zkpok
 
 ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
 ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
-ZBC_FHE_TOOL_VERSION ?= main
+ZBC_FHE_TOOL_VERSION ?= bd650c277767052b993f9428cdf06b72d063b14a
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= feature/new-output-mechanism
+ZBC_SOLIDITY_VERSION ?= feature/update-e2e
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -150,7 +147,6 @@ print-info:
 	@echo 'ETHERMINT_TAG: $(ETHERMINT_VERSION) ---extracted from go.mod'
 	@bash scripts/get_repository_info.sh evmos ${CURDIR}
 	@bash scripts/get_repository_info.sh tfhe-rs $(TFHE_RS_PATH)
-	@bash scripts/get_repository_info.sh zbc-development $(ZBC_DEVELOPMENT_PATH)
 	@bash scripts/get_repository_info.sh zbc-fhe-tool $(ZBC_FHE_TOOL_PATH)
 	@bash scripts/get_repository_info.sh zbc-solidity $(ZBC_SOLIDITY_PATH)
 
@@ -165,7 +161,7 @@ build_c_api_tfhe:
 # Magic to make this command work locally and in a docker where sudo is not defined
 	$(SUDO) cp $(TFHE_RS_PATH)/target/release/tfhe.h /usr/include/
 	$(SUDO) mkdir -p /usr/lib/tfhe
-	$(SUDO) cp $(TFHE_RS_PATH)/target/release/libtfhe.* /usr/lib/tfhe/
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/libtfhe.* /usr/lib/
 
 build: 
 	BUILD_ARGS=-o $(BUILDDIR)
@@ -212,8 +208,6 @@ ifeq ($(ZBC_SOLIDITY_PATH_EXISTS), true)
 	@if [ ! -d $(WORKDIR)/zbc-solidity ]; then \
         echo 'zbc-solidity is not available in $(WORKDIR)'; \
         echo "ZBC_SOLIDITY_PATH is set to a custom value"; \
-        echo 'Copy local version located in $(ZBC_SOLIDITY_PATH) into  $(WORKDIR)'; \
-        cp -r $(ZBC_SOLIDITY_PATH) $(WORKDIR)/; \
     else \
         echo 'zbc-solidity is already available in $(WORKDIR)'; \
     fi
@@ -224,24 +218,6 @@ else
 	$(MAKE) clone_zbc_solidty
 endif
 
-check-zbc-development: $(WORKDIR)/
-	$(info check-zbc-development)
-ifeq ($(ZBC_DEVELOPMENT_PATH_EXISTS), true)
-	@echo "zbc-development exists in $(ZBC_DEVELOPMENT_PATH)"
-	@if [ ! -d $(WORKDIR)/zbc-development ]; then \
-        echo 'zbc-development is not available in $(WORKDIR)'; \
-        echo "ZBC_DEVELOPMENT_PATH is set to a custom value"; \
-        echo 'Copy local version located in $(ZBC_DEVELOPMENT_PATH) into  $(WORKDIR)'; \
-        cp -r $(ZBC_DEVELOPMENT_PATH) $(WORKDIR)/; \
-    else \
-        echo 'zbc-development is already available in $(WORKDIR)'; \
-    fi
-else
-	@echo "zbc-development does not exist"
-	echo "We clone it for you!"
-	echo "If you want your own version please update ZBC_DEVELOPMENT_PATH pointing to your zbc-development folder!"
-	$(MAKE) clone_zbc_development
-endif
 
 check-zbc-fhe-tool: $(WORKDIR)/
 	$(info check-zbc-fhe-tool)
@@ -251,8 +227,6 @@ ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
 	@if [ ! -d $(WORKDIR)/zbc-fhe-tool ]; then \
         echo 'zbc-fhe-tool is not available in $(WORKDIR)'; \
         echo "ZBC_FHE_TOOL_PATH is set to a custom value"; \
-        echo 'Copy local version located in $(ZBC_FHE_TOOL_PATH) into  $(WORKDIR)'; \
-        cp -r $(ZBC_FHE_TOOL_PATH) $(WORKDIR)/; \
     else \
         echo 'zbc-fhe-tool is already available in $(WORKDIR)'; \
     fi
@@ -277,15 +251,11 @@ ifeq ($(GITHUB_ACTIONS),true)
 	@cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/x86_64-unix
 else
 	$(info Not running in a GitHub Actions workflow for build_zbc_fhe_tool)
-	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && echo "Arch is $${ARCH_TO_BUIL_ZBC_FHE_TOOL}"
-	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd work_dir/zbc-fhe-tool && ./scripts/get_arch.sh) && cd work_dir/zbc-fhe-tool && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && echo "Arch is $${ARCH_TO_BUIL_ZBC_FHE_TOOL}"
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
 
 endif
 	
-clone_zbc_development: $(WORKDIR)/
-	$(info Cloning zbc-development version $(ZBC_DEVELOPMENT_VERSION))
-	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-development.git
-	cd $(WORKDIR)/zbc-development && git checkout $(ZBC_DEVELOPMENT_VERSION)
 
 clone_zbc_fhe_tool: $(WORKDIR)/
 	$(info Cloning zbc-fhe-tool version $(ZBC_FHE_TOOL_VERSION))
@@ -316,14 +286,14 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity check-zbc-development
+check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity 
 
 prepare-build-docker: $(WORKDIR)/ clone_go_ethereum clone_ethermint	update-go-mod check-tfhe-rs
 
 prepare-build-docker-ci: $(WORKDIR)/ update-go-mod check-tfhe-rs
 
 copy_zbc_fhe_binary:
-	cp -v $(ZBC_FHE_TOOL_PATH)/target/release/zbc-fhe $(ZBC_SOLIDITY_PATH)
+	cp -v $(ZBC_FHE_TOOL_PATH)/target/release/zbc-fhe-tool $(ZBC_SOLIDITY_PATH)
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
@@ -371,8 +341,8 @@ endif
 generate_fhe_keys:
 	@echo 'generate_fhe_keys'
 	# Generate fhe global keys and copy into volumes
-	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh $(ZBC_FHE_TOOL_PATH)/target/release
-	@bash $(ZBC_DEVELOPMENT_PATH)/prepare_demo_local.sh
+	@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(ZBC_FHE_TOOL_PATH)/target/release
+	@bash ./scripts/prepare_demo_local.sh
 
 run_evmos:
 	@docker compose  -f docker-compose/docker-compose.local.yml -f docker-compose/docker-compose.local.override.yml  up --detach
@@ -384,7 +354,7 @@ stop_evmos:
 
 run_e2e_test:
 	# TODO replace hard-coded path to evmos 
-	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh ../../volumes/network-public-fhe-keys
+	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh $(WORKDIR)/../volumes/network-public-fhe-keys
 	@cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
 	@sleep 5
 
