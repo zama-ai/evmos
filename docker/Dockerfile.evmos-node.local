@@ -30,7 +30,7 @@ RUN make build
 RUN ls /src/evmos
 RUN ls /src/evmos/build
 
-FROM zama-zbc-build:latest
+FROM ghcr.io/zama-ai/zama-zbc-build:latest
 
 RUN apt-get update -y
 RUN apt-get install ca-certificates jq -y
