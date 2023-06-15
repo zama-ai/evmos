@@ -1,27 +1,12 @@
 FROM ghcr.io/zama-ai/zama-zbc-build:latest AS build-env
 
 ENV LD_LIBRARY_PATH=/usr/lib/tfhe
-
-# ADD work_dir/tfhe-rs /src/tfhe-rs
-# ADD work_dir/ethermint /src/ethermint
-# ADD work_dir/go-ethereum /src/go-ethereum
 ADD . /src/evmos
-
-# WORKDIR /src/tfhe-rs
-# RUN ls 
-# RUN RUSTFLAGS="" make build_c_api
-# RUN ls target/release
-# RUN cat /etc/os-release 
 
 WORKDIR /src/evmos
 
-RUN mkdir -p /usr/lib/tfhe
 RUN mkdir -p /usr/include
 
-# # RUN cp /src/tfhe-rs/target/release/tfhe.h /src/go-ethereum/core/vm/
-# RUN cp /src/tfhe-rs/target/release/tfhe.h /usr/include
-# # RUN cp /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
-# RUN cp /src/tfhe-rs/target/release/libtfhe.* /usr/lib/tfhe
 RUN cp go.mod.updated /src/evmos/go.mod
 
 RUN tail /src/evmos/go.mod

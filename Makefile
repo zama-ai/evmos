@@ -34,7 +34,7 @@ GOPRIVATE = github.com/zama-ai/*
 
 TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
 TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
-TFHE_RS_VERSION ?= 189f02b696acad96ac18e6549714d64e4031a795 
+TFHE_RS_VERSION ?= 1d817c45d5234bcf33638406191b656998b30c2a 
 
 
 ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
@@ -155,7 +155,7 @@ build_c_api_tfhe:
 	mkdir -p $(WORKDIR)/
 	$(info tfhe-rs path $(TFHE_RS_PATH))
 	$(info sudo_bin $(SUDO_BIN))
-	cd $(TFHE_RS_PATH) && RUSTFLAGS="" make build_c_api
+	cd $(TFHE_RS_PATH) && RUSTFLAGS="" make build_c_api_experimental_deterministic_fft
 	ls $(TFHE_RS_PATH)/target/release
 # In tfhe.go the library path is specified as following : #cgo LDFLAGS: -L/usr/lib/tfhe -ltfhe
 # Magic to make this command work locally and in a docker where sudo is not defined
@@ -310,8 +310,16 @@ build-base-image:
 	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build
 
 build-evmosnodelocal:
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running in a GitHub Actions workflow)
+	@echo 'Build evmosnodelocal'
+	@docker build . -f docker/Dockerfile.evmos-node.local -t evmos-node
+else
+	$(info Not running in a GitHub Actions workflow)
 	@echo 'Build evmosnodelocal'
 	@docker build . -f docker/Dockerfile.evmos-node.local -t evmosnodelocal
+endif
+	
 
 build-local-docker:
 ifeq ($(GITHUB_ACTIONS),true)
