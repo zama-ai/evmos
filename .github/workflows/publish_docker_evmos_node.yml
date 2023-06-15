@@ -92,6 +92,5 @@ jobs:
         working-directory: ./evmos
         run: |
           make build-local-docker
-          docker tag evmos-node:${{ inputs.evmos_node_tag }}
-          docker tag evmos-node:latest
+          docker tag evmos-node:latest evmos-node:${{ inputs.evmos_node_tag }}
           docker push ${{ env.DOCKER_IMAGE }} --all-tags
