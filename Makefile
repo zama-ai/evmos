@@ -43,7 +43,7 @@ ZBC_FHE_TOOL_VERSION ?= v1.0.1-beta
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= feature/update-e2e
+ZBC_SOLIDITY_VERSION ?= feature/update-e2e-ci
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -354,8 +354,8 @@ stop_evmos:
 
 run_e2e_test:
 	# TODO replace hard-coded path to evmos 
-	@cd $(ZBC_SOLIDITY_PATH) && ./prepare_fhe_keys_from_fhe_tool.sh $(WORKDIR)/../volumes/network-public-fhe-keys
-	@cd $(ZBC_SOLIDITY_PATH) && ./run_local_test_from_evmos.sh mykey1
+	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
+	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
 	@sleep 5
 
 e2e-test-local: check-all-test-repo  init_evmos_node generate_fhe_keys run_evmos run_e2e_test stop_evmos
