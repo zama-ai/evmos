@@ -31,7 +31,7 @@ fi
 KEYS_FULL_PATH=$CURRENT_FOLDER/res/keys
 mkdir -p $KEYS_FULL_PATH
 
-$ZBC_FHE_TOOL_PATH/$BINARY_NAME generate-keys res/keys
+$ZBC_FHE_TOOL_PATH/$BINARY_NAME generate-keys -d res/keys
 
 
 echo "###########################################################"
