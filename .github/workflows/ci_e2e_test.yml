@@ -19,10 +19,10 @@ jobs:
           echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
 
       - name: Install Node.js and npm
-      run: |
-        sudo apt update
-        sudo apt install nodejs
-        sudo apt install npm
+        run: |
+          sudo apt update
+          sudo apt install nodejs
+          sudo apt install npm
 
       - name: Checkout
         uses: actions/checkout@v3
