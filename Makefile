@@ -39,7 +39,7 @@ TFHE_RS_VERSION ?= 189f02b696acad96ac18e6549714d64e4031a795
 
 ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
 ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
-ZBC_FHE_TOOL_VERSION ?= bd650c277767052b993f9428cdf06b72d063b14a
+ZBC_FHE_TOOL_VERSION ?= v1.0.1-beta
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
