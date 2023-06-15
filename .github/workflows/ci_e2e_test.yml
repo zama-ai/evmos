@@ -131,7 +131,7 @@ jobs:
         run: |
           docker images
 
-      - name: Run e2e test
+      - name: Install @openzeppelin/contracts
         working-directory: evmos/work_dir/zbc-solidity
         run: |
           npm install @openzeppelin/contracts
