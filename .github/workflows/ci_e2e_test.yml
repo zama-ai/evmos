@@ -18,6 +18,12 @@ jobs:
         run: |
           echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
 
+      - name: Install Node.js and npm
+      run: |
+        sudo apt update
+        sudo apt install nodejs
+        sudo apt install npm
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -125,6 +131,10 @@ jobs:
         run: |
           docker images
 
+      - name: Run e2e test
+        working-directory: evmos/work_dir/zbc-solidity
+        run: |
+          npm install @openzeppelin/contracts
 
       - name: Run e2e test
         working-directory: ./evmos
