@@ -142,7 +142,7 @@ jobs:
       - name: Start whole testnet
         working-directory: ./evmos
         run: |
-          docker compose  -f docker-compose/docker-compose.validator.yml -f docker-compose.validator.override.yml  up --detach
+          docker compose  -f docker-compose/docker-compose.validator.yml -f docker-compose/docker-compose.validator.override.yml  up --detach
 
       - name: Check running docker
         run: |
