@@ -359,7 +359,7 @@ stop_evmos:
 run_e2e_test:
 	# TODO replace hard-coded path to evmos 
 	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
-	@cd $(ZBC_SOLIDITY_PATH) && npm install
+	@cd $(ZBC_SOLIDITY_PATH) && npm install @openzeppelin/contracts
 	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
 	@sleep 5
 
