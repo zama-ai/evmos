@@ -174,4 +174,4 @@ jobs:
         if: ${{ inputs.run_test }}
         working-directory: evmos/work_dir/zbc-solidity
         run: |
-          ./run_ERC20_ci_test.sh mykey1 ../../
+          ./ci/scripts/run_ERC20_ci_test.sh mykey1 ../../
