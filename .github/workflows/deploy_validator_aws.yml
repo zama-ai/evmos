@@ -94,15 +94,15 @@ jobs:
           aws-region: eu-west-3
 
       - name: Download keys from S3
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         env:
           AWS_S3_BUCKET: zbc-testnet
         run: |
-          aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
-          ./prepare_volumes_validator_ci.sh
+          aws s3 ls s3://${AWS_S3_BUCKET}
+          ./scripts/prepare_volumes_validator_ci.sh
 
       - name: Prepare files for node setup
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           mkdir -p node/evmos
           cp ../evmos/private.ed25519 node/evmos 
@@ -111,7 +111,7 @@ jobs:
           ls node/evmos
 
       - name: List files in volumes
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           ls volumes
 
@@ -123,26 +123,26 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Prepare evmos node aka run setup.sh
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
-          docker compose -f docker-compose.validator.yml run validator bash /config/setup.sh
+          docker compose -f docker-compose/docker-compose.validator.yml run validator bash /config/setup.sh
       
 
       - name: Check running node owner and change it 
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           ls -all .
-          sudo chown -R $USER:$USER running_node/
+          sudo chown -R $USER: running_node/
 
-      - name: Prepare test (called demo)
-        working-directory: ./zbc-development
+      - name: Prepare keys
+        working-directory: ./evmos
         run: |
-          ./prepare_validator_ci.sh
+          ./scripts/prepare_validator_ci.sh
       
       - name: Start whole testnet
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
-          docker compose  -f docker-compose.validator.yml -f docker-compose.validator.override.yml  up --detach
+          docker compose  -f docker-compose/docker-compose.validator.yml -f docker-compose.validator.override.yml  up --detach
 
       - name: Check running docker
         run: |
@@ -153,7 +153,7 @@ jobs:
           sleep 5s
           
       - name: List files in zbc-solidity
-        working-directory: ./zbc-solidity
+        working-directory: ./work_dir/zbc-solidity
         run: |
           ls
 
@@ -166,12 +166,12 @@ jobs:
           ./upload_genesis.sh
 
       - name: Prepare/download fhe keys
-        working-directory: ./zbc-solidity
+        working-directory: ./work_dir/zbc-solidity
         run: |
-          ./prepare_fhe_keys_ci.sh
+          ./scripts/prepare_fhe_keys_ci.sh
 
       - name: Run e2e test from zbc-solidty
         if: ${{ inputs.run_test }}
-        working-directory: ./zbc-solidity
+        working-directory: ./work_dir/zbc-solidity
         run: |
-          ./run_ci_test.sh mykey1
+          ./run_ERC20_ci_test.sh mykey1 ../../
