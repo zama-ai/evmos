@@ -163,7 +163,7 @@ jobs:
           AWS_S3_BUCKET: zbc-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/
-          ./upload_genesis.sh
+          ./script/upload_genesis.sh
 
       - name: Prepare/download fhe keys
         working-directory: evmos/work_dir/zbc-solidity
