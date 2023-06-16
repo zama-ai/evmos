@@ -170,6 +170,11 @@ jobs:
         run: |
           ./ci/scripts/prepare_fhe_keys_ci.sh
 
+      - name: Install @openzeppelin/contracts
+        working-directory: evmos/work_dir/zbc-solidity
+        run: |
+          npm install @openzeppelin/contracts
+
       - name: Run e2e test from zbc-solidty
         if: ${{ inputs.run_test }}
         working-directory: evmos/work_dir/zbc-solidity
