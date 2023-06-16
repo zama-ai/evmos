@@ -1,0 +1,5 @@
+version: '3'
+
+services:
+  validator:
+    entrypoint: /usr/bin/evmosd  start --home /root/.evmosd    --minimum-gas-prices=0.000000000000000001aevmos  --json-rpc.gas-cap=9999999999999999  --gas-prices=0.00000000000000000000000000000000001aev0mos  --gas-adjustment=0.000000000000000000000000001 --json-rpc.api eth,txpool,personal,net,debug,web3
