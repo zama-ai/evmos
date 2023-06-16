@@ -168,7 +168,7 @@ jobs:
       - name: Prepare/download fhe keys
         working-directory: evmos/work_dir/zbc-solidity
         run: |
-          ./scripts/prepare_fhe_keys_ci.sh
+          ./ci/scripts/prepare_fhe_keys_ci.sh
 
       - name: Run e2e test from zbc-solidty
         if: ${{ inputs.run_test }}
