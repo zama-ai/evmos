@@ -9,6 +9,7 @@ DEFAULT_TAG=$(shell git rev-list --tags="v*" --max-count=1)
 VERSION ?= $(shell echo $(shell git describe --tags $(or $(DIFF_TAG), $(DEFAULT_TAG))) | sed 's/^v//')
 TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
+HOST_ARCH := $(shell uname -m)
 LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
 EVMOS_BINARY = evmosd
@@ -244,18 +245,13 @@ endif
 install-tfhe-rs: clone_tfhe_rs
 
 build_zbc_fhe_tool:
-	echo 'build with x86_64'
-ifeq ($(GITHUB_ACTIONS),true)
-	echo 'build with x86'
-	$(info Running in a GitHub Actions workflow for build_zbc_fhe_tool)
-	@cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/x86_64-unix
-else
-	$(info Not running in a GitHub Actions workflow for build_zbc_fhe_tool)
-	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && echo "Arch is $${ARCH_TO_BUIL_ZBC_FHE_TOOL}"
+ifeq ($(HOST_ARCH), x86_64)
+	@echo 'Arch is x86'
 	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
-
-endif
-	
+else
+	@echo 'Arch is not x86'
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo +nightly build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+endif	
 
 clone_zbc_fhe_tool: $(WORKDIR)/
 	$(info Cloning zbc-fhe-tool version $(ZBC_FHE_TOOL_VERSION))
