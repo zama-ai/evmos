@@ -40,11 +40,11 @@ TFHE_RS_VERSION ?= 1d817c45d5234bcf33638406191b656998b30c2a
 
 ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
 ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
-ZBC_FHE_TOOL_VERSION ?= v1.0.1-beta
+ZBC_FHE_TOOL_VERSION ?= v0.1.0
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= feature/update-e2e-ci
+ZBC_SOLIDITY_VERSION ?= feature/test-m1
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
