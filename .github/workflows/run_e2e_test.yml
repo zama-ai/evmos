@@ -134,7 +134,6 @@ jobs:
           npm install @openzeppelin/contracts
 
       - name: Run e2e test from zbc-solidty
-        if: ${{ inputs.run_test }}
         working-directory: evmos/work_dir/zbc-solidity
         run: |
           ./ci/scripts/run_ERC20_ci_test.sh mykey1 ../../
