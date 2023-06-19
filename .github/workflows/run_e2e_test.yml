@@ -32,8 +32,8 @@ jobs:
 
       - name: Install npm
         run: |
-          apt update
-          apt install npm
+          sudo apt update
+          sudo apt install npm
 
       - name: Checkout
         uses: actions/checkout@v3
