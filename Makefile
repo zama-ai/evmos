@@ -320,7 +320,7 @@ endif
 	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 
 
-build-with-docker:
+build-docker:
 ifeq ($(LOCAL_BUILD),true)
 	$(info LOCAL_BUILD is set, build from sources)
 	@$(MAKE) build-local-docker
