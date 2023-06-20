@@ -6,8 +6,6 @@ VOLUME_NETWORK_PUBLIC_KEYS_PATH=./volumes/network-public-fhe-keys
 VOLUME_NETWORK_PRIVATE_KEYS_PATH=./volumes/network-private-fhe-keys
 EVMOS_NETWORK_KEYS_PATH=./running_node/node2/.evmosd/zama/keys/network-fhe-keys
 
-VOLUME_USERS_KEYS_PATH=./volumes/users-fhe-keys
-
 mkdir -p $EVMOS_NETWORK_KEYS_PATH
 
 # In go-ethereum both private and public key for network are at the same place
