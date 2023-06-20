@@ -23,6 +23,7 @@ jobs:
     env:
       EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
       ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
+      LOCAL_BUILD: "false"
     steps:
       - name: Echo user parameters 
         run: |
