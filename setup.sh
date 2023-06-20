@@ -39,9 +39,9 @@ cat $HOME_EVMOSD/config/genesis.json | jq '.app_state["gov"]["deposit_params"]["
 cat $HOME_EVMOSD/config/genesis.json | jq '.app_state["evm"]["params"]["evm_denom"]="aevmos"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 cat $HOME_EVMOSD/config/genesis.json | jq '.app_state["inflation"]["params"]["mint_denom"]="aevmos"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 
-# Set gas and txn limit in genesis
-cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="9999999999999999"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
-cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_bytes"]="104857600"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
+# Set gas limit of 100000000 and txn limit of 4 MB in genesis
+cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="100000000"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
+cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_bytes"]="4194304"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 
 # Set claims start time
 node_address=$($EVMOSD keys list | grep  "address: " | cut -c12-)
@@ -64,12 +64,8 @@ cat $HOME_EVMOSD/config/genesis.json | jq -r --arg amount_to_claim "$amount_to_c
 # Increase transaction and HTTP server body sizes.
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' 's/create_empty_blocks = true/create_empty_blocks = false/g' $HOME_EVMOSD/config/config.toml
-    sed -i '' 's/max_body_bytes = 1000000/max_body_bytes = 1000000000/g' $HOME_EVMOSD/config/config.toml
-    sed -i '' 's/max_tx_bytes = 1048576/max_tx_bytes = 100000000/g' $HOME_EVMOSD/config/config.toml
   else
     sed -i 's/create_empty_blocks = true/create_empty_blocks = false/g' $HOME_EVMOSD/config/config.toml
-    sed -i 's/max_body_bytes = 1000000/max_body_bytes = 1000000000/g' $HOME_EVMOSD/config/config.toml
-    sed -i 's/max_tx_bytes = 1048576/max_tx_bytes = 100000000/g' $HOME_EVMOSD/config/config.toml
 fi
 
 if [[ $1 == "pending" ]]; then
