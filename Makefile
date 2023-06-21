@@ -329,7 +329,7 @@ $(BUILDDIR)/:
 
 build-base-image:
 	@echo 'Build base image with go and rust tools'
-	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build
+	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build:latest
 	
 
 build-local-docker:
