@@ -375,7 +375,7 @@ else
 	$(info LOCAL_BUILD is not set, run docker images from docker registry)
 	@docker compose  -f docker-compose/docker-compose.validator.yml -f docker-compose/docker-compose.validator.override.yml  up --detach
 endif
-	@echo 'sleep a bit to let the docker starts...'
+	@echo 'sleep a little to let the docker start up'
 	sleep 10
 
 stop_evmos:
@@ -410,24 +410,16 @@ else
 	@$(SUDO) chown -R $(USER): running_node/
 endif
 
+
 e2e-test-local: 
-	@docker compose -f docker-compose/docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
-	$(MAKE) change_running_node_owner
-	$(MAKE) generate_fhe_keys
-	@bash ./scripts/prepare_demo_local.sh
+	$(MAKE) init-evmos-node-local
 	$(MAKE) run_evmos
 	$(MAKE) run_e2e_test
 	$(MAKE) stop_evmos
 
 
 e2e-test-from-registry:
-	mkdir -p node/evmos
-	cp private.ed25519 node/evmos
-	cp public.ed25519 node/evmos
-	@docker compose -f docker-compose/docker-compose.validator.yml run validator bash /config/setup.sh
-	$(MAKE) change_running_node_owner
-	$(MAKE) generate_fhe_keys
-	bash ./scripts/prepare_validator_ci.sh
+	$(MAKE) init-evmos-node-from-registry
 	$(MAKE) run_evmos
 	$(MAKE) run_e2e_test
 	$(MAKE) stop_evmos
@@ -441,6 +433,31 @@ ifeq ($(LOCAL_BUILD),true)
 else
 	$(info LOCAL_BUILD is not set, use docker registry for docker images)
 	@$(MAKE) e2e-test-from-registry
+endif
+
+init-evmos-node-local:
+	@docker compose -f docker-compose/docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
+	$(MAKE) change_running_node_owner
+	$(MAKE) generate_fhe_keys
+	@bash ./scripts/prepare_demo_local.sh
+
+init-evmos-node-from-registry:
+	mkdir -p node/evmos
+	cp private.ed25519 node/evmos
+	cp public.ed25519 node/evmos
+	@docker compose -f docker-compose/docker-compose.validator.yml run validator bash /config/setup.sh
+	$(MAKE) change_running_node_owner
+	$(MAKE) generate_fhe_keys
+	bash ./scripts/prepare_validator_ci.sh
+
+init-evmos-node:
+	@$(MAKE) check-all-test-repo
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set, run e2e test from locally built docker images)
+	@$(MAKE) init-evmos-node-local
+else
+	$(info LOCAL_BUILD is not set, use docker registry for docker images)
+	@$(MAKE) init-evmos-node-from-registry
 endif
 
 clean-node-storage:

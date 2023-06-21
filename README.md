@@ -44,69 +44,213 @@ interoperable with Ethereum. It's built using the [Cosmos SDK](https://github.co
 
 **Note**: Requires [Go 1.18+](https://golang.org/dl/)
 
-## Instructions for Zama block chain
 
-1. [MANDATORY] In order to use our custom EVM, please use the branch [__1.10.19-zama__](https://github.com/zama-ai/go-ethereum/tree/1.10.19-zama) in Zama go-ethereum repository.
-2. [CHECK] Please check that go.mod in this repository root folder points to the custom go-ethereum repository (end of the file).
-3. [MANDATORY] For pre-compiled contracts, we need to add to go_ethereum the C API dynamic library. The [install_tfhe_rs_script](https://github.com/zama-ai/go-ethereum/blob/1.10.19-zama/install_thfe_rs_api.sh) scripts allows to install it directly to the right place. To be more precise, the libray files are built and copied into __core/vm/lib__ folder and the tfhe C header file is placed in __core/vm__ folder. 
-4. [HELP_IF_ERROR] If the library is not found when the node is run  consider updating some env variable as __LD_LIBRARY_PATH__ with the path of go-ethereum/core/vm/lib. 
-4. [HELP_IF_ERROR_IN_DEBUG] If the library is not found in the DEBUG mode, please consider to add the env variable as for the point 4 for the launch.json file. Here is an example launch.json file. 
-```bash
-{
-    "configurations": [
-        {
-            "name": "evmosd",
-            "type": "go",
-            "request": "launch",
-            "mode": "exec",
-            "program": "/home/ldemir/go/bin/evmosd",
-            "env": {
-                "LD_LIBRARY_PATH": "/home/ldemir/Documents/dev/blockchain/go-ethereum/core/vm/lib/"
-            },
-            "args": [
-                "start",
-                "--pruning=nothing",
-                "--log_level=info",
-                "--minimum-gas-prices=0.0001aevmos",
-                "--json-rpc.api=eth,txpool,personal,net,debug,web3"
-            ]
-        }
-    ]
-}
-```
+# Local build
 
-Now you can continue to Installation session. 
-
-
-## Installation
-
-For prerequisites and detailed build instructions please read the [Installation](https://evmos.dev/validators/quickstart/installation.html) instructions. Once the dependencies are installed, run:
+To build evmosd binary directly in your system. 
 
 ```bash
-make install
+export GOPRIVATE=github.com/zama-ai/*
+make build-local
 ```
 
-Or check out the latest [release](https://github.com/evmos/evmos/releases).
+The binary is built in build folder.
 
-## Quick Start
+Dependencies:
 
-To learn how the Evmos works from a high-level perspective, go to the [Introduction](https://evmos.dev/about/intro/overview.html) section from the documentation. You can also check the instructions to [Run a Node](https://evmos.dev/validators/quickstart/run_node.html).
+| Name        | Type       | Variable name   | where it is defined | Current version/value |
+| ----------- | ---------- | --------------- | ------------------- | --------------------- |
+| go-ethereum | repository | -               | directly in go.mod  | v0.1.0                |
+| ethermint   | repository | -               | directly in go.mod  | v0.1.0                |
+| tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       | v0.1.0                |
 
-## Community
 
-The following chat channels and forums are a great spot to ask questions about Evmos:
 
-- [Evmos Twitter](https://twitter.com/EvmosOrg)
-- [Evmos Discord](https://discord.gg/evmos)
-- [Evmos Forum](https://commonwealth.im/evmos)
-- [Tharsis Twitter](https://twitter.com/TharsisHQ)
+
+
+# Local build through docker and e2e test
+
+## From sources
+
+If the developer wants to build everything locally from sources, and run the e2e test this build is the more adapted.
+
+Dependencies:
+
+| Name        | Type       | Variable name   | where it is defined | Current version/value |
+| ----------- | ---------- | --------------- | ------------------- | --------------------- |
+| evmos       | repository | LOCAL_BUILD     | .env                | true                  |
+| go-ethereum | repository | -               | directly in go.mod  | v0.1.0                |
+| ethermint   | repository | -               | directly in go.mod  | v0.1.0                |
+| tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       | v0.1.0                |
+
+
+
+
+```bash
+make build-docker
+```
+
+<br />
+<details>
+  <summary>Here are the steps executed automatically</summary>
+<br />
+
+
+- Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__.
+- Check tfhe-rs is available in TFHE_RS_PATH (default is work_dir/tfhe-rs)
+- In any case the custom version or the cloned (TFHE_RS_VERSION) one is copied into work_dir/tfhe-rs
+- Clone go-ethereum and ethermint to work_dir (version are parsed from go.mod to avoid handling ssh keys inside docker because those repositories are private)
+- Update go.mod to make it use local repositories (related to the just above changes)
+- Build a container called __evmosnodelocal__.
+
+</details>
+<br />
+
+To only init and run the node:
+
+```bash
+make init-evmos-node
+make run_evmos
+# make stop_evmos
+```
+
+Docker ps output:
+
+```
+CONTAINER ID   IMAGE                     NAMES
+0bc6ae374153   evmosnodelocal            evmosnodelocal0
+422f83a0ea73   docker-compose_oracledb   zbcoracledb
+
+```
+
+
+To execute the e2e test, here are the dependencies:
+
+| Name          | Type       | Variable name         | where it is defined | Current version/value |
+| ------------- | ---------- | --------------------- | ------------------- | --------------------- |
+| evmos         | repository | LOCAL_BUILD           | .env                | true                  |
+| zbc-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       | v0.1.0                |
+| zbc-fhe-tool  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       | v0.1.0                |
+| zbc-oracle-db | repository | ZBC_ORACLE_DB_VERSION | Makefile/.env       | main                  |
+
+
+
+
+```bash
+# without the previous init
+make e2e-test
+# or if evmos is already initialized.
+make run_evmos 
+make run_e2e_test
+make stop_evmos
+```
+
+<br />
+<details>
+  <summary>Here are the steps executed automatically</summary>
+<br />
+
+
+- check you have all the needed repositories
+  - zbc-fhe-tool
+  - zbc-solidity
+  - zbc-oracledb
+- init evmos node by calling /config/setup.sh file
+- generate fhe keys using zbc-fhe-tool based on scripts/prepare_volumes_from_fhe_tool.sh script
+- copy them at the right folder using scripts/prepare_demo_local.sh script
+- start evmosnodelocal0 and oracledb (local build) using docker-compose/docker-compose.local.yml file
+- run the e2e test 
+  - copy pks to encrypt user input using $(ZBC_SOLIDITY_PATH)/prepare_fhe_keys_for_e2e_test script
+  - start the test using $(ZBC_SOLIDITY_PATH)/run_ERC20_e2e_test.sh
+    - Get the private key of main account 
+    - Give it to the python test script $(ZBC_SOLIDITY_PATH)/ci/tests/ERC20.py
+
+</details>
+<br />
+
+## From github package registry
+
+The fast way to run the e2e test locally using ready to use docker images
+
+Dependencies:
+
+| Name                       | Type              | Variable name | where it is defined          | Current version/value |
+| -------------------------- | ----------------- | ------------- | ---------------------------- | --------------------- |
+| evmos                      | repository        | LOCAL_BUILD   | .env                         | false                 |
+| ghcr.io/zama-ai/evmos-node | docker image name | hard-coded    | docker-compose.validator.yml | v0.1.0                |
+
+
+
+
+Init evmos and run it:
+
+```bash
+make init-evmos-node
+make run_evmos
+# make stop_evmos
+```
+
+Docker ps output:
+```
+CONTAINER ID   IMAGE                                      NAMES
+02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.0     evmosnode0
+ac2073c0d6fc   ghcr.io/zama-ai/oracle-db-service:latest   zbcoracledb
+```
+
+To execute the e2e test, here are the dependencies:
+
+```bash
+# if evmos is already initialized.
+make run_evmos 
+make run_e2e_test
+make stop_evmos
+```
+|            Name            |       Type        |     Variable name     |     where it is defined      | Current version/value |
+| :------------------------: | :---------------: | :-------------------: | :--------------------------: | :-------------------: |
+|           evmos            |       evmos       |      LOCAL_BUILD      |             .env             |         false         |
+| ghcr.io/zama-ai/evmos-node | docker image name |      hard-coded       | docker-compose.validator.yml |        v0.1.0         |
+|     oracle-db-service      | docker image name |      hard-coded       | docker-compose.validator.yml |        latest         |
+|        zbc-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |        v0.1.0         |
+|        zbc-fhe-tool        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |        v0.1.0         |
+|       zbc-oracle-db        |    repository     | ZBC_ORACLE_DB_VERSION |        Makefile/.env         |         main          |
+
+
+
+
+Note:
+- for the zbc-oracle-db docker image it could not work on arm64 because the arm64 version is not yet pushed in ghcr.io
+
+<br />
+<details>
+  <summary>Troubleshoot ghcr.io</summary>
+
+Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/zbc-fhe-tool#using-the-published-image-easiest-way).
+
+  If you get trouble to pull image from ghcri.io, one can build it locally with
+  ```bash
+  docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
+  ```
+</details>
+
+<details>
+  <summary>Troubleshoot go modules for local-build</summary>
+
+Because evmos depends on private [go-ethereum](https://github.com/zama-ai/go-ethereum) and [ethermint](https://github.com/zama-ai/ethermint) repositories, one need to pay attention to two points to allow go modules manager to work correctly.
+
+1. Check that GOPRIVATE is set to __github.com/zama-ai/*__ (normally this env variable is set by default in Makefile)
+2. Check you have the following lines in your gitconfig files:
+
+```bash
+[url "ssh://git@github.com/"]
+        insteadOf = https://github.com/
+```
+</details>
+<br />
+
+
 
 ## Contributing
 
 Looking for a good place to start contributing? Check out some [`good first issues`](https://github.com/evmos/evmos/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
 For additional instructions, standards and style guides, please refer to the [Contributing](./CONTRIBUTING.md) document.
-
-## Careers
-
-See our open positions on [Cosmos Jobs](https://jobs.cosmos.network/project/evmos-d0sk1uxuh-remote/), [Notion](https://tharsis.notion.site), or feel free to [reach out](mailto:careers@thars.is) via email.
