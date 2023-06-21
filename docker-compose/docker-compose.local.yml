@@ -22,8 +22,10 @@ services:
         ipv4_address: 192.167.10.2
 
   oracledb:
-    image: ghcr.io/zama-ai/oracle-db-service:latest
     container_name: zbcoracledb
+    build:
+      context: ../work_dir/zbc-oracle-db
+      dockerfile: ./Dockerfile.local.dev
     ports:
       - "8001:8001"
     networks:

@@ -42,6 +42,10 @@ ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
 ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
 ZBC_FHE_TOOL_VERSION ?= v0.1.0
 
+ZBC_ORACLE_DB_PATH ?= $(WORKDIR)/zbc-oracle-db
+ZBC_ORACLE_DB_PATH_EXISTS := $(shell test -d $(ZBC_ORACLE_DB_PATH)/.git && echo "true" || echo "false")
+ZBC_ORACLE_DB_VERSION ?= main
+
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
 ZBC_SOLIDITY_VERSION ?= feature/test-m1
@@ -217,6 +221,23 @@ else
 	$(MAKE) clone_zbc_solidty
 endif
 
+check-zbc-oracle-db: $(WORKDIR)/
+	$(info check-zbc-oracle-db)
+ifeq ($(ZBC_ORACLE_DB_PATH_EXISTS), true)
+	@echo "zbc-oracle-db exists in $(ZBC_ORACLE_DB_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-oracle-db ]; then \
+        echo 'zbc-oracle-db is not available in $(WORKDIR)'; \
+        echo "ZBC_ORACLE_DB_PATH is set to a custom value"; \
+    else \
+        echo 'zbc-oracle-db is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-oracle-db does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_ORACLE_DB_PATH pointing to your zbc-oracle-db folder!"
+	$(MAKE) clone_zbc_oracle_db
+endif
+
 
 check-zbc-fhe-tool: $(WORKDIR)/
 	$(info check-zbc-fhe-tool)
@@ -266,6 +287,11 @@ clone_tfhe_rs: $(WORKDIR)/
 	cd $(WORKDIR) && git clone git@github.com:zama-ai/tfhe-rs.git
 	cd $(WORKDIR)/tfhe-rs && git checkout $(TFHE_RS_VERSION)
 
+clone_zbc_oracle_db: $(WORKDIR)/
+	$(info Cloning zbc-oracle-db version $(ZBC_ORACLE_DB_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-oracle-db.git
+	cd $(WORKDIR)/zbc-oracle-db && git checkout $(ZBC_ORACLE_DB_VERSION)
+
 clone_go_ethereum: $(WORKDIR)/
 	$(info Cloning Go-ethereum version $(GO_ETHEREUM_VERSION))
 	@if [ -d "$(WORKDIR)/go-ethereum" ] && [ "$(ls -A $(WORKDIR)/go-ethereum)" ]; then \
@@ -289,7 +315,7 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity
+check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity check-zbc-oracle-db
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
