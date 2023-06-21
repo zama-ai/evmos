@@ -335,6 +335,7 @@ build-base-image:
 build-local-docker:
 ifeq ($(GITHUB_ACTIONS),true)
 	$(info Running in a GitHub Actions workflow)
+	@$(MAKE) build-base-image
 else
 	$(info Not running in a GitHub Actions workflow)
 	@$(MAKE) build-base-image
