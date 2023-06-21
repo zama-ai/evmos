@@ -41,6 +41,13 @@ jobs:
         with:
           path: evmos
 
+      - name: Update .env to trigger build from registry
+        working-directory: ./evmos
+        run: |
+          sed -i 's/LOCAL_BUILD=true/LOCAL_BUILD=false/g' .env
+          grep LOCAL_BUILD .env
+
+
       - name: Checkout zbc-solidity
         uses: actions/checkout@v3
         with:
