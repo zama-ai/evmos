@@ -315,7 +315,7 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity check-zbc-oracle-db
+check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
