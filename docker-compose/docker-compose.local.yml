@@ -17,6 +17,9 @@ services:
       - ../node/init_scripts/setup.sh:/config/setup.sh:Z
       - ../node/zama_config/zama_config_local_testnet.toml:/config/zama_config.toml:Z
       - ../vm.log:/root/.evmosd/zama/vm.log:Z
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
     networks:
       localnet:
         ipv4_address: 192.167.10.2
@@ -26,6 +29,9 @@ services:
     container_name: zbcoracledb
     ports:
       - "8001:8001"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
     networks:
       localnet:
         ipv4_address: 192.167.10.12
