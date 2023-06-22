@@ -65,7 +65,7 @@ For build:
 
 |    Name     |    Type    |                 version                  |
 | :---------: | :--------: | :--------------------------------------: |
-| go-ethereum | repository |                  v0.1.3                  |
+| go-ethereum | repository |                  v0.1.0                  |
 |  ethermint  | repository |                  v0.1.0                  |
 |   tfhe-rs   | repository | 1d817c45d5234bcf33638406191b656998b30c2a |
 
