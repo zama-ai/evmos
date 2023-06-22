@@ -1,23 +1,23 @@
 name: Run ci e2e test
 
 on:
-  workflow_dispatch:
-    inputs:
-      oracle_db_service_tag:
-        description: 'Oracle Db service image tag (default: latest)'
-        type: string
-        required: false
+  push:
+    branches:
+    - v9.1.0-zama
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - ready_for_review
 
 jobs:
   docker:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
     env:
-      ORACLE_DB_SERVICE_TAG: ${{ inputs.oracle_db_service_tag }}
+      ORACLE_DB_SERVICE_TAG: latest
     steps:
-      - name: Echo user parameters 
-        run: |
-          echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
-
       - name: Install Node.js and npm
         run: |
           sudo apt update
