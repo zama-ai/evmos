@@ -173,6 +173,6 @@ replace (
 replace github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 
 // TODO: Remove once our forks are public.
-replace github.com/ethereum/go-ethereum v1.10.19 => github.com/zama-ai/go-ethereum v0.1.3 
+replace github.com/ethereum/go-ethereum v1.10.19 => github.com/zama-ai/go-ethereum v0.1.3-louis-test
 
 replace github.com/evmos/ethermint v0.19.3 => github.com/zama-ai/ethermint v1.0.0-test
