@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+include .env
+
 PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
 PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
 DIFF_TAG=$(shell git rev-list --tags="v*" --max-count=1 --not $(shell git rev-list --tags="v*" "HEAD..origin"))
@@ -7,6 +9,7 @@ DEFAULT_TAG=$(shell git rev-list --tags="v*" --max-count=1)
 VERSION ?= $(shell echo $(shell git describe --tags $(or $(DIFF_TAG), $(DEFAULT_TAG))) | sed 's/^v//')
 TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
+HOST_ARCH := $(shell uname -m)
 LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
 EVMOS_BINARY = evmosd
@@ -15,12 +18,41 @@ BUILDDIR ?= $(CURDIR)/build
 SIMAPP = ./app
 HTTPS_GIT := https://github.com/evmos/evmos.git
 DOCKER := $(shell which docker)
+SUDO := $(shell which sudo)
+ifneq ($(shell grep docker /proc/1/cgroup -qa),)
+	SUDO :=
+endif
+
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
 NAMESPACE := tharsishq
 PROJECT := evmos
 DOCKER_IMAGE := $(NAMESPACE)/$(PROJECT)
 COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)
 DOCKER_TAG := $(COMMIT_HASH)
+WORKDIR ?= $(CURDIR)/work_dir
+# Needed as long as go-ethereum and ethermint are private repositories
+GOPRIVATE = github.com/zama-ai/*
+
+TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
+TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
+TFHE_RS_VERSION ?= 1d817c45d5234bcf33638406191b656998b30c2a 
+
+
+ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
+ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
+ZBC_FHE_TOOL_VERSION ?= v0.1.0
+
+ZBC_ORACLE_DB_PATH ?= $(WORKDIR)/zbc-oracle-db
+ZBC_ORACLE_DB_PATH_EXISTS := $(shell test -d $(ZBC_ORACLE_DB_PATH)/.git && echo "true" || echo "false")
+ZBC_ORACLE_DB_VERSION ?= main
+
+ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
+ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
+ZBC_SOLIDITY_VERSION ?= v0.1.0
+
+ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
+GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
+UPDATE_GO_MOD = go.mod.updated
 
 export GO111MODULE = on
 
@@ -115,56 +147,333 @@ endif
 
 BUILD_TARGETS := build install
 
-build: BUILD_ARGS=-o $(BUILDDIR)/
+print-info:
+	@echo 'GO_ETHEREUM_TAG: $(GO_ETHEREUM_VERSION) ---extracted from go.mod'
+	@echo 'ETHERMINT_TAG: $(ETHERMINT_VERSION) ---extracted from go.mod'
+	@bash scripts/get_repository_info.sh evmos ${CURDIR}
+	@bash scripts/get_repository_info.sh tfhe-rs $(TFHE_RS_PATH)
+	@bash scripts/get_repository_info.sh zbc-fhe-tool $(ZBC_FHE_TOOL_PATH)
+	@bash scripts/get_repository_info.sh zbc-solidity $(ZBC_SOLIDITY_PATH)
+
+build_c_api_tfhe:
+	$(info build tfhe-rs C API)
+	mkdir -p $(WORKDIR)/
+	$(info tfhe-rs path $(TFHE_RS_PATH))
+	$(info sudo_bin $(SUDO_BIN))
+	cd $(TFHE_RS_PATH) && RUSTFLAGS="" make build_c_api_experimental_deterministic_fft
+	ls $(TFHE_RS_PATH)/target/release
+# In tfhe.go the library path is specified as following : #cgo LDFLAGS: -L/usr/lib/tfhe -ltfhe
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/tfhe.h /usr/include/
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/libtfhe.* /usr/lib/
+
+build: 
+	BUILD_ARGS=-o $(BUILDDIR)
+	$(info build)
+	
 build-linux:
+	$(info build-linux)
 	GOOS=linux GOARCH=amd64 LEDGER_ENABLED=false $(MAKE) build
 
-$(BUILD_TARGETS): go.sum $(BUILDDIR)/
-	go $@ $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+build-local: check-tfhe-rs  go.sum build_c_api_tfhe $(BUILDDIR)/
+	$(info build-local)
+	go build $(BUILD_FLAGS) -o build $(BUILD_ARGS) ./...
+	@echo 'evmosd binary is ready in build folder'
+
+
+# $(BUILD_TARGETS): go.sum $(BUILDDIR)/
+$(BUILD_TARGETS): go.sum build_c_api_tfhe $(BUILDDIR)/
+	$(info BUILD_TARGETS)
+	go $@ $(BUILD_FLAGS) -o build $(BUILD_ARGS) ./...
+
+check-tfhe-rs: $(WORKDIR)/
+	$(info check-tfhe-rs)
+ifeq ($(TFHE_RS_EXISTS), true)
+	@echo "Tfhe-rs exists in $(TFHE_RS_PATH)"
+	@if [ ! -d $(WORKDIR)/tfhe-rs ]; then \
+        echo 'tfhe-rs is not available in $(WORKDIR)'; \
+        echo "TFHE_RS_PATH is set to a custom value"; \
+        echo 'Copy local version located in $(TFHE_RS_PATH) into  $(WORKDIR)'; \
+        cp -r $(TFHE_RS_PATH) $(WORKDIR)/; \
+    else \
+        echo 'tfhe-rs is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "Tfhe-rs does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update TFHE_RS_PATH pointing to your tfhe-rs folder!"
+	$(MAKE) clone_tfhe_rs
+endif
+
+check-zbc-solidity: $(WORKDIR)/
+	$(info check-zbc-solidity)
+ifeq ($(ZBC_SOLIDITY_PATH_EXISTS), true)
+	@echo "zbc-solidity exists in $(ZBC_SOLIDITY_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-solidity ]; then \
+        echo 'zbc-solidity is not available in $(WORKDIR)'; \
+        echo "ZBC_SOLIDITY_PATH is set to a custom value"; \
+    else \
+        echo 'zbc-solidity is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-solidity does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_SOLIDITY_PATH pointing to your zbc-solidity folder!"
+	$(MAKE) clone_zbc_solidty
+endif
+
+check-zbc-oracle-db: $(WORKDIR)/
+	$(info check-zbc-oracle-db)
+ifeq ($(ZBC_ORACLE_DB_PATH_EXISTS), true)
+	@echo "zbc-oracle-db exists in $(ZBC_ORACLE_DB_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-oracle-db ]; then \
+        echo 'zbc-oracle-db is not available in $(WORKDIR)'; \
+        echo "ZBC_ORACLE_DB_PATH is set to a custom value"; \
+    else \
+        echo 'zbc-oracle-db is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-oracle-db does not exist"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_ORACLE_DB_PATH pointing to your zbc-oracle-db folder!"
+	$(MAKE) clone_zbc_oracle_db
+endif
+
+
+check-zbc-fhe-tool: $(WORKDIR)/
+	$(info check-zbc-fhe-tool)
+	@echo "ZBC_FHE_TOOL_PATH_EXISTS  $(ZBC_FHE_TOOL_PATH_EXISTS)"
+ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
+	@echo "zbc-fhe-tool exists in $(ZBC_FHE_TOOL_PATH)"
+	@if [ ! -d $(WORKDIR)/zbc-fhe-tool ]; then \
+        echo 'zbc-fhe-tool is not available in $(WORKDIR)'; \
+        echo "ZBC_FHE_TOOL_PATH is set to a custom value"; \
+    else \
+        echo 'zbc-fhe-tool is already available in $(WORKDIR)'; \
+    fi
+else
+	@echo "zbc-fhe-tool does not exist in $(ZBC_FHE_TOOL_PATH)"
+	echo "We clone it for you!"
+	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your zbc-fhe-tool folder!"
+	$(MAKE) clone_zbc_fhe_tool
+endif
+	echo 'Call build zbc fhe'
+	$(MAKE) build_zbc_fhe_tool
+
+
+
+install-tfhe-rs: clone_tfhe_rs
+
+build_zbc_fhe_tool:
+ifeq ($(HOST_ARCH), x86_64)
+	@echo 'Arch is x86'
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+else
+	@echo 'Arch is not x86'
+	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo +nightly build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+endif	
+
+clone_zbc_fhe_tool: $(WORKDIR)/
+	$(info Cloning zbc-fhe-tool version $(ZBC_FHE_TOOL_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-fhe-tool.git
+	cd $(WORKDIR)/zbc-fhe-tool && git checkout $(ZBC_FHE_TOOL_VERSION)
+	
+clone_zbc_solidty: $(WORKDIR)/
+	$(info Cloning zbc-solidity version $(ZBC_SOLIDITY_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-solidity.git
+	cd $(WORKDIR)/zbc-solidity && git checkout $(ZBC_SOLIDITY_VERSION)
+
+clone_tfhe_rs: $(WORKDIR)/
+	$(info Cloning tfhe-rs version $(TFHE_RS_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/tfhe-rs.git
+	cd $(WORKDIR)/tfhe-rs && git checkout $(TFHE_RS_VERSION)
+
+clone_zbc_oracle_db: $(WORKDIR)/
+	$(info Cloning zbc-oracle-db version $(ZBC_ORACLE_DB_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-oracle-db.git
+	cd $(WORKDIR)/zbc-oracle-db && git checkout $(ZBC_ORACLE_DB_VERSION)
+
+clone_go_ethereum: $(WORKDIR)/
+	$(info Cloning Go-ethereum version $(GO_ETHEREUM_VERSION))
+	@if [ -d "$(WORKDIR)/go-ethereum" ] && [ "$(ls -A $(WORKDIR)/go-ethereum)" ]; then \
+    	echo "$(WORKDIR)/go-ethereum already exists and is not empty. Skipping git clone."; \
+	else \
+		cd $(WORKDIR) && git clone git@github.com:zama-ai/go-ethereum.git; \
+		cd $(WORKDIR)/go-ethereum && git checkout $(GO_ETHEREUM_VERSION); \
+	fi
+	
+
+clone_ethermint: $(WORKDIR)/
+	$(info Cloning Ethermint version $(ETHERMINT_VERSION))
+	@if [ -d "$(WORKDIR)/ethermint" ] && [ "$(ls -A $(WORKDIR)/ethermint)" ]; then \
+	echo "$(WORKDIR)/ethermint already exists and is not empty. Skipping git clone."; \
+	else \
+		cd $(WORKDIR) && git clone git@github.com:zama-ai/ethermint.git; \
+		cd $(WORKDIR)/ethermint && git checkout $(ETHERMINT_VERSION); \
+	fi
+
+$(WORKDIR)/:
+	$(info WORKDIR)
+	mkdir -p $(WORKDIR)
+
+check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity
+
+update-go-mod:
+	@cp go.mod $(UPDATE_GO_MOD)
+	@bash scripts/replace_go_mod.sh $(UPDATE_GO_MOD) go-ethereum
+	@bash scripts/replace_go_mod.sh $(UPDATE_GO_MOD) ethermint
+
 
 $(BUILDDIR)/:
-	mkdir -p $(BUILDDIR)/
+	$(info BUILDDIR)
+	mkdir -p $(BUILDDIR)
 
-build-reproducible: go.sum
-	$(DOCKER) rm latest-build || true
-	$(DOCKER) run --volume=$(CURDIR):/sources:ro \
-        --env TARGET_PLATFORMS='linux/amd64' \
-        --env APP=evmosd \
-        --env VERSION=$(VERSION) \
-        --env COMMIT=$(COMMIT) \
-        --env CGO_ENABLED=1 \
-        --env LEDGER_ENABLED=$(LEDGER_ENABLED) \
-        --name latest-build tendermintdev/rbuilder:latest
-	$(DOCKER) cp -a latest-build:/home/builder/artifacts/ $(CURDIR)/
+build-base-image:
+	@echo 'Build base image with go and rust tools'
+	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build:latest
+	
+
+build-local-docker:
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running in a GitHub Actions workflow)
+else
+	$(info Not running in a GitHub Actions workflow)
+	@$(MAKE) build-base-image
+	@$(MAKE) clone_go_ethereum
+	@$(MAKE) clone_ethermint
+endif
+	$(MAKE) update-go-mod
+	$(MAKE) check-tfhe-rs
+	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 
 
 build-docker:
-	# TODO replace with kaniko
-	$(DOCKER) build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-	$(DOCKER) tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
-	# docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:${COMMIT_HASH}
-	# update old container
-	$(DOCKER) rm evmos || true
-	# create a new container from the latest image
-	$(DOCKER) create --name evmos -t -i ${DOCKER_IMAGE}:latest evmos
-	# move the binaries to the ./build directory
-	mkdir -p ./build/
-	$(DOCKER) cp evmos:/usr/bin/evmosd ./build/
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set, build from sources)
+	@$(MAKE) build-local-docker
+else
+	$(info LOCAL_BUILD is not set, use docker registry for docker images)
+	@$(MAKE) build-from-registry
+endif
 
-push-docker: build-docker
-	$(DOCKER) push ${DOCKER_IMAGE}:${DOCKER_TAG}
-	$(DOCKER) push ${DOCKER_IMAGE}:latest
+	
 
-$(MOCKS_DIR):
-	mkdir -p $(MOCKS_DIR)
+build-from-registry:
+	echo 'Nothing to do'
+	
 
-distclean: clean tools-clean
+generate_fhe_keys:
+	@echo 'generate_fhe_keys'
+	# Generate fhe global keys and copy into volumes
+	@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(ZBC_FHE_TOOL_PATH)/target/release
 
-clean:
+
+run_evmos:
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set, run locally built docker images)
+	@docker compose  -f docker-compose/docker-compose.local.yml -f docker-compose/docker-compose.local.override.yml  up --detach
+else
+	$(info LOCAL_BUILD is not set, run docker images from docker registry)
+	@docker compose  -f docker-compose/docker-compose.validator.yml -f docker-compose/docker-compose.validator.override.yml  up --detach
+endif
+	@echo 'sleep a little to let the docker start up'
+	sleep 10
+
+stop_evmos:
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set, run locally built docker images)
+	@docker compose  -f docker-compose/docker-compose.local.yml down
+else
+	$(info LOCAL_BUILD is not set, run docker images from docker registry)
+	@docker compose  -f docker-compose/docker-compose.validator.yml down
+endif
+
+run_e2e_test:
+	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
+	@cd $(ZBC_SOLIDITY_PATH) && npm install @openzeppelin/contracts
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set)
+	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
+else
+	$(info LOCAL_BUILD is not set)
+	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_ci_test.sh mykey1 $(CURDIR)
+endif
+	@sleep 5
+	
+	
+
+change_running_node_owner:
+ifeq ($(GITHUB_ACTIONS),true)
+	$(info Running e2e-test-local in a GitHub Actions workflow)
+	sudo chown -R runner:docker running_node/
+else
+	$(info Not running e2e-test-local in a GitHub Actions workflow)
+	@$(SUDO) chown -R $(USER): running_node/
+endif
+
+
+e2e-test-local: 
+	$(MAKE) init-evmos-node-local
+	$(MAKE) run_evmos
+	$(MAKE) run_e2e_test
+	$(MAKE) stop_evmos
+
+
+e2e-test-from-registry:
+	$(MAKE) init-evmos-node-from-registry
+	$(MAKE) run_evmos
+	$(MAKE) run_e2e_test
+	$(MAKE) stop_evmos
+
+
+e2e-test:
+	@$(MAKE) check-all-test-repo
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set, run e2e test from locally built docker images)
+	@$(MAKE) e2e-test-local
+else
+	$(info LOCAL_BUILD is not set, use docker registry for docker images)
+	@$(MAKE) e2e-test-from-registry
+endif
+
+init-evmos-node-local:
+	@docker compose -f docker-compose/docker-compose.local.yml run evmosnodelocal bash /config/setup.sh
+	$(MAKE) change_running_node_owner
+	$(MAKE) generate_fhe_keys
+	@bash ./scripts/prepare_demo_local.sh
+
+init-evmos-node-from-registry:
+	mkdir -p node/evmos
+	cp private.ed25519 node/evmos
+	cp public.ed25519 node/evmos
+	@docker compose -f docker-compose/docker-compose.validator.yml run validator bash /config/setup.sh
+	$(MAKE) change_running_node_owner
+	$(MAKE) generate_fhe_keys
+	bash ./scripts/prepare_validator_ci.sh
+
+init-evmos-node:
+	@$(MAKE) check-all-test-repo
+ifeq ($(LOCAL_BUILD),true)
+	$(info LOCAL_BUILD is set, run e2e test from locally built docker images)
+	@$(MAKE) init-evmos-node-local
+else
+	$(info LOCAL_BUILD is not set, use docker registry for docker images)
+	@$(MAKE) init-evmos-node-from-registry
+endif
+
+clean-node-storage:
+	@echo 'clean node storage'
+	sudo rm -rf running_node
+
+clean: clean-node-storage
+	$(MAKE) stop_evmos
 	rm -rf \
     $(BUILDDIR)/ \
     artifacts/ \
-    tmp-swagger-gen/
+    tmp-swagger-gen/ \
+	$(WORKDIR)/ \
+	build
+	rm -f $(UPDATE_GO_MOD)
+	
 
 all: build
 
@@ -270,146 +579,6 @@ go.sum: go.mod
 	go mod verify
 	go mod tidy
 
-###############################################################################
-###                              Documentation                              ###
-###############################################################################
-
-update-swagger-docs: statik
-	$(BINDIR)/statik -src=client/docs/swagger-ui -dest=client/docs -f -m
-	@if [ -n "$(git status --porcelain)" ]; then \
-        echo "\033[91mSwagger docs are out of sync!!!\033[0m";\
-        exit 1;\
-    else \
-        echo "\033[92mSwagger docs are in sync\033[0m";\
-    fi
-.PHONY: update-swagger-docs
-
-godocs:
-	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/evmos/evmos/types"
-	godoc -http=:6060
-
-# Start docs site at localhost:8080
-docs-serve:
-	@cd docs && \
-	yarn && \
-	yarn run serve
-
-# Build the site into docs/.vuepress/dist
-build-docs:
-	@$(MAKE) docs-tools-stamp && \
-	cd docs && \
-	yarn && \
-	yarn run build
-
-# This builds a docs site for each branch/tag in `./docs/versions`
-# and copies each site to a version prefixed path. The last entry inside
-# the `versions` file will be the default root index.html.
-build-docs-versioned:
-	@$(MAKE) docs-tools-stamp && \
-	cd docs && \
-	while read -r branch path_prefix; do \
-		(git checkout $${branch} && npm install && VUEPRESS_BASE="/$${path_prefix}/" npm run build) ; \
-		mkdir -p ~/output/$${path_prefix} ; \
-		cp -r .vuepress/dist/* ~/output/$${path_prefix}/ ; \
-		cp ~/output/$${path_prefix}/index.html ~/output ; \
-	done < versions ;
-
-.PHONY: docs-serve build-docs build-docs-versioned
-
-###############################################################################
-###                           Tests & Simulation                            ###
-###############################################################################
-
-test: test-unit
-test-all: test-unit test-race
-PACKAGES_UNIT=$(shell go list ./...)
-TEST_PACKAGES=./...
-TEST_TARGETS := test-unit test-unit-cover test-race
-
-# Test runs-specific rules. To add a new test target, just add
-# a new rule, customise ARGS or TEST_PACKAGES ad libitum, and
-# append the new rule to the TEST_TARGETS list.
-test-unit: ARGS=-timeout=10m -race
-test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
-
-test-race: ARGS=-race
-test-race: TEST_PACKAGES=$(PACKAGES_NOSIMULATION)
-$(TEST_TARGETS): run-tests
-
-test-unit-cover: ARGS=-timeout=10m -race -coverprofile=coverage.txt -covermode=atomic
-test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-
-run-tests:
-ifneq (,$(shell which tparse 2>/dev/null))
-	go test -mod=readonly -json $(ARGS) $(EXTRA_ARGS) $(TEST_PACKAGES) | tparse
-else
-	go test -mod=readonly $(ARGS)  $(EXTRA_ARGS) $(TEST_PACKAGES)
-endif
-
-test-import:
-	@go test ./tests/importer -v --vet=off --run=TestImportBlocks --datadir tmp \
-	--blockchain blockchain
-	rm -rf tests/importer/tmp
-
-test-rpc:
-	./scripts/integration-test-all.sh -t "rpc" -q 1 -z 1 -s 2 -m "rpc" -r "true"
-
-test-rpc-pending:
-	./scripts/integration-test-all.sh -t "pending" -q 1 -z 1 -s 2 -m "pending" -r "true"
-
-.PHONY: run-tests test test-all test-import test-rpc $(TEST_TARGETS)
-
-test-sim-nondeterminism:
-	@echo "Running non-determinism test..."
-	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true \
-		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
-
-test-sim-custom-genesis-fast:
-	@echo "Running custom genesis simulation..."
-	@echo "By default, ${HOME}/.$(EVMOS_DIR)/config/genesis.json will be used."
-	@go test -mod=readonly $(SIMAPP) -run TestFullAppSimulation -Genesis=${HOME}/.$(EVMOS_DIR)/config/genesis.json \
-		-Enabled=true -NumBlocks=100 -BlockSize=200 -Commit=true -Seed=99 -Period=5 -v -timeout 24h
-
-test-sim-import-export: runsim
-	@echo "Running application import/export simulation. This may take several minutes..."
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppImportExport
-
-test-sim-after-import: runsim
-	@echo "Running application simulation-after-import. This may take several minutes..."
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppSimulationAfterImport
-
-test-sim-custom-genesis-multi-seed: runsim
-	@echo "Running multi-seed custom genesis simulation..."
-	@echo "By default, ${HOME}/.$(EVMOS_DIR)/config/genesis.json will be used."
-	@$(BINDIR)/runsim -Genesis=${HOME}/.$(EVMOS_DIR)/config/genesis.json -SimAppPkg=$(SIMAPP) -ExitOnFail 400 5 TestFullAppSimulation
-
-test-sim-multi-seed-long: runsim
-	@echo "Running long multi-seed application simulation. This may take awhile!"
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 500 50 TestFullAppSimulation
-
-test-sim-multi-seed-short: runsim
-	@echo "Running short multi-seed application simulation. This may take awhile!"
-	@$(BINDIR)/runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
-
-test-sim-benchmark-invariants:
-	@echo "Running simulation invariant benchmarks..."
-	@go test -mod=readonly $(SIMAPP) -benchmem -bench=BenchmarkInvariants -run=^$ \
-	-Enabled=true -NumBlocks=1000 -BlockSize=200 \
-	-Period=1 -Commit=true -Seed=57 -v -timeout 24h
-
-.PHONY: \
-test-sim-nondeterminism \
-test-sim-custom-genesis-fast \
-test-sim-import-export \
-test-sim-after-import \
-test-sim-custom-genesis-multi-seed \
-test-sim-multi-seed-short \
-test-sim-multi-seed-long \
-test-sim-benchmark-invariants
-
-benchmark:
-	@go test -mod=readonly -bench=. $(PACKAGES_NOSIMULATION)
-.PHONY: benchmark
 
 ###############################################################################
 ###                                Linting                                  ###
@@ -508,175 +677,3 @@ proto-update-deps:
 
 .PHONY: proto-all proto-gen proto-gen-any proto-swagger-gen proto-format proto-lint proto-check-breaking proto-update-deps
 
-###############################################################################
-###                                Localnet                                 ###
-###############################################################################
-
-# Build image for a local testnet
-localnet-build:
-	@$(MAKE) -C networks/local
-
-# Start a 4-node testnet locally
-localnet-start: localnet-stop localnet-build
-	@if ! [ -f build/node0/$(EVMOS_BINARY)/config/genesis.json ]; then docker run --rm -v $(CURDIR)/build:/evmos:Z evmos/node "./evmosd testnet init-files --v 4 -o /evmos --keyring-backend=test --starting-ip-address 192.167.10.2"; fi
-	docker-compose up -d
-
-# Stop testnet
-localnet-stop:
-	docker-compose down
-
-# Clean testnet
-localnet-clean:
-	docker-compose down
-	sudo rm -rf build/*
-
- # Reset testnet
-localnet-unsafe-reset:
-	docker-compose down
-ifeq ($(OS),Windows_NT)
-	@docker run --rm -v $(CURDIR)\build\node0\evmosd:/evmos\Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-	@docker run --rm -v $(CURDIR)\build\node1\evmosd:/evmos\Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-	@docker run --rm -v $(CURDIR)\build\node2\evmosd:/evmos\Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-	@docker run --rm -v $(CURDIR)\build\node3\evmosd:/evmos\Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-else
-	@docker run --rm -v $(CURDIR)/build/node0/evmosd:/evmos:Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-	@docker run --rm -v $(CURDIR)/build/node1/evmosd:/evmos:Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-	@docker run --rm -v $(CURDIR)/build/node2/evmosd:/evmos:Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-	@docker run --rm -v $(CURDIR)/build/node3/evmosd:/evmos:Z evmos/node "./evmosd tendermint unsafe-reset-all --home=/evmos"
-endif
-
-# Clean testnet
-localnet-show-logstream:
-	docker-compose logs --tail=1000 -f
-
-.PHONY: localnet-build localnet-start localnet-stop
-
-###############################################################################
-###                                Releasing                                ###
-###############################################################################
-
-PACKAGE_NAME:=github.com/evmos/evmos
-GOLANG_CROSS_VERSION  = v1.18
-GOPATH ?= '$(HOME)/go'
-release-dry-run:
-	docker run \
-		--rm \
-		--privileged \
-		-e CGO_ENABLED=1 \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/go/src/$(PACKAGE_NAME) \
-		-v ${GOPATH}/pkg:/go/pkg \
-		-w /go/src/$(PACKAGE_NAME) \
-		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		--rm-dist --skip-validate --skip-publish --snapshot
-
-release:
-	@if [ ! -f ".release-env" ]; then \
-		echo "\033[91m.release-env is required for release\033[0m";\
-		exit 1;\
-	fi
-	docker run \
-		--rm \
-		--privileged \
-		-e CGO_ENABLED=1 \
-		--env-file .release-env \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/go/src/$(PACKAGE_NAME) \
-		-w /go/src/$(PACKAGE_NAME) \
-		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		release --rm-dist --skip-validate
-
-.PHONY: release-dry-run release
-
-###############################################################################
-###                                Releasing                                ###
-###############################################################################
-
-PACKAGE_NAME:=github.com/evmos/evmos
-GOLANG_CROSS_VERSION  = v1.18
-GOPATH ?= '$(HOME)/go'
-release-dry-run:
-	docker run \
-		--rm \
-		--privileged \
-		-e CGO_ENABLED=1 \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/go/src/$(PACKAGE_NAME) \
-		-v ${GOPATH}/pkg:/go/pkg \
-		-w /go/src/$(PACKAGE_NAME) \
-		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		--rm-dist --skip-validate --skip-publish --snapshot
-
-release:
-	@if [ ! -f ".release-env" ]; then \
-		echo "\033[91m.release-env is required for release\033[0m";\
-		exit 1;\
-	fi
-	docker run \
-		--rm \
-		--privileged \
-		-e CGO_ENABLED=1 \
-		--env-file .release-env \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/go/src/$(PACKAGE_NAME) \
-		-w /go/src/$(PACKAGE_NAME) \
-		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		release --rm-dist --skip-validate
-
-.PHONY: release-dry-run release
-
-###############################################################################
-###                        Compile Solidity Contracts                       ###
-###############################################################################
-
-CONTRACTS_DIR := contracts
-COMPILED_DIR := contracts/compiled_contracts
-TMP := tmp
-TMP_CONTRACTS := $(TMP).contracts
-TMP_COMPILED := $(TMP)/compiled.json
-TMP_JSON := $(TMP)/tmp.json
-
-# Compile and format solidity contracts for the erc20 module. Also install
-# openzeppeling as the contracts are build on top of openzeppelin templates.
-contracts-compile: contracts-clean openzeppelin create-contracts-json
-
-# Install openzeppelin solidity contracts
-openzeppelin:
-	@echo "Importing openzeppelin contracts..."
-	@cd $(CONTRACTS_DIR)
-	@npm install
-	@cd ../../../../
-	@mv node_modules $(TMP)
-	@mv package-lock.json $(TMP)
-	@mv $(TMP)/@openzeppelin $(CONTRACTS_DIR)
-
-# Clean tmp files
-contracts-clean:
-	@rm -rf tmp
-	@rm -rf node_modules
-	@rm -rf $(COMPILED_DIR)
-	@rm -rf $(CONTRACTS_DIR)/@openzeppelin
-
-# Compile, filter out and format contracts into the following format.
-# {
-# 	"abi": "[{\"inpu 			# JSON string
-# 	"bin": "60806040
-# 	"contractName": 			# filename without .sol
-# }
-create-contracts-json:
-	@for c in $(shell ls $(CONTRACTS_DIR) | grep '\.sol' | sed 's/.sol//g'); do \
-		command -v jq > /dev/null 2>&1 || { echo >&2 "jq not installed."; exit 1; } ;\
-		command -v solc > /dev/null 2>&1 || { echo >&2 "solc not installed."; exit 1; } ;\
-		mkdir -p $(COMPILED_DIR) ;\
-		mkdir -p $(TMP) ;\
-		echo "\nCompiling solidity contract $${c}..." ;\
-		solc --combined-json abi,bin $(CONTRACTS_DIR)/$${c}.sol > $(TMP_COMPILED) ;\
-		echo "Formatting JSON..." ;\
-		get_contract=$$(jq '.contracts["$(CONTRACTS_DIR)/'$$c'.sol:'$$c'"]' $(TMP_COMPILED)) ;\
-		add_contract_name=$$(echo $$get_contract | jq '. + { "contractName": "'$$c'" }') ;\
-		echo $$add_contract_name | jq > $(TMP_JSON) ;\
-		abi_string=$$(echo $$add_contract_name | jq -cr '.abi') ;\
-		echo $$add_contract_name | jq --arg newval "$$abi_string" '.abi = $$newval' > $(TMP_JSON) ;\
-		mv $(TMP_JSON) $(COMPILED_DIR)/$${c}.json ;\
-	done
-	@rm -rf tmp

@@ -3,21 +3,6 @@ name: Deploy validator on Aws
 on:
   workflow_dispatch:
     inputs:
-      ref_for_zbc_development:
-        description: 'Branch, tag or commit SHA1 to zbc-development'
-        required: true
-        default: "main"
-        type: string
-      ref_to_evmos:
-        description: 'Branch, tag or commit SHA1 to checkout evmos'
-        required: true
-        default: "v9.1.0-zama"
-        type: string
-      ref_to_zbc_solidity:
-        description: 'Branch, tag or commit SHA1 to checkout zbc-solidity'
-        required: true
-        default: "feature/CI-testing"
-        type: string
       evmos_node_tag:
         description: 'Evmos node image tag (default: latest)'
         default: 'latest'
@@ -33,6 +18,11 @@ on:
         default: true
         type: boolean
         required: false
+      run_test:
+        description: 'Run e2e test after deployment  (default: true)'
+        default: true
+        type: boolean
+        required: false
 
 
 jobs:
@@ -42,12 +32,12 @@ jobs:
     if: ${{ inputs.clean }}
     steps:
       - name: Stop docker compose
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
-          docker compose -f docker-compose.validator.yml  down
+          docker compose -f docker-compose/docker-compose.validator.yml  down
 
       - name: Clean all docker related image, cache, container ...
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           docker system prune -af
 
@@ -62,9 +52,6 @@ jobs:
     steps:
       - name: Echo user parameters 
         run: |
-          echo "ref_for_zbc_development: ${{ inputs.ref_for_zbc_development }}"
-          echo "ref_to_evmos: ${{ inputs.ref_to_evmos }}"
-          echo "ref_to_zbc_solidity: ${{ inputs.ref_to_zbc_solidity }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
           echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
           echo "clean: ${{ inputs.clean }}"
@@ -75,24 +62,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          path: evmos
-          ref: ${{ inputs.ref_to_evmos }}
-      
-      - name: Checkout zbc-dev
-        uses: actions/checkout@v3
-        with:
-          repository: zama-ai/zbc-development
-          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: zbc-development
-          ref: ${{ inputs.ref_for_zbc_development }}
+          path: evmos      
+
+
+      - name: Get version for all needed repositories
+        working-directory: ./evmos
+        run: |
+          echo "ZBC_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_SOLIDITY_VERSION)" >> $GITHUB_ENV
+          
+      - name: Echo versions parsed from Makefile and go.mod
+        run: |
+          echo "ZBC_SOLIDITY_VERSION: $ZBC_SOLIDITY_VERSION"
 
       - name: Checkout zbc-solidity
         uses: actions/checkout@v3
         with:
           repository: zama-ai/zbc-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: zbc-solidity
-          ref: ${{ inputs.ref_to_zbc_solidity }}
+          path: ./evmos/work_dir/zbc-solidity
+          ref: ${{ env.ZBC_SOLIDITY_VERSION }}
 
       - name: List files in the repository
         run: |
@@ -106,15 +94,15 @@ jobs:
           aws-region: eu-west-3
 
       - name: Download keys from S3
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         env:
           AWS_S3_BUCKET: zbc-testnet
         run: |
-          aws s3 ls s3://${AWS_S3_BUCKET}/users-fhe-keys/
-          ./prepare_volumes_validator_ci.sh
+          aws s3 ls s3://${AWS_S3_BUCKET}
+          ./scripts/prepare_volumes_validator_ci.sh
 
       - name: Prepare files for node setup
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           mkdir -p node/evmos
           cp ../evmos/private.ed25519 node/evmos 
@@ -123,7 +111,7 @@ jobs:
           ls node/evmos
 
       - name: List files in volumes
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           ls volumes
 
@@ -135,26 +123,26 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Prepare evmos node aka run setup.sh
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
-          docker compose -f docker-compose.validator.yml run validator bash /config/setup.sh
+          docker compose -f docker-compose/docker-compose.validator.yml run validator bash /config/setup.sh
       
 
       - name: Check running node owner and change it 
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
           ls -all .
-          sudo chown -R $USER:$USER running_node/
+          sudo chown -R $USER: running_node/
 
-      - name: Prepare test (called demo)
-        working-directory: ./zbc-development
+      - name: Prepare keys
+        working-directory: ./evmos
         run: |
-          ./prepare_demo_testnet_ci.sh
+          ./scripts/prepare_validator_ci.sh
       
       - name: Start whole testnet
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         run: |
-          docker compose  -f docker-compose.validator.yml -f docker-compose.validator.override.yml  up --detach
+          docker compose  -f docker-compose/docker-compose.validator.yml -f docker-compose/docker-compose.validator.override.yml  up --detach
 
       - name: Check running docker
         run: |
@@ -165,19 +153,30 @@ jobs:
           sleep 5s
           
       - name: List files in zbc-solidity
-        working-directory: ./zbc-solidity
+        working-directory: evmos/work_dir/zbc-solidity
         run: |
           ls
 
       - name: Upload genesis and node_id to S3 bucket to allow other nodes to sync
-        working-directory: ./zbc-development
+        working-directory: ./evmos
         env:
           AWS_S3_BUCKET: zbc-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/
-          ./upload_genesis.sh
+          ./scripts/upload_genesis.sh
+
+      - name: Prepare/download fhe keys
+        working-directory: evmos/work_dir/zbc-solidity
+        run: |
+          ./ci/scripts/prepare_fhe_keys_ci.sh
+
+      - name: Install @openzeppelin/contracts
+        working-directory: evmos/work_dir/zbc-solidity
+        run: |
+          npm install @openzeppelin/contracts
 
       - name: Run e2e test from zbc-solidty
-        working-directory: ./zbc-solidity
+        if: ${{ inputs.run_test }}
+        working-directory: evmos/work_dir/zbc-solidity
         run: |
-          ./run_ci_test.sh mykey1
+          ./ci/scripts/run_ERC20_ci_test.sh mykey1 ../../

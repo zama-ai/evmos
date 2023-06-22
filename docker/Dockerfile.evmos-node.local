@@ -1,0 +1,39 @@
+FROM ghcr.io/zama-ai/zama-zbc-build:latest AS build-env
+
+ENV LD_LIBRARY_PATH=/usr/lib/tfhe
+ADD . /src/evmos
+
+WORKDIR /src/evmos
+
+RUN mkdir -p /usr/include
+
+RUN cp go.mod.updated /src/evmos/go.mod
+
+RUN tail /src/evmos/go.mod
+
+RUN make build
+RUN ls /src/evmos
+RUN ls /src/evmos/build
+RUN mkdir -p /src/evmos/build
+
+FROM ghcr.io/zama-ai/zama-zbc-build:latest
+
+RUN apt-get update -y
+RUN apt-get install ca-certificates jq -y
+ENV LD_LIBRARY_PATH=/usr/lib
+
+
+COPY --from=build-env /src/evmos/build/evmosd /usr/bin/evmosd
+COPY --from=build-env /usr/lib/libtfhe.* /usr/lib/
+COPY --from=build-env /usr/include/tfhe.h /usr/include
+
+WORKDIR /config
+ADD setup.sh .
+RUN chmod +x /config/setup.sh
+ADD zama_config.toml .
+RUN mkdir -p /root/.evmosd/zama
+RUN touch /root/.evmosd/zama/vm.log
+
+EXPOSE 26656 26657 1317 9090 8545 8546
+
+CMD ["/usr/bin/evmosd", "start", "--home", "/root/.evmosd"]

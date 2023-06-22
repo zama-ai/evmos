@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  validator:
+    image: ghcr.io/zama-ai/evmos-node:v0.1.0
+    container_name: evmosnode0
+    ports:
+      - "26656-26657:26656-26657"
+      - "8545:8545"
+    volumes:
+      - ../running_node/node2:/root:Z
+      - ../node/evmos/private.ed25519:/config/private.ed25519:Z
+      - ../node/evmos/public.ed25519:/config/public.ed25519:Z
+      - ../node/init_scripts/setup.sh:/config/setup.sh:Z
+      - ../node/zama_config/zama_config_validator.toml:/config/zama_config.toml:Z
+      - ../vm.log:/root/.evmosd/zama/vm.log:Z
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.2
+
+  oracledb:
+    image: ghcr.io/zama-ai/oracle-db-service:latest
+    container_name: zbcoracledb
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    ports:
+      - "8001:8001"
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.12
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.167.10.0/16
