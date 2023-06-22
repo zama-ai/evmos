@@ -3,31 +3,6 @@ name: Publish Evmos node
 on:
   workflow_dispatch:
     inputs:
-      ref_to_get_dockerfile:
-        description: 'Branch, tag or commit SHA1 to checkout Evmos (only to get right Dockerfile)'
-        required: true
-        default: "feature/CI"
-        type: string
-      ref_to_build_tfhe_rs_c_api:
-        description: 'Branch, tag or commit SHA1 to checkout tfhe-rs'
-        required: true
-        default: "blockchain-demo-deterministic-fft"
-        type: string
-      ref_to_build_evmos:
-        description: 'Branch, tag or commit SHA1 to checkout Evmos'
-        required: true
-        default: "feature/CI"
-        type: string
-      ref_to_build_go_ethereum:
-        description: 'Branch, tag or commit SHA1 to checkout go-ethereum'
-        required: true
-        default: "petar/extensive-log"
-        type: string
-      ref_to_build_ethermint:
-        description: 'Branch, tag or commit SHA1 to checkout Ethermint'
-        required: true
-        default: "v0.19.3-zama"
-        type: string
       zbc_build_image_tag:
         description: 'Tag for zbc build docker image (defaul:latest)'
         required: true
@@ -46,56 +21,57 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo user parameters 
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: evmos
+
+      - name: Get version for all needed repositories
+        working-directory: ./evmos
         run: |
-          echo "ref_to_get_dockerfile: ${{ inputs.ref_to_get_dockerfile }}"
-          echo "ref_to_build_tfhe_rs_c_api: ${{ inputs.ref_to_build_tfhe_rs_c_api }}"
-          echo "ref_to_build_evmos: ${{ inputs.ref_to_build_evmos }}"
-          echo "ref_to_build_go_ethereum: ${{ inputs.ref_to_build_go_ethereum }}"
-          echo "ref_to_build_ethermint: ${{ inputs.ref_to_build_ethermint }}"
-          echo "zbc_build_image_tag: ${{ inputs.zbc_build_image_tag }}"
-          echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
+          echo "ZBC_DEVELOPMENT_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_DEVELOPMENT_VERSION)" >> $GITHUB_ENV
+          echo "TFHE_RS_VERSION=$(./scripts/get_version_from_makefile.sh TFHE_RS_VERSION)" >> $GITHUB_ENV
+          echo "ZBC_FHE_TOOL_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_FHE_TOOL_VERSION)" >> $GITHUB_ENV
+          echo "ZBC_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_SOLIDITY_VERSION)" >> $GITHUB_ENV
+          echo "ETHERMINT_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/ethermint)" >> $GITHUB_ENV
+          echo "GO_ETHEREUM_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)" >> $GITHUB_ENV
+          
+      - name: Echo versions parsed from Makefile and go.mod
+        run: |
+          echo "TFHE_RS_VERSION: $TFHE_RS_VERSION"
+          echo "ETHERMINT_VERSION: $ETHERMINT_VERSION"
+          echo "GO_ETHEREUM_VERSION: $GO_ETHEREUM_VERSION"
+
+      - name: Checkout tfhe-rs
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/tfhe-rs
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/tfhe-rs
+          ref: ${{ env.TFHE_RS_VERSION }}
+
+      - name: Checkout go-ethereum
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/go-ethereum
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/go-ethereum
+          ref: ${{ env.GO_ETHEREUM_VERSION }}
+
+      - name: Checkout ethermint
+        uses: actions/checkout@v3
+        with:
+          repository: zama-ai/ethermint
+          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
+          path: ./evmos/work_dir/ethermint
+          ref: ${{ env.ETHERMINT_VERSION }}
+
 
       - name: Check OS
         run: |
           lscpu
           uname -r
           lsb_release -a
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          path: evmosDockerfile
-          ref: ${{ inputs.ref_to_get_dockerfile }}
-
-      - name: Check out tfhe-rs
-        uses: actions/checkout@v3
-        with:
-          repository: zama-ai/tfhe-rs
-          ref: ${{ inputs.ref_to_build_tfhe_rs_c_api }}
-          path: tfhe-rs
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          path: evmos
-          ref: ${{ inputs.ref_to_build_evmos }}
-
-      - name: PrepareGoEthereum
-        uses: actions/checkout@v3
-        with:
-          repository: zama-ai/go-ethereum
-          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: go-ethereum
-          ref: ${{ inputs.ref_to_build_go_ethereum }}
-
-      - name: PrepareEthermint
-        uses: actions/checkout@v3
-        with:
-          repository: zama-ai/ethermint
-          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ethermint
-          ref: ${{ inputs.ref_to_build_ethermint }}
 
       - name: List files in the repository
         run: |
@@ -112,14 +88,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          build-args: |
-            ZBC_BUILD_IMAGE_TAG=${{ inputs.zbc_build_image_tag }}
-          context: .
-          file: evmosDockerfile/docker/Dockerfile.evmos-node.testnet
-          push: true
-          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }},${{ env.DOCKER_IMAGE }}:latest
-          labels: evmos_node
-
+      - name: Build local docker 
+        working-directory: ./evmos
+        run: |
+          make build-docker
+          docker tag evmos-node:latest ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }}
+          docker tag evmos-node:latest ${{ env.DOCKER_IMAGE }}:latest
+          docker push ${{ env.DOCKER_IMAGE }} --all-tags
