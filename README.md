@@ -44,6 +44,14 @@ interoperable with Ethereum. It's built using the [Cosmos SDK](https://github.co
 
 **Note**: Requires [Go 1.18+](https://golang.org/dl/)
 
+# What is the last version
+
+Please check the [CHANGELOG](./CHANGELOG.md) to get the last version of the published (ready-to-use)  docker image and check all the related dependencies.
+
+The quick start is to follow this [section](#from-github-package-registry)
+
+Note: on arm64 we still have some issues, fixes are coming soon
+
 
 # Local build
 
@@ -58,11 +66,11 @@ The binary is built in build folder.
 
 Dependencies:
 
-| Name        | Type       | Variable name   | where it is defined | Current version/value |
-| ----------- | ---------- | --------------- | ------------------- | --------------------- |
-| go-ethereum | repository | -               | directly in go.mod  | v0.1.0                |
-| ethermint   | repository | -               | directly in go.mod  | v0.1.0                |
-| tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       | v0.1.0                |
+| Name        | Type       | Variable name   | where it is defined |
+| ----------- | ---------- | --------------- | ------------------- |
+| go-ethereum | repository | -               | directly in go.mod  |
+| ethermint   | repository | -               | directly in go.mod  |
+| tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       |
 
 
 
@@ -76,12 +84,12 @@ If the developer wants to build everything locally from sources, and run the e2e
 
 Dependencies:
 
-| Name        | Type       | Variable name   | where it is defined | Current version/value |
-| ----------- | ---------- | --------------- | ------------------- | --------------------- |
-| evmos       | repository | LOCAL_BUILD     | .env                | true                  |
-| go-ethereum | repository | -               | directly in go.mod  | v0.1.0                |
-| ethermint   | repository | -               | directly in go.mod  | v0.1.0                |
-| tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       | v0.1.0                |
+| Name        | Type       | Variable name   | where it is defined |
+| ----------- | ---------- | --------------- | ------------------- |
+| evmos       | repository | LOCAL_BUILD     | .env                |
+| go-ethereum | repository | -               | directly in go.mod  |
+| ethermint   | repository | -               | directly in go.mod  |
+| tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       |
 
 
 
@@ -126,12 +134,12 @@ CONTAINER ID   IMAGE                     NAMES
 
 To execute the e2e test, here are the dependencies:
 
-| Name          | Type       | Variable name         | where it is defined | Current version/value |
-| ------------- | ---------- | --------------------- | ------------------- | --------------------- |
-| evmos         | repository | LOCAL_BUILD           | .env                | true                  |
-| zbc-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       | v0.1.0                |
-| zbc-fhe-tool  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       | v0.1.0                |
-| zbc-oracle-db | repository | ZBC_ORACLE_DB_VERSION | Makefile/.env       | main                  |
+| Name          | Type       | Variable name         | where it is defined |
+| ------------- | ---------- | --------------------- | ------------------- |
+| evmos         | repository | LOCAL_BUILD           | .env                |
+| zbc-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       |
+| zbc-fhe-tool  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       |
+| zbc-oracle-db | repository | ZBC_ORACLE_DB_VERSION | Makefile/.env       |
 
 
 
@@ -174,10 +182,10 @@ The fast way to run the e2e test locally using ready to use docker images
 
 Dependencies:
 
-| Name                       | Type              | Variable name | where it is defined          | Current version/value |
-| -------------------------- | ----------------- | ------------- | ---------------------------- | --------------------- |
-| evmos                      | repository        | LOCAL_BUILD   | .env                         | false                 |
-| ghcr.io/zama-ai/evmos-node | docker image name | hard-coded    | docker-compose.validator.yml | v0.1.0                |
+| Name                       | Type              | Variable name | where it is defined          |
+| -------------------------- | ----------------- | ------------- | ---------------------------- |
+| evmos                      | repository        | LOCAL_BUILD   | .env                         |
+| ghcr.io/zama-ai/evmos-node | docker image name | hard-coded    | docker-compose.validator.yml |
 
 
 
