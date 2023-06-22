@@ -19,7 +19,6 @@ services:
       - ../vm.log:/root/.evmosd/zama/vm.log:Z
     security_opt:
       - no-new-privileges:true
-    read_only: true
     networks:
       localnet:
         ipv4_address: 192.167.10.2
@@ -31,7 +30,6 @@ services:
       - "8001:8001"
     security_opt:
       - no-new-privileges:true
-    read_only: true
     networks:
       localnet:
         ipv4_address: 192.167.10.12
