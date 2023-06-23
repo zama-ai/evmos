@@ -94,4 +94,15 @@ jobs:
           make build-docker
           docker tag evmosnodelocal:latest ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }}
           docker tag evmosnodelocal:latest ${{ env.DOCKER_IMAGE }}:latest
+
+      - name: Check docker images
+        working-directory: ./evmos
+        run: |
+          docker images
+
+      - name: Push
+        working-directory: ./evmos
+        run: |
           docker push ${{ env.DOCKER_IMAGE }} --all-tags
+          
+          
