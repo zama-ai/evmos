@@ -150,10 +150,16 @@ BUILD_TARGETS := build install
 print-info:
 	@echo 'GO_ETHEREUM_TAG: $(GO_ETHEREUM_VERSION) ---extracted from go.mod'
 	@echo 'ETHERMINT_TAG: $(ETHERMINT_VERSION) ---extracted from go.mod'
+	@echo 'TFHE_RS_VERSION: $(TFHE_RS_VERSION) ---extracted from Makefile'
+	@echo 'ZBC_FHE_TOOL_VERSION: $(ZBC_FHE_TOOL_VERSION) ---extracted from Makefile'
+	@echo 'ZBC_ORACLE_DB_VERSION: $(ZBC_ORACLE_DB_VERSION) ---extracted from Makefile'
+	@echo 'ZBC_SOLIDITY_VERSION: $(ZBC_SOLIDITY_VERSION) ---extracted from Makefile'
 	@bash scripts/get_repository_info.sh evmos ${CURDIR}
 	@bash scripts/get_repository_info.sh tfhe-rs $(TFHE_RS_PATH)
 	@bash scripts/get_repository_info.sh zbc-fhe-tool $(ZBC_FHE_TOOL_PATH)
 	@bash scripts/get_repository_info.sh zbc-solidity $(ZBC_SOLIDITY_PATH)
+
+
 
 build_c_api_tfhe:
 	$(info build tfhe-rs C API)

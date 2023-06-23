@@ -35,6 +35,29 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.3]
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.3
+
+**Major update**: move tfhe-rs to tag __0.3.0-beta.0__
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.3                  |
+|  ethermint  | repository |                v1.0.0-test               |
+|   tfhe-rs   | repository |               0.3.0-beta.0               |
+
+
+For e2e test:
+
+|     Name      |    Type    | version |
+| :-----------: | :--------: | :-----: |
+| zbc-solidity  | repository | v0.1.1  |
+| zbc-fhe-tool  | repository | v0.1.1  |
+| zbc-oracle-db | repository |  main   |
+
 ## [v0.1.2]
 
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.2
@@ -44,7 +67,7 @@ For build:
 |    Name     |    Type    |                 version                  |
 | :---------: | :--------: | :--------------------------------------: |
 | go-ethereum | repository |                  v0.1.3                  |
-|  ethermint  | repository |                  v0.1.0                  |
+|  ethermint  | repository |                v1.0.0-test               |
 |   tfhe-rs   | repository | 1d817c45d5234bcf33638406191b656998b30c2a |
 
 
@@ -66,7 +89,7 @@ For build:
 |    Name     |    Type    |                 version                  |
 | :---------: | :--------: | :--------------------------------------: |
 | go-ethereum | repository |                  v0.1.0                  |
-|  ethermint  | repository |                  v0.1.0                  |
+|  ethermint  | repository |                v1.0.0-test               |
 |   tfhe-rs   | repository | 1d817c45d5234bcf33638406191b656998b30c2a |
 
 
