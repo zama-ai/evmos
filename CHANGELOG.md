@@ -35,11 +35,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [v0.1.3]
+## [v0.1.4]
 
-Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.3
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.4
 
-**Major update**: move tfhe-rs to tag __0.3.0-beta.0__
+**Major update**: 
+- (improve gas estimation)[https://github.com/zama-ai/go-ethereum/pull/124]
+- (add support for casting)[https://github.com/zama-ai/go-ethereum/pull/118] 
+- (Add all available FHE ops)[https://github.com/zama-ai/go-ethereum/pull/120]
 
 For build:
 

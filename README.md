@@ -213,14 +213,14 @@ make run_evmos
 make run_e2e_test
 make stop_evmos
 ```
-|            Name            |       Type        |     Variable name     |     where it is defined      | Current version/value |
-| :------------------------: | :---------------: | :-------------------: | :--------------------------: | :-------------------: |
-|           evmos            |       evmos       |      LOCAL_BUILD      |             .env             |         false         |
-| ghcr.io/zama-ai/evmos-node | docker image name |      hard-coded       | docker-compose.validator.yml |        v0.1.0         |
-|     oracle-db-service      | docker image name |      hard-coded       | docker-compose.validator.yml |        latest         |
-|        zbc-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |        v0.1.0         |
-|        zbc-fhe-tool        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |        v0.1.0         |
-|       zbc-oracle-db        |    repository     | ZBC_ORACLE_DB_VERSION |        Makefile/.env         |         main          |
+|            Name            |       Type        |     Variable name     |     where it is defined      |
+| :------------------------: | :---------------: | :-------------------: | :--------------------------: |
+|           evmos            |       evmos       |      LOCAL_BUILD      |             .env             |
+| ghcr.io/zama-ai/evmos-node | docker image name |      hard-coded       | docker-compose.validator.yml |
+|     oracle-db-service      | docker image name |      hard-coded       | docker-compose.validator.yml |
+|        zbc-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |
+|        zbc-fhe-tool        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |
+|       zbc-oracle-db        |    repository     | ZBC_ORACLE_DB_VERSION |        Makefile/.env         |
 
 
 
