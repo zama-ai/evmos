@@ -48,7 +48,7 @@ ZBC_ORACLE_DB_VERSION ?= main
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= d2ecb53f3bcab0e923548ca5276c72900d73c828
+ZBC_SOLIDITY_VERSION ?= ci/solc-compilation-fix
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -395,7 +395,7 @@ endif
 
 run_e2e_test:
 	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
-	@cd $(ZBC_SOLIDITY_PATH) && npm install @openzeppelin/contracts
+	@cd $(ZBC_SOLIDITY_PATH) && npm install
 ifeq ($(LOCAL_BUILD),true)
 	$(info LOCAL_BUILD is set)
 	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
