@@ -2,7 +2,3 @@
 mode = "node"
 oracle_db_address = "http://13.37.31.214:8001"
 require_retry_count = 1
-
-[tfhe]
-ciphertexts_to_garbage_collect = 1000
-ciphertexts_garbage_collect_interval_secs = 2
