@@ -150,7 +150,7 @@ jobs:
 
       - name: Sleep for 3 seconds to ensure validtor is running
         run: |
-          sleep 5s
+          sleep 10s
           
       - name: List files in zbc-solidity
         working-directory: evmos/work_dir/zbc-solidity

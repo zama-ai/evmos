@@ -2,7 +2,7 @@ version: '3'
 
 services:
   validator:
-    image: ghcr.io/zama-ai/evmos-node:v0.1.3
+    image: ghcr.io/zama-ai/evmos-node:v0.1.5
     container_name: evmosnode0
     ports:
       - "26656-26657:26656-26657"

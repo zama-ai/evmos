@@ -48,7 +48,7 @@ ZBC_ORACLE_DB_VERSION ?= main
 
 ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= v0.1.2
+ZBC_SOLIDITY_VERSION ?= v0.1.3-beta
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
