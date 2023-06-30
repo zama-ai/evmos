@@ -35,6 +35,35 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.5]
+
+**This version should be stable, from now on we do not think to add important changes for the short-term period.**
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.5
+
+**Major update**: 
+* Handle errors from tfhe-rs by @dartdart26 (here)[https://github.com/zama-ai/go-ethereum/pull/135]
+* Add scalar ops, bitshift, min/max by @tremblaythibaultl (link)[https://github.com/zama-ai/go-ethereum/pull/130]
+* fix(faucet): make faucet drop 10 coins by @tremblaythibaultl (link)[https://github.com/zama-ai/go-ethereum/pull/132]
+* Fix nil pointer dereference on gas estimation by @tremblaythibaultl (link)[https://github.com/zama-ai/go-ethereum/pull/133]
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.6                  |
+|  ethermint  | repository |                  v0.1.0                  |
+|   tfhe-rs   | repository |               0.3.0-beta.0               |
+
+
+For e2e test:
+
+|     Name      |    Type    | version |
+| :-----------: | :--------: | :-----: |
+| zbc-solidity  | repository | v0.1.2  |
+| zbc-fhe-tool  | repository | v0.1.1  |
+| zbc-oracle-db | repository |  main   |
+
 ## [v0.1.4]
 
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.4
