@@ -42,10 +42,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.5
 
 **Major update**: 
-* Handle errors from tfhe-rs by @dartdart26 (here)[https://github.com/zama-ai/go-ethereum/pull/135]
-* Add scalar ops, bitshift, min/max by @tremblaythibaultl (link)[https://github.com/zama-ai/go-ethereum/pull/130]
-* fix(faucet): make faucet drop 10 coins by @tremblaythibaultl (link)[https://github.com/zama-ai/go-ethereum/pull/132]
-* Fix nil pointer dereference on gas estimation by @tremblaythibaultl (link)[https://github.com/zama-ai/go-ethereum/pull/133]
+* Handle errors from tfhe-rs by @dartdart26 [go-ethereum/pull/135](https://github.com/zama-ai/go-ethereum/pull/135)
+* Add scalar ops, bitshift, min/max by @tremblaythibaultl [go-ethereum/pull/130](https://github.com/zama-ai/go-ethereum/pull/130)
+* fix(faucet): make faucet drop 10 coins by @tremblaythibaultl [go-ethereum/pull/132](https://github.com/zama-ai/go-ethereum/pull/132)
+* Fix nil pointer dereference on gas estimation by @tremblaythibaultl [go-ethereum/pull/133](https://github.com/zama-ai/go-ethereum/pull/133)
 
 For build:
 
@@ -69,9 +69,9 @@ For e2e test:
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.4
 
 **Major update**: 
-- (improve gas estimation)[https://github.com/zama-ai/go-ethereum/pull/124]
-- (add support for casting)[https://github.com/zama-ai/go-ethereum/pull/118] 
-- (Add all available FHE ops)[https://github.com/zama-ai/go-ethereum/pull/120]
+- [improve gas estimation](https://github.com/zama-ai/go-ethereum/pull/124)
+- [add support for casting](https://github.com/zama-ai/go-ethereum/pull/118])
+- [Add all available FHE ops](https://github.com/zama-ai/go-ethereum/pull/120)
 
 For build:
 
