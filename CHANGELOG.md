@@ -60,8 +60,8 @@ For e2e test:
 
 |     Name      |    Type    | version |
 | :-----------: | :--------: | :-----: |
-| zbc-solidity  | repository | v0.1.2  |
-| zbc-fhe-tool  | repository | v0.1.1  |
+| fhevm-solidity  | repository | v0.1.2  |
+| fhevm-tfhe-cli  | repository | v0.1.1  |
 | zbc-oracle-db | repository |  main   |
 
 ## [v0.1.4]
@@ -86,8 +86,8 @@ For e2e test:
 
 |     Name      |    Type    | version |
 | :-----------: | :--------: | :-----: |
-| zbc-solidity  | repository | v0.1.1  |
-| zbc-fhe-tool  | repository | v0.1.1  |
+| fhevm-solidity  | repository | v0.1.1  |
+| fhevm-tfhe-cli  | repository | v0.1.1  |
 | zbc-oracle-db | repository |  main   |
 
 ## [v0.1.3]
@@ -109,8 +109,8 @@ For e2e test:
 
 |     Name      |    Type    | version |
 | :-----------: | :--------: | :-----: |
-| zbc-solidity  | repository | v0.1.1  |
-| zbc-fhe-tool  | repository | v0.1.1  |
+| fhevm-solidity  | repository | v0.1.1  |
+| fhevm-tfhe-cli  | repository | v0.1.1  |
 | zbc-oracle-db | repository |  main   |
 
 ## [v0.1.2]
@@ -130,8 +130,8 @@ For e2e test:
 
 |     Name      |    Type    | version |
 | :-----------: | :--------: | :-----: |
-| zbc-solidity  | repository | v0.1.0  |
-| zbc-fhe-tool  | repository | v0.1.0  |
+| fhevm-solidity  | repository | v0.1.0  |
+| fhevm-tfhe-cli  | repository | v0.1.0  |
 | zbc-oracle-db | repository |  main   |
 
 
@@ -152,7 +152,7 @@ For e2e test:
 
 |     Name      |    Type    | version |
 | :-----------: | :--------: | :-----: |
-| zbc-solidity  | repository | v0.1.0  |
-| zbc-fhe-tool  | repository | v0.1.0  |
+| fhevm-solidity  | repository | v0.1.0  |
+| fhevm-tfhe-cli  | repository | v0.1.0  |
 | zbc-oracle-db | repository |  main   |
 

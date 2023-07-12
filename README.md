@@ -137,8 +137,8 @@ To execute the e2e test, here are the dependencies:
 | Name          | Type       | Variable name         | where it is defined |
 | ------------- | ---------- | --------------------- | ------------------- |
 | evmos         | repository | LOCAL_BUILD           | .env                |
-| zbc-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       |
-| zbc-fhe-tool  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       |
+| fhevm-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       |
+| fhevm-tfhe-cli  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       |
 | zbc-oracle-db | repository | ZBC_ORACLE_DB_VERSION | Makefile/.env       |
 
 
@@ -160,11 +160,11 @@ make stop_evmos
 
 
 - check you have all the needed repositories
-  - zbc-fhe-tool
-  - zbc-solidity
+  - fhevm-tfhe-cli
+  - fhevm-solidity
   - zbc-oracledb
 - init evmos node by calling /config/setup.sh file
-- generate fhe keys using zbc-fhe-tool based on scripts/prepare_volumes_from_fhe_tool.sh script
+- generate fhe keys using fhevm-tfhe-cli based on scripts/prepare_volumes_from_fhe_tool.sh script
 - copy them at the right folder using scripts/prepare_demo_local.sh script
 - start evmosnodelocal0 and oracledb (local build) using docker-compose/docker-compose.local.yml file
 - run the e2e test 
@@ -218,8 +218,8 @@ make stop_evmos
 |           evmos            |       evmos       |      LOCAL_BUILD      |             .env             |
 | ghcr.io/zama-ai/evmos-node | docker image name |      hard-coded       | docker-compose.validator.yml |
 |     oracle-db-service      | docker image name |      hard-coded       | docker-compose.validator.yml |
-|        zbc-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |
-|        zbc-fhe-tool        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |
+|        fhevm-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |
+|        fhevm-tfhe-cli        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |
 |       zbc-oracle-db        |    repository     | ZBC_ORACLE_DB_VERSION |        Makefile/.env         |
 
 
@@ -232,7 +232,7 @@ Note:
 <details>
   <summary>Troubleshoot ghcr.io</summary>
 
-Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/zbc-fhe-tool#using-the-published-image-easiest-way).
+Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/fhevm-tfhe-cli#using-the-published-image-easiest-way).
 
   If you get trouble to pull image from ghcri.io, one can build it locally with
   ```bash

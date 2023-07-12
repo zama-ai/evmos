@@ -56,12 +56,12 @@ jobs:
           path: ./evmos/work_dir/zbc-development
           ref: ${{ env.ZBC_DEVELOPMENT_VERSION }}
 
-      - name: Checkout zbc-solidity
+      - name: Checkout fhevm-solidity
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-solidity
+          repository: zama-ai/fhevm-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-solidity
+          path: ./evmos/work_dir/fhevm-solidity
           ref: ${{ env.ZBC_SOLIDITY_VERSION }}
 
       - name: Checkout tfhe-rs
@@ -72,12 +72,12 @@ jobs:
           path: ./evmos/work_dir/tfhe-rs
           ref: ${{ env.TFHE_RS_VERSION }}
 
-      - name: Checkout zbc-fhe-tool
+      - name: Checkout fhevm-tfhe-cli
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-fhe-tool
+          repository: zama-ai/fhevm-tfhe-cli
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-fhe-tool
+          path: ./evmos/work_dir/fhevm-tfhe-cli
           ref: ${{ env.ZBC_FHE_TOOL_VERSION }}
 
       - name: Checkout go-ethereum
@@ -132,7 +132,7 @@ jobs:
           docker images
 
       - name: Install @openzeppelin/contracts
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-solidity
         run: |
           npm install @openzeppelin/contracts
 
@@ -141,6 +141,6 @@ jobs:
         run: |
           ls ${{ github.workspace }}
           ls work_dir
-          ls work_dir/zbc-fhe-tool
-          ls work_dir/zbc-fhe-tool/.git
+          ls work_dir/fhevm-tfhe-cli
+          ls work_dir/fhevm-tfhe-cli/.git
           make e2e-test

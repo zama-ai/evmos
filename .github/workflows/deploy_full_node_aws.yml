@@ -13,8 +13,8 @@ on:
         required: true
         default: "v9.1.0-zama"
         type: string
-      ref_to_zbc_solidity:
-        description: 'Branch, tag or commit SHA1 to checkout zbc-solidity'
+      ref_to_fhevm_solidity:
+        description: 'Branch, tag or commit SHA1 to checkout fhevm-solidity'
         required: true
         default: "feature/CI-testing"
         type: string
@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "ref_for_zbc_development: ${{ inputs.ref_for_zbc_development }}"
           echo "ref_to_evmos: ${{ inputs.ref_to_evmos }}"
-          echo "ref_to_zbc_solidity: ${{ inputs.ref_to_zbc_solidity }}"
+          echo "ref_to_fhevm_solidity: ${{ inputs.ref_to_fhevm_solidity }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
           echo "clean: ${{ inputs.clean }}"
           
@@ -84,13 +84,13 @@ jobs:
           path: zbc-development
           ref: ${{ inputs.ref_for_zbc_development }}
 
-      - name: Checkout zbc-solidity
+      - name: Checkout fhevm-solidity
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-solidity
+          repository: zama-ai/fhevm-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: zbc-solidity
-          ref: ${{ inputs.ref_to_zbc_solidity }}
+          path: fhevm-solidity
+          ref: ${{ inputs.ref_to_fhevm_solidity }}
 
       - name: List files in the repository
         run: |

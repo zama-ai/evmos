@@ -11,8 +11,8 @@ on:
         description: 'Oracle Db service image tag (default: latest)'
         type: string
         required: false
-      ref_to_zbc_solidity:
-        description: 'Branch, tag or commit SHA1 to checkout zbc-solidity'
+      ref_to_fhevm_solidity:
+        description: 'Branch, tag or commit SHA1 to checkout fhevm-solidity'
         required: true
         default: "feature/test-m1"
         type: string
@@ -29,7 +29,7 @@ jobs:
         run: |
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
           echo "oracle_db_service_tag: ${{ inputs.oracle_db_service_tag }}"
-          echo "ref_to_zbc_solidity: ${{ inputs.ref_to_zbc_solidity }}"
+          echo "ref_to_fhevm_solidity: ${{ inputs.ref_to_fhevm_solidity }}"
 
       - name: Install npm
         run: |
@@ -48,13 +48,13 @@ jobs:
           grep LOCAL_BUILD .env
 
 
-      - name: Checkout zbc-solidity
+      - name: Checkout fhevm-solidity
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-solidity
+          repository: zama-ai/fhevm-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-solidity
-          ref: ${{ inputs.ref_to_zbc_solidity }}
+          path: ./evmos/work_dir/fhevm-solidity
+          ref: ${{ inputs.ref_to_fhevm_solidity }}
 
       - name: List files in the repository
         run: |
@@ -126,22 +126,22 @@ jobs:
         run: |
           sleep 5s
           
-      - name: List files in zbc-solidity
-        working-directory: evmos/work_dir/zbc-solidity
+      - name: List files in fhevm-solidity
+        working-directory: evmos/work_dir/fhevm-solidity
         run: |
           ls
 
       - name: Prepare/download fhe keys
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-solidity
         run: |
           ./ci/scripts/prepare_fhe_keys_ci.sh
 
       - name: Install @openzeppelin/contracts
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-solidity
         run: |
           npm install @openzeppelin/contracts
 
       - name: Run e2e test from zbc-solidty
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-solidity
         run: |
           ./ci/scripts/run_ERC20_ci_test.sh mykey1 ../../

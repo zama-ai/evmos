@@ -8,13 +8,13 @@ set -Eeuo pipefail
 
 if [ "$#" -ne 1 ]; then
     echo "Please give the path to the zbc-fhe tool"
-    echo "Example: $(basename $0) PATH_TO/zbc-fhe-tool/target/release"
-    echo "Reminder to build zbc-fhe-tool: cargo build --release "
+    echo "Example: $(basename $0) PATH_TO/fhevm-tfhe-cli/target/release"
+    echo "Reminder to build fhevm-tfhe-cli: cargo build --release "
     exit
 fi
 
 ZBC_FHE_TOOL_PATH=$1
-BINARY_NAME="zbc-fhe-tool"
+BINARY_NAME="fhevm-tfhe-cli"
 CURRENT_FOLDER=$PWD
 
 echo "Check if $BINARY_NAME is available in $ZBC_FHE_TOOL_PATH "
@@ -76,7 +76,7 @@ cp $KEYS_FULL_PATH/$key $NETWORK_KEYS_PRIVATE_PATH/cks
 
 echo "###########################################################"
 echo "If you want to execute a local test using the same keys,"
-echo "please run the following command in zbc-solidity:"
+echo "please run the following command in fhevm-solidity:"
 echo "prepare_fhe_keys_from_fhe_tool.sh $KEYS_FULL_PATH"
 echo "###########################################################"
 

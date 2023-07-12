@@ -88,7 +88,7 @@ ETHERMINT_TAG: v1.0.0-test ---extracted from go.mod
 <details>
   <summary>Troubleshoot ghcr.io</summary>
 
-Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/zbc-fhe-tool#using-the-published-image-easiest-way).
+Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/fhevm-tfhe-cli#using-the-published-image-easiest-way).
 
   If you get trouble to pull image from ghcri.io, one can build it locally with
   ```bash
@@ -129,11 +129,11 @@ Every repositories are cloned into **work_dir**.
 
 This test will:
 - check you have all the needed repositories
-  - zbc-fhe-tool
-  - zbc-solidity
+  - fhevm-tfhe-cli
+  - fhevm-solidity
   - zbc-development
 - init evmos node by calling /config/setup.sh file
-- generate fhe keys using zbc-fhe-tool based on $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh script
+- generate fhe keys using fhevm-tfhe-cli based on $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh script
 - copy them at the right folder using $(ZBC_DEVELOPMENT_PATH)/prepare_demo_local.sh script
 - start validator and oracle db using docker-compose/docker-compose.local.yml file
 - run the e2e test 

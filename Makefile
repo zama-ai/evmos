@@ -38,7 +38,7 @@ TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "f
 TFHE_RS_VERSION ?= 0.3.0-beta.0 
 
 
-ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/zbc-fhe-tool
+ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
 ZBC_FHE_TOOL_VERSION ?= v0.1.1
 
@@ -46,7 +46,7 @@ ZBC_ORACLE_DB_PATH ?= $(WORKDIR)/zbc-oracle-db
 ZBC_ORACLE_DB_PATH_EXISTS := $(shell test -d $(ZBC_ORACLE_DB_PATH)/.git && echo "true" || echo "false")
 ZBC_ORACLE_DB_VERSION ?= main
 
-ZBC_SOLIDITY_PATH ?= $(WORKDIR)/zbc-solidity
+ZBC_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
 ZBC_SOLIDITY_VERSION ?= v0.1.3-beta
 
@@ -156,8 +156,8 @@ print-info:
 	@echo 'ZBC_SOLIDITY_VERSION: $(ZBC_SOLIDITY_VERSION) ---extracted from Makefile'
 	@bash scripts/get_repository_info.sh evmos ${CURDIR}
 	@bash scripts/get_repository_info.sh tfhe-rs $(TFHE_RS_PATH)
-	@bash scripts/get_repository_info.sh zbc-fhe-tool $(ZBC_FHE_TOOL_PATH)
-	@bash scripts/get_repository_info.sh zbc-solidity $(ZBC_SOLIDITY_PATH)
+	@bash scripts/get_repository_info.sh fhevm-tfhe-cli $(ZBC_FHE_TOOL_PATH)
+	@bash scripts/get_repository_info.sh fhevm-solidity $(ZBC_SOLIDITY_PATH)
 
 
 
@@ -210,20 +210,20 @@ else
 	$(MAKE) clone_tfhe_rs
 endif
 
-check-zbc-solidity: $(WORKDIR)/
-	$(info check-zbc-solidity)
+check-fhevm-solidity: $(WORKDIR)/
+	$(info check-fhevm-solidity)
 ifeq ($(ZBC_SOLIDITY_PATH_EXISTS), true)
-	@echo "zbc-solidity exists in $(ZBC_SOLIDITY_PATH)"
-	@if [ ! -d $(WORKDIR)/zbc-solidity ]; then \
-        echo 'zbc-solidity is not available in $(WORKDIR)'; \
+	@echo "fhevm-solidity exists in $(ZBC_SOLIDITY_PATH)"
+	@if [ ! -d $(WORKDIR)/fhevm-solidity ]; then \
+        echo 'fhevm-solidity is not available in $(WORKDIR)'; \
         echo "ZBC_SOLIDITY_PATH is set to a custom value"; \
     else \
-        echo 'zbc-solidity is already available in $(WORKDIR)'; \
+        echo 'fhevm-solidity is already available in $(WORKDIR)'; \
     fi
 else
-	@echo "zbc-solidity does not exist"
+	@echo "fhevm-solidity does not exist"
 	echo "We clone it for you!"
-	echo "If you want your own version please update ZBC_SOLIDITY_PATH pointing to your zbc-solidity folder!"
+	echo "If you want your own version please update ZBC_SOLIDITY_PATH pointing to your fhevm-solidity folder!"
 	$(MAKE) clone_zbc_solidty
 endif
 
@@ -245,31 +245,31 @@ else
 endif
 
 
-check-zbc-fhe-tool: $(WORKDIR)/
-	$(info check-zbc-fhe-tool)
+check-fhevm-tfhe-cli: $(WORKDIR)/
+	$(info check-fhevm-tfhe-cli)
 	@echo "ZBC_FHE_TOOL_PATH_EXISTS  $(ZBC_FHE_TOOL_PATH_EXISTS)"
 ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
-	@echo "zbc-fhe-tool exists in $(ZBC_FHE_TOOL_PATH)"
-	@if [ ! -d $(WORKDIR)/zbc-fhe-tool ]; then \
-        echo 'zbc-fhe-tool is not available in $(WORKDIR)'; \
+	@echo "fhevm-tfhe-cli exists in $(ZBC_FHE_TOOL_PATH)"
+	@if [ ! -d $(WORKDIR)/fhevm-tfhe-cli ]; then \
+        echo 'fhevm-tfhe-cli is not available in $(WORKDIR)'; \
         echo "ZBC_FHE_TOOL_PATH is set to a custom value"; \
     else \
-        echo 'zbc-fhe-tool is already available in $(WORKDIR)'; \
+        echo 'fhevm-tfhe-cli is already available in $(WORKDIR)'; \
     fi
 else
-	@echo "zbc-fhe-tool does not exist in $(ZBC_FHE_TOOL_PATH)"
+	@echo "fhevm-tfhe-cli does not exist in $(ZBC_FHE_TOOL_PATH)"
 	echo "We clone it for you!"
-	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your zbc-fhe-tool folder!"
-	$(MAKE) clone_zbc_fhe_tool
+	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your fhevm-tfhe-cli folder!"
+	$(MAKE) clone_fhevm_tfhe_cli
 endif
 	echo 'Call build zbc fhe'
-	$(MAKE) build_zbc_fhe_tool
+	$(MAKE) build_fhevm_tfhe_cli
 
 
 
 install-tfhe-rs: clone_tfhe_rs
 
-build_zbc_fhe_tool:
+build_fhevm_tfhe_cli:
 ifeq ($(HOST_ARCH), x86_64)
 	@echo 'Arch is x86'
 	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
@@ -278,15 +278,15 @@ else
 	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo +nightly build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
 endif	
 
-clone_zbc_fhe_tool: $(WORKDIR)/
-	$(info Cloning zbc-fhe-tool version $(ZBC_FHE_TOOL_VERSION))
-	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-fhe-tool.git
-	cd $(WORKDIR)/zbc-fhe-tool && git checkout $(ZBC_FHE_TOOL_VERSION)
+clone_fhevm_tfhe_cli: $(WORKDIR)/
+	$(info Cloning fhevm-tfhe-cli version $(ZBC_FHE_TOOL_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-tfhe-cli.git
+	cd $(WORKDIR)/fhevm-tfhe-cli && git checkout $(ZBC_FHE_TOOL_VERSION)
 	
 clone_zbc_solidty: $(WORKDIR)/
-	$(info Cloning zbc-solidity version $(ZBC_SOLIDITY_VERSION))
-	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-solidity.git
-	cd $(WORKDIR)/zbc-solidity && git checkout $(ZBC_SOLIDITY_VERSION)
+	$(info Cloning fhevm-solidity version $(ZBC_SOLIDITY_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-solidity.git
+	cd $(WORKDIR)/fhevm-solidity && git checkout $(ZBC_SOLIDITY_VERSION)
 
 clone_tfhe_rs: $(WORKDIR)/
 	$(info Cloning tfhe-rs version $(TFHE_RS_VERSION))
@@ -321,7 +321,7 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-zbc-fhe-tool check-zbc-solidity
+check-all-test-repo: check-fhevm-tfhe-cli check-fhevm-solidity
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
