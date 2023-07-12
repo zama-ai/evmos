@@ -39,8 +39,8 @@ cat $HOME_EVMOSD/config/genesis.json | jq '.app_state["gov"]["deposit_params"]["
 cat $HOME_EVMOSD/config/genesis.json | jq '.app_state["evm"]["params"]["evm_denom"]="aevmos"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 cat $HOME_EVMOSD/config/genesis.json | jq '.app_state["inflation"]["params"]["mint_denom"]="aevmos"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 
-# Set gas limit of 100000000 and txn limit of 4 MB in genesis
-cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="100000000"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
+# Set gas limit of 10000000 and txn limit of 4 MB in genesis
+cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="10000000"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 cat $HOME_EVMOSD/config/genesis.json | jq '.consensus_params["block"]["max_bytes"]="4194304"' > $HOME_EVMOSD/config/tmp_genesis.json && mv $HOME_EVMOSD/config/tmp_genesis.json $HOME_EVMOSD/config/genesis.json
 
 # Set claims start time
