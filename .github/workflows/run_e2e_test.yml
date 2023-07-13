@@ -8,7 +8,7 @@ on:
         type: string
         required: false
       oracle_db_service_tag:
-        description: 'Oracle Db service image tag (default: latest)'
+        description: 'fhEVM requires DB service image tag (default: latest)'
         type: string
         required: false
       ref_to_fhevm_solidity:

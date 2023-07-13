@@ -135,7 +135,7 @@ This test will:
 - init evmos node by calling /config/setup.sh file
 - generate fhe keys using fhevm-tfhe-cli based on $(FHEVM_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh script
 - copy them at the right folder using $(FHEVM_DEVELOPMENT_PATH)/prepare_demo_local.sh script
-- start validator and oracle db using docker-compose/docker-compose.local.yml file
+- start validator and fhevm requires db using docker-compose/docker-compose.local.yml file
 - run the e2e test 
   - copy pks to encrypt user input using $(FHEVM_SOLIDITY_PATH)/prepare_fhe_keys_from_fhe_tool script
   - start the test using $(FHEVM_SOLIDITY_PATH)/run_local_test_from_evmos.sh
