@@ -3,8 +3,8 @@ name: Deploy full node on Aws
 on:
   workflow_dispatch:
     inputs:
-      ref_for_zbc_development:
-        description: 'Branch, tag or commit SHA1 to zbc-development'
+      ref_for_fhevm_development:
+        description: 'Branch, tag or commit SHA1 to fhevm-development'
         required: true
         default: "main"
         type: string
@@ -38,30 +38,30 @@ on:
 jobs:
   clean_instance:
     name: Clean docker related components
-    runs-on: zbc-testnet-fn
+    runs-on: fhevm-testnet-fn
     if: ${{ inputs.clean }}
     steps:
       - name: Stop docker compose
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           docker compose -f docker-compose.fullnode.yml  down
 
       - name: Clean all docker related image, cache, container ...
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           docker system prune -af
 
   push_to_registry:
     if: ${{ always() }}
     needs: clean_instance
-    name: Deploy new version of zbc full node
-    runs-on: zbc-testnet-fn
+    name: Deploy new version of fhevm full node
+    runs-on: fhevm-testnet-fn
     env:
       EVMOS_NODE_TAG: ${{ inputs.evmos_node_tag }}
     steps:
       - name: Echo user parameters 
         run: |
-          echo "ref_for_zbc_development: ${{ inputs.ref_for_zbc_development }}"
+          echo "ref_for_fhevm_development: ${{ inputs.ref_for_fhevm_development }}"
           echo "ref_to_evmos: ${{ inputs.ref_to_evmos }}"
           echo "ref_to_fhevm_solidity: ${{ inputs.ref_to_fhevm_solidity }}"
           echo "evmos_node_tag: ${{ inputs.evmos_node_tag }}"
@@ -76,13 +76,13 @@ jobs:
           path: evmos
           ref: ${{ inputs.ref_to_evmos }}
       
-      - name: Checkout zbc-dev
+      - name: Checkout fhevm-dev
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-development
+          repository: zama-ai/fhevm-development
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: zbc-development
-          ref: ${{ inputs.ref_for_zbc_development }}
+          path: fhevm-development
+          ref: ${{ inputs.ref_for_fhevm_development }}
 
       - name: Checkout fhevm-solidity
         uses: actions/checkout@v3
@@ -104,15 +104,15 @@ jobs:
           aws-region: eu-west-3
 
       - name: Download keys from S3
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         env:
-          AWS_S3_BUCKET: zbc-testnet
+          AWS_S3_BUCKET: fhevm-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}
           ./prepare_volumes_full_node_ci.sh
 
       - name: Prepare files for node setup
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           mkdir -p node/evmos
           cp ../evmos/private.ed25519 node/evmos 
@@ -121,7 +121,7 @@ jobs:
           ls node/evmos
 
       - name: List files in volumes
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           ls volumes
 
@@ -133,26 +133,26 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Prepare evmos node aka run setup.sh
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           docker compose -f docker-compose.fullnode.yml run validator bash /config/setup.sh
       
       - name: Check running node owner and change it 
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           ls -all .
           sudo chown -R $USER:$USER running_node/
 
       - name: Download genesis and node_id
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         env:
-          AWS_S3_BUCKET: zbc-testnet
+          AWS_S3_BUCKET: fhevm-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}/
           ./download_genesis.sh ${{ inputs.validator_ip_address }}
 
       - name: Prepare test (called demo)
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           ./prepare_demo_full_node_ci.sh
 
@@ -161,6 +161,6 @@ jobs:
           docker ps
 
       - name: Start full node
-        working-directory: ./zbc-development
+        working-directory: ./fhevm-development
         run: |
           docker compose  -f docker-compose.fullnode.yml -f docker-compose.fullnode.override.yml  up --detach

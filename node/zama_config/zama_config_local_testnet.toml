@@ -1,5 +1,5 @@
 [oracle]
 mode = "oracle"
-oracle_db_address = "http://zbcoracledb:8001"
+oracle_db_address = "http://fhevmrequiresdb:8001"
 require_retry_count = 1
 

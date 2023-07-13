@@ -70,7 +70,7 @@ jobs:
       - name: Download keys from S3
         working-directory: ./evmos
         env:
-          AWS_S3_BUCKET: zbc-testnet
+          AWS_S3_BUCKET: fhevm-testnet
         run: |
           aws s3 ls s3://${AWS_S3_BUCKET}
           ./scripts/prepare_volumes_validator_ci.sh
@@ -141,7 +141,7 @@ jobs:
         run: |
           npm install @openzeppelin/contracts
 
-      - name: Run e2e test from zbc-solidty
+      - name: Run e2e test from fhevm-solidity
         working-directory: evmos/work_dir/fhevm-solidity
         run: |
           ./ci/scripts/run_ERC20_ci_test.sh mykey1 ../../

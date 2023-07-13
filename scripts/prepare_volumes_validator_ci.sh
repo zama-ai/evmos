@@ -4,7 +4,7 @@ set -Eeuo pipefail
 
 NETWORK_KEYS_PUBLIC_PATH=./volumes/network-public-fhe-keys
 NETWORK_KEYS_PRIVATE_PATH=./volumes/network-private-fhe-keys
-S3_BUCKET_PATH="s3://zbc-testnet"
+S3_BUCKET_PATH="s3://fhevm-testnet"
 S3_NETWORK_KEYS_PATH="$S3_BUCKET_PATH/network-fhe-keys"
 S3_NETWORK_KEYS_FULL_PATH="$S3_NETWORK_KEYS_PATH/keys_gen_with_fhevm_tfhe_cli_v0_1_1"
 

@@ -1,4 +1,4 @@
-FROM ghcr.io/zama-ai/zama-zbc-build:latest AS build-env
+FROM ghcr.io/zama-ai/zama-fhevm-build:latest AS build-env
 
 ENV LD_LIBRARY_PATH=/usr/lib/tfhe
 ADD . /src/evmos
@@ -16,7 +16,7 @@ RUN ls /src/evmos
 RUN ls /src/evmos/build
 RUN mkdir -p /src/evmos/build
 
-FROM ghcr.io/zama-ai/zama-zbc-build:latest
+FROM ghcr.io/zama-ai/zama-fhevm-build:latest
 
 RUN apt-get update -y
 RUN apt-get install ca-certificates jq -y

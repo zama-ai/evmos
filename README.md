@@ -104,7 +104,7 @@ make build-docker
 <br />
 
 
-- Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__.
+- Build a base image (or retrieve it from ghcr.io) called __zama-fhevm-build__.
 - Check tfhe-rs is available in TFHE_RS_PATH (default is work_dir/tfhe-rs)
 - In any case the custom version or the cloned (TFHE_RS_VERSION) one is copied into work_dir/tfhe-rs
 - Clone go-ethereum and ethermint to work_dir (version are parsed from go.mod to avoid handling ssh keys inside docker because those repositories are private)
@@ -127,7 +127,7 @@ Docker ps output:
 ```
 CONTAINER ID   IMAGE                     NAMES
 0bc6ae374153   evmosnodelocal            evmosnodelocal0
-422f83a0ea73   docker-compose_oracledb   zbcoracledb
+422f83a0ea73   docker-compose_oracledb   fhevmrequiresdb
 
 ```
 
@@ -137,9 +137,9 @@ To execute the e2e test, here are the dependencies:
 | Name          | Type       | Variable name         | where it is defined |
 | ------------- | ---------- | --------------------- | ------------------- |
 | evmos         | repository | LOCAL_BUILD           | .env                |
-| fhevm-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       |
-| fhevm-tfhe-cli  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       |
-| zbc-oracle-db | repository | ZBC_ORACLE_DB_VERSION | Makefile/.env       |
+| fhevm-solidity  | repository | FHEVM_SOLIDITY_VERSION  | Makefile/.env       |
+| fhevm-tfhe-cli  | repository | FHEVM_TFHE_CLI_VERSION  | Makefile/.env       |
+| fhevm-requires-db | repository | FHEVM_REQUIRES_DB_VERSION | Makefile/.env       |
 
 
 
@@ -162,16 +162,16 @@ make stop_evmos
 - check you have all the needed repositories
   - fhevm-tfhe-cli
   - fhevm-solidity
-  - zbc-oracledb
+  - fhevm-oracledb
 - init evmos node by calling /config/setup.sh file
 - generate fhe keys using fhevm-tfhe-cli based on scripts/prepare_volumes_from_fhe_tool.sh script
 - copy them at the right folder using scripts/prepare_demo_local.sh script
 - start evmosnodelocal0 and oracledb (local build) using docker-compose/docker-compose.local.yml file
 - run the e2e test 
-  - copy pks to encrypt user input using $(ZBC_SOLIDITY_PATH)/prepare_fhe_keys_for_e2e_test script
-  - start the test using $(ZBC_SOLIDITY_PATH)/run_ERC20_e2e_test.sh
+  - copy pks to encrypt user input using $(FHEVM_SOLIDITY_PATH)/prepare_fhe_keys_for_e2e_test script
+  - start the test using $(FHEVM_SOLIDITY_PATH)/run_ERC20_e2e_test.sh
     - Get the private key of main account 
-    - Give it to the python test script $(ZBC_SOLIDITY_PATH)/ci/tests/ERC20.py
+    - Give it to the python test script $(FHEVM_SOLIDITY_PATH)/ci/tests/ERC20.py
 
 </details>
 <br />
@@ -202,7 +202,7 @@ Docker ps output:
 ```
 CONTAINER ID   IMAGE                                      NAMES
 02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.0     evmosnode0
-ac2073c0d6fc   ghcr.io/zama-ai/oracle-db-service:latest   zbcoracledb
+ac2073c0d6fc   ghcr.io/zama-ai/oracle-db-service:latest   fhevmrequiresdb
 ```
 
 To execute the e2e test, here are the dependencies:
@@ -218,15 +218,15 @@ make stop_evmos
 |           evmos            |       evmos       |      LOCAL_BUILD      |             .env             |
 | ghcr.io/zama-ai/evmos-node | docker image name |      hard-coded       | docker-compose.validator.yml |
 |     oracle-db-service      | docker image name |      hard-coded       | docker-compose.validator.yml |
-|        fhevm-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |
-|        fhevm-tfhe-cli        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |
-|       zbc-oracle-db        |    repository     | ZBC_ORACLE_DB_VERSION |        Makefile/.env         |
+|        fhevm-solidity        |    repository     | FHEVM_SOLIDITY_VERSION  |        Makefile/.env         |
+|        fhevm-tfhe-cli        |    repository     | FHEVM_TFHE_CLI_VERSION  |        Makefile/.env         |
+|       fhevm-requires-db        |    repository     | FHEVM_REQUIRES_DB_VERSION |        Makefile/.env         |
 
 
 
 
 Note:
-- for the zbc-oracle-db docker image it could not work on arm64 because the arm64 version is not yet pushed in ghcr.io
+- for the fhevm-requires-db docker image it could not work on arm64 because the arm64 version is not yet pushed in ghcr.io
 
 <br />
 <details>
@@ -236,7 +236,7 @@ Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/
 
   If you get trouble to pull image from ghcri.io, one can build it locally with
   ```bash
-  docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
+  docker build . -t zama-fhevm-build -f docker/Dockerfile.fhevm.build
   ```
 </details>
 

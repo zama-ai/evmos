@@ -22,7 +22,7 @@ services:
 
   oracledb:
     image: ghcr.io/zama-ai/oracle-db-service:latest
-    container_name: zbcoracledb
+    container_name: fhevmrequiresdb
     security_opt:
       - no-new-privileges:true
     ports:

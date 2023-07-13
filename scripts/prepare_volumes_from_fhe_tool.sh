@@ -2,23 +2,23 @@
 
 # This bash script creates key for 4 different users: global, alice, bob and carol
 # and copy them to the right folder in volumes directory.
-# It accepts the path to the zbc-fhe tool as parameter.
+# It accepts the path to the fhevm-tfhe-cli tool as parameter.
 
 set -Eeuo pipefail
 
 if [ "$#" -ne 1 ]; then
-    echo "Please give the path to the zbc-fhe tool"
+    echo "Please give the path to the fhevm-tfhe-cli tool"
     echo "Example: $(basename $0) PATH_TO/fhevm-tfhe-cli/target/release"
     echo "Reminder to build fhevm-tfhe-cli: cargo build --release "
     exit
 fi
 
-ZBC_FHE_TOOL_PATH=$1
+FHEVM_TFHE_CLI_PATH=$1
 BINARY_NAME="fhevm-tfhe-cli"
 CURRENT_FOLDER=$PWD
 
-echo "Check if $BINARY_NAME is available in $ZBC_FHE_TOOL_PATH "
-if [ ! -f "$ZBC_FHE_TOOL_PATH/$BINARY_NAME" ]; then
+echo "Check if $BINARY_NAME is available in $FHEVM_TFHE_CLI_PATH "
+if [ ! -f "$FHEVM_TFHE_CLI_PATH/$BINARY_NAME" ]; then
     echo "#####ATTENTION######"
     echo "BINARY_NAME does not exist!"
     echo "####################"
@@ -31,7 +31,7 @@ fi
 KEYS_FULL_PATH=$CURRENT_FOLDER/res/keys
 mkdir -p $KEYS_FULL_PATH
 
-$ZBC_FHE_TOOL_PATH/$BINARY_NAME generate-keys -d res/keys
+$FHEVM_TFHE_CLI_PATH/$BINARY_NAME generate-keys -d res/keys
 
 
 echo "###########################################################"

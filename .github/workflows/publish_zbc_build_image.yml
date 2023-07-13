@@ -1,16 +1,16 @@
-name: Publish zbc build image
+name: Publish fhevm build image
 
 on:
   workflow_dispatch:
     inputs:
-      zama_zbc_tag:
-        description: 'Zama zbc build image tag (default: latest)'
+      zama_fhevm_tag:
+        description: 'Zama fhevm build image tag (default: latest)'
         default: "latest"
         type: string
         required: false
 
 env:
-  DOCKER_IMAGE: ghcr.io/zama-ai/zama-zbc-build
+  DOCKER_IMAGE: ghcr.io/zama-ai/zama-fhevm-build
   
 
 jobs:
@@ -47,8 +47,8 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: docker/Dockerfile.zbc.build
+          file: docker/Dockerfile.fhevm.build
           push: true
           pull: true
-          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.zama_zbc_tag }},${{ env.DOCKER_IMAGE }}:latest
-          labels: zbc-build
+          tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.zama_fhevm_tag }},${{ env.DOCKER_IMAGE }}:latest
+          labels: fhevm-build

@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-S3_BUCKET_PATH="s3://zbc-testnet"
+S3_BUCKET_PATH="s3://fhevm-testnet"
 S3_FULL_PATH="$S3_BUCKET_PATH/testnet_full_node"
 LOCAL_PATH_TO_NODE="./node"
 LOCAL_PATH_TO_EVMOSD="./running_node/node2"

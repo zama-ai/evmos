@@ -43,7 +43,7 @@ make build-local
 ## Using docker
 
 Here are the steps executed automatically:
-- Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__.
+- Build a base image (or retrieve it from ghcr.io) called __zama-fhevm-build__.
   
 
 - Check tfhe-rs is available in TFHE_RS_PATH (default is work_dir/tfhe-rs)
@@ -69,7 +69,7 @@ And the following images:
 docker images
 REPOSITORY       TAG        IMAGE ID       CREATED          SIZE
 evmosnodelocal   latest     04a5b55c8d9c   10 minutes ago   2.22GB
-zama-zbc-build   latest     c280fb388ab5   12 minutes ago   1.99GB
+zama-fhevm-build   latest     c280fb388ab5   12 minutes ago   1.99GB
 golang           bullseye   342faadef914   5 days ago       777MB
 ```
 
@@ -92,7 +92,7 @@ Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/
 
   If you get trouble to pull image from ghcri.io, one can build it locally with
   ```bash
-  docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
+  docker build . -t zama-fhevm-build -f docker/Dockerfile.fhevm.build
   ```
 </details>
 
@@ -131,14 +131,14 @@ This test will:
 - check you have all the needed repositories
   - fhevm-tfhe-cli
   - fhevm-solidity
-  - zbc-development
+  - fhevm-development
 - init evmos node by calling /config/setup.sh file
-- generate fhe keys using fhevm-tfhe-cli based on $(ZBC_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh script
-- copy them at the right folder using $(ZBC_DEVELOPMENT_PATH)/prepare_demo_local.sh script
+- generate fhe keys using fhevm-tfhe-cli based on $(FHEVM_DEVELOPMENT_PATH)/prepare_volumes_from_fhe_tool.sh script
+- copy them at the right folder using $(FHEVM_DEVELOPMENT_PATH)/prepare_demo_local.sh script
 - start validator and oracle db using docker-compose/docker-compose.local.yml file
 - run the e2e test 
-  - copy pks to encrypt user input using $(ZBC_SOLIDITY_PATH)/prepare_fhe_keys_from_fhe_tool script
-  - start the test using $(ZBC_SOLIDITY_PATH)/run_local_test_from_evmos.sh
+  - copy pks to encrypt user input using $(FHEVM_SOLIDITY_PATH)/prepare_fhe_keys_from_fhe_tool script
+  - start the test using $(FHEVM_SOLIDITY_PATH)/run_local_test_from_evmos.sh
     - Get the private key of main account 
-    - Give it to the python test script $(ZBC_SOLIDITY_PATH)/demo_test_high_level_fhe_tool
+    - Give it to the python test script $(FHEVM_SOLIDITY_PATH)/demo_test_high_level_fhe_tool
 

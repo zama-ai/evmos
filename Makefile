@@ -38,17 +38,17 @@ TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "f
 TFHE_RS_VERSION ?= 0.3.0-beta.0 
 
 
-ZBC_FHE_TOOL_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
-ZBC_FHE_TOOL_PATH_EXISTS := $(shell test -d $(ZBC_FHE_TOOL_PATH)/.git && echo "true" || echo "false")
-ZBC_FHE_TOOL_VERSION ?= v0.1.1
+FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
+FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
+FHEVM_TFHE_CLI_VERSION ?= v0.1.1
 
-ZBC_ORACLE_DB_PATH ?= $(WORKDIR)/zbc-oracle-db
-ZBC_ORACLE_DB_PATH_EXISTS := $(shell test -d $(ZBC_ORACLE_DB_PATH)/.git && echo "true" || echo "false")
-ZBC_ORACLE_DB_VERSION ?= main
+FHEVM_REQUIRES_DB_PATH ?= $(WORKDIR)/fhevm-requires-db
+FHEVM_REQUIRES_DB_PATH_EXISTS := $(shell test -d $(FHEVM_REQUIRES_DB_PATH)/.git && echo "true" || echo "false")
+FHEVM_REQUIRES_DB_VERSION ?= main
 
-ZBC_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
-ZBC_SOLIDITY_PATH_EXISTS := $(shell test -d $(ZBC_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-ZBC_SOLIDITY_VERSION ?= v0.1.3-beta
+FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
+FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
+FHEVM_SOLIDITY_VERSION ?= v0.1.3-beta
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -151,13 +151,13 @@ print-info:
 	@echo 'GO_ETHEREUM_TAG: $(GO_ETHEREUM_VERSION) ---extracted from go.mod'
 	@echo 'ETHERMINT_TAG: $(ETHERMINT_VERSION) ---extracted from go.mod'
 	@echo 'TFHE_RS_VERSION: $(TFHE_RS_VERSION) ---extracted from Makefile'
-	@echo 'ZBC_FHE_TOOL_VERSION: $(ZBC_FHE_TOOL_VERSION) ---extracted from Makefile'
-	@echo 'ZBC_ORACLE_DB_VERSION: $(ZBC_ORACLE_DB_VERSION) ---extracted from Makefile'
-	@echo 'ZBC_SOLIDITY_VERSION: $(ZBC_SOLIDITY_VERSION) ---extracted from Makefile'
+	@echo 'FHEVM_TFHE_CLI_VERSION: $(FHEVM_TFHE_CLI_VERSION) ---extracted from Makefile'
+	@echo 'FHEVM_REQUIRES_DB_VERSION: $(FHEVM_REQUIRES_DB_VERSION) ---extracted from Makefile'
+	@echo 'FHEVM_SOLIDITY_VERSION: $(FHEVM_SOLIDITY_VERSION) ---extracted from Makefile'
 	@bash scripts/get_repository_info.sh evmos ${CURDIR}
 	@bash scripts/get_repository_info.sh tfhe-rs $(TFHE_RS_PATH)
-	@bash scripts/get_repository_info.sh fhevm-tfhe-cli $(ZBC_FHE_TOOL_PATH)
-	@bash scripts/get_repository_info.sh fhevm-solidity $(ZBC_SOLIDITY_PATH)
+	@bash scripts/get_repository_info.sh fhevm-tfhe-cli $(FHEVM_TFHE_CLI_PATH)
+	@bash scripts/get_repository_info.sh fhevm-solidity $(FHEVM_SOLIDITY_PATH)
 
 
 
@@ -212,57 +212,57 @@ endif
 
 check-fhevm-solidity: $(WORKDIR)/
 	$(info check-fhevm-solidity)
-ifeq ($(ZBC_SOLIDITY_PATH_EXISTS), true)
-	@echo "fhevm-solidity exists in $(ZBC_SOLIDITY_PATH)"
+ifeq ($(FHEVM_SOLIDITY_PATH_EXISTS), true)
+	@echo "fhevm-solidity exists in $(FHEVM_SOLIDITY_PATH)"
 	@if [ ! -d $(WORKDIR)/fhevm-solidity ]; then \
         echo 'fhevm-solidity is not available in $(WORKDIR)'; \
-        echo "ZBC_SOLIDITY_PATH is set to a custom value"; \
+        echo "FHEVM_SOLIDITY_PATH is set to a custom value"; \
     else \
         echo 'fhevm-solidity is already available in $(WORKDIR)'; \
     fi
 else
 	@echo "fhevm-solidity does not exist"
 	echo "We clone it for you!"
-	echo "If you want your own version please update ZBC_SOLIDITY_PATH pointing to your fhevm-solidity folder!"
-	$(MAKE) clone_zbc_solidty
+	echo "If you want your own version please update FHEVM_SOLIDITY_PATH pointing to your fhevm-solidity folder!"
+	$(MAKE) clone_fhevm_solidity
 endif
 
-check-zbc-oracle-db: $(WORKDIR)/
-	$(info check-zbc-oracle-db)
-ifeq ($(ZBC_ORACLE_DB_PATH_EXISTS), true)
-	@echo "zbc-oracle-db exists in $(ZBC_ORACLE_DB_PATH)"
-	@if [ ! -d $(WORKDIR)/zbc-oracle-db ]; then \
-        echo 'zbc-oracle-db is not available in $(WORKDIR)'; \
-        echo "ZBC_ORACLE_DB_PATH is set to a custom value"; \
+check-fhevm-requires-db: $(WORKDIR)/
+	$(info check-fhevm-requires-db)
+ifeq ($(FHEVM_REQUIRES_DB_PATH_EXISTS), true)
+	@echo "fhevm-requires-db exists in $(FHEVM_REQUIRES_DB_PATH)"
+	@if [ ! -d $(WORKDIR)/fhevm-requires-db ]; then \
+        echo 'fhevm-requires-db is not available in $(WORKDIR)'; \
+        echo "FHEVM_REQUIRES_DB_PATH is set to a custom value"; \
     else \
-        echo 'zbc-oracle-db is already available in $(WORKDIR)'; \
+        echo 'fhevm-requires-db is already available in $(WORKDIR)'; \
     fi
 else
-	@echo "zbc-oracle-db does not exist"
+	@echo "fhevm-requires-db does not exist"
 	echo "We clone it for you!"
-	echo "If you want your own version please update ZBC_ORACLE_DB_PATH pointing to your zbc-oracle-db folder!"
-	$(MAKE) clone_zbc_oracle_db
+	echo "If you want your own version please update FHEVM_REQUIRES_DB_PATH pointing to your fhevm-requires-db folder!"
+	$(MAKE) clone_fhevm_requires_db
 endif
 
 
 check-fhevm-tfhe-cli: $(WORKDIR)/
 	$(info check-fhevm-tfhe-cli)
-	@echo "ZBC_FHE_TOOL_PATH_EXISTS  $(ZBC_FHE_TOOL_PATH_EXISTS)"
-ifeq ($(ZBC_FHE_TOOL_PATH_EXISTS), true)
-	@echo "fhevm-tfhe-cli exists in $(ZBC_FHE_TOOL_PATH)"
+	@echo "FHEVM_TFHE_CLI_PATH_EXISTS  $(FHEVM_TFHE_CLI_PATH_EXISTS)"
+ifeq ($(FHEVM_TFHE_CLI_PATH_EXISTS), true)
+	@echo "fhevm-tfhe-cli exists in $(FHEVM_TFHE_CLI_PATH)"
 	@if [ ! -d $(WORKDIR)/fhevm-tfhe-cli ]; then \
         echo 'fhevm-tfhe-cli is not available in $(WORKDIR)'; \
-        echo "ZBC_FHE_TOOL_PATH is set to a custom value"; \
+        echo "FHEVM_TFHE_CLI_PATH is set to a custom value"; \
     else \
         echo 'fhevm-tfhe-cli is already available in $(WORKDIR)'; \
     fi
 else
-	@echo "fhevm-tfhe-cli does not exist in $(ZBC_FHE_TOOL_PATH)"
+	@echo "fhevm-tfhe-cli does not exist in $(FHEVM_TFHE_CLI_PATH)"
 	echo "We clone it for you!"
-	echo "If you want your own version please update ZBC_FHE_TOOL_PATH pointing to your fhevm-tfhe-cli folder!"
+	echo "If you want your own version please update FHEVM_TFHE_CLI_PATH pointing to your fhevm-tfhe-cli folder!"
 	$(MAKE) clone_fhevm_tfhe_cli
 endif
-	echo 'Call build zbc fhe'
+	echo 'Call build fhevm fhe'
 	$(MAKE) build_fhevm_tfhe_cli
 
 
@@ -272,31 +272,31 @@ install-tfhe-rs: clone_tfhe_rs
 build_fhevm_tfhe_cli:
 ifeq ($(HOST_ARCH), x86_64)
 	@echo 'Arch is x86'
-	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+	@ARCH_TO_BUIL_FHEVM_TFHE_CLI=$$(cd $(FHEVM_TFHE_CLI_PATH) && ./scripts/get_arch.sh) && cd $(FHEVM_TFHE_CLI_PATH) && cargo build --release --features tfhe/$${ARCH_TO_BUIL_FHEVM_TFHE_CLI}
 else
 	@echo 'Arch is not x86'
-	@ARCH_TO_BUIL_ZBC_FHE_TOOL=$$(cd $(ZBC_FHE_TOOL_PATH) && ./scripts/get_arch.sh) && cd $(ZBC_FHE_TOOL_PATH) && cargo +nightly build --release --features tfhe/$${ARCH_TO_BUIL_ZBC_FHE_TOOL}
+	@ARCH_TO_BUIL_FHEVM_TFHE_CLI=$$(cd $(FHEVM_TFHE_CLI_PATH) && ./scripts/get_arch.sh) && cd $(FHEVM_TFHE_CLI_PATH) && cargo +nightly build --release --features tfhe/$${ARCH_TO_BUIL_FHEVM_TFHE_CLI}
 endif	
 
 clone_fhevm_tfhe_cli: $(WORKDIR)/
-	$(info Cloning fhevm-tfhe-cli version $(ZBC_FHE_TOOL_VERSION))
+	$(info Cloning fhevm-tfhe-cli version $(FHEVM_TFHE_CLI_VERSION))
 	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-tfhe-cli.git
-	cd $(WORKDIR)/fhevm-tfhe-cli && git checkout $(ZBC_FHE_TOOL_VERSION)
+	cd $(WORKDIR)/fhevm-tfhe-cli && git checkout $(FHEVM_TFHE_CLI_VERSION)
 	
-clone_zbc_solidty: $(WORKDIR)/
-	$(info Cloning fhevm-solidity version $(ZBC_SOLIDITY_VERSION))
+clone_fhevm_solidity: $(WORKDIR)/
+	$(info Cloning fhevm-solidity version $(FHEVM_SOLIDITY_VERSION))
 	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-solidity.git
-	cd $(WORKDIR)/fhevm-solidity && git checkout $(ZBC_SOLIDITY_VERSION)
+	cd $(WORKDIR)/fhevm-solidity && git checkout $(FHEVM_SOLIDITY_VERSION)
 
 clone_tfhe_rs: $(WORKDIR)/
 	$(info Cloning tfhe-rs version $(TFHE_RS_VERSION))
 	cd $(WORKDIR) && git clone git@github.com:zama-ai/tfhe-rs.git
 	cd $(WORKDIR)/tfhe-rs && git checkout $(TFHE_RS_VERSION)
 
-clone_zbc_oracle_db: $(WORKDIR)/
-	$(info Cloning zbc-oracle-db version $(ZBC_ORACLE_DB_VERSION))
-	cd $(WORKDIR) && git clone git@github.com:zama-ai/zbc-oracle-db.git
-	cd $(WORKDIR)/zbc-oracle-db && git checkout $(ZBC_ORACLE_DB_VERSION)
+clone_fhevm_requires_db: $(WORKDIR)/
+	$(info Cloning fhevm-requires-db version $(FHEVM_REQUIRES_DB_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-requires-db.git
+	cd $(WORKDIR)/fhevm-requires-db && git checkout $(FHEVM_REQUIRES_DB_VERSION)
 
 clone_go_ethereum: $(WORKDIR)/
 	$(info Cloning Go-ethereum version $(GO_ETHEREUM_VERSION))
@@ -335,7 +335,7 @@ $(BUILDDIR)/:
 
 build-base-image:
 	@echo 'Build base image with go and rust tools'
-	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build:latest
+	@docker build . -f docker/Dockerfile.fhevm.build -t zama-fhevm-build:latest
 	
 
 build-local-docker:
@@ -370,7 +370,7 @@ build-from-registry:
 generate_fhe_keys:
 	@echo 'generate_fhe_keys'
 	# Generate fhe global keys and copy into volumes
-	@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(ZBC_FHE_TOOL_PATH)/target/release
+	@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(FHEVM_TFHE_CLI_PATH)/target/release
 
 
 run_evmos:
@@ -394,14 +394,14 @@ else
 endif
 
 run_e2e_test:
-	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
-	@cd $(ZBC_SOLIDITY_PATH) && npm install
+	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
+	@cd $(FHEVM_SOLIDITY_PATH) && npm install
 ifeq ($(LOCAL_BUILD),true)
 	$(info LOCAL_BUILD is set)
-	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
+	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
 else
 	$(info LOCAL_BUILD is not set)
-	@cd $(ZBC_SOLIDITY_PATH) && ci/scripts/run_ERC20_ci_test.sh mykey1 $(CURDIR)
+	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_ERC20_ci_test.sh mykey1 $(CURDIR)
 endif
 	@sleep 5
 	
