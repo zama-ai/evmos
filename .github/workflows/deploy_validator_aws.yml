@@ -68,19 +68,19 @@ jobs:
       - name: Get version for all needed repositories
         working-directory: ./evmos
         run: |
-          echo "ZBC_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_SOLIDITY_VERSION)" >> $GITHUB_ENV
+          echo "FHEVM_TFHE_CLI_VERSION=$(./scripts/get_version_from_makefile.sh FHEVM_TFHE_CLI_VERSION)" >> $GITHUB_ENV
           
       - name: Echo versions parsed from Makefile and go.mod
         run: |
-          echo "ZBC_SOLIDITY_VERSION: $ZBC_SOLIDITY_VERSION"
+          echo "FHEVM_TFHE_CLI_VERSION: $FHEVM_TFHE_CLI_VERSION"
 
-      - name: Checkout zbc-solidity
+      - name: Checkout fhevm-tfhe-cli
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-solidity
+          repository: zama-ai/fhevm-tfhe-cli
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-solidity
-          ref: ${{ env.ZBC_SOLIDITY_VERSION }}
+          path: ./evmos/work_dir/fhevm-tfhe-cli
+          ref: ${{ env.FHEVM_TFHE_CLI_VERSION }}
 
       - name: List files in the repository
         run: |
@@ -152,8 +152,8 @@ jobs:
         run: |
           sleep 10s
           
-      - name: List files in zbc-solidity
-        working-directory: evmos/work_dir/zbc-solidity
+      - name: List files in fhevm-tfhe-cli
+        working-directory: evmos/work_dir/fhevm-tfhe-cli
         run: |
           ls
 
@@ -166,17 +166,17 @@ jobs:
           ./scripts/upload_genesis.sh
 
       - name: Prepare/download fhe keys
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-tfhe-cli
         run: |
           ./ci/scripts/prepare_fhe_keys_ci.sh
 
       - name: Install @openzeppelin/contracts
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-tfhe-cli
         run: |
           npm install @openzeppelin/contracts
 
       - name: Run e2e test from zbc-solidty
         if: ${{ inputs.run_test }}
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-tfhe-cli
         run: |
           ./ci/scripts/run_ERC20_ci_test.sh mykey1 ../../

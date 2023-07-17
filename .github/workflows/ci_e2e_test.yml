@@ -32,37 +32,28 @@ jobs:
       - name: Get version for all needed repositories
         working-directory: ./evmos
         run: |
-          echo "ZBC_DEVELOPMENT_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_DEVELOPMENT_VERSION)" >> $GITHUB_ENV
           echo "TFHE_RS_VERSION=$(./scripts/get_version_from_makefile.sh TFHE_RS_VERSION)" >> $GITHUB_ENV
-          echo "ZBC_FHE_TOOL_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_FHE_TOOL_VERSION)" >> $GITHUB_ENV
-          echo "ZBC_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_SOLIDITY_VERSION)" >> $GITHUB_ENV
+          echo "FHEVM_TFHE_CLI_VERSION=$(./scripts/get_version_from_makefile.sh FHEVM_TFHE_CLI_VERSION)" >> $GITHUB_ENV
+          echo "FHEVM_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh FHEVM_SOLIDITY_VERSION)" >> $GITHUB_ENV
           echo "ETHERMINT_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/ethermint)" >> $GITHUB_ENV
           echo "GO_ETHEREUM_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)" >> $GITHUB_ENV
           
       - name: Echo versions parsed from Makefile and go.mod
         run: |
-          echo "ZBC_DEVELOPMENT_VERSION: $ZBC_DEVELOPMENT_VERSION"
           echo "TFHE_RS_VERSION: $TFHE_RS_VERSION"
-          echo "ZBC_FHE_TOOL_VERSION: $ZBC_FHE_TOOL_VERSION"
-          echo "ZBC_SOLIDITY_VERSION: $ZBC_SOLIDITY_VERSION"
+          echo "FHEVM_TFHE_CLI_VERSION: $FHEVM_TFHE_CLI_VERSION"
+          echo "FHEVM_SOLIDITY_VERSION: $FHEVM_SOLIDITY_VERSION"
           echo "ETHERMINT_VERSION: $ETHERMINT_VERSION"
           echo "GO_ETHEREUM_VERSION: $GO_ETHEREUM_VERSION"
       
-      - name: Checkout zbc-dev
-        uses: actions/checkout@v3
-        with:
-          repository: zama-ai/zbc-development
-          token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-development
-          ref: ${{ env.ZBC_DEVELOPMENT_VERSION }}
 
-      - name: Checkout zbc-solidity
+      - name: Checkout fhevm-solidity
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-solidity
+          repository: zama-ai/fhevm-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-solidity
-          ref: ${{ env.ZBC_SOLIDITY_VERSION }}
+          path: ./evmos/work_dir/fhevm-solidity
+          ref: ${{ env.FHEVM_SOLIDITY_VERSION }}
 
       - name: Checkout tfhe-rs
         uses: actions/checkout@v3
@@ -72,13 +63,13 @@ jobs:
           path: ./evmos/work_dir/tfhe-rs
           ref: ${{ env.TFHE_RS_VERSION }}
 
-      - name: Checkout zbc-fhe-tool
+      - name: Checkout fhevm-tfhe-cli
         uses: actions/checkout@v3
         with:
-          repository: zama-ai/zbc-fhe-tool
+          repository: zama-ai/fhevm-tfhe-cli
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
-          path: ./evmos/work_dir/zbc-fhe-tool
-          ref: ${{ env.ZBC_FHE_TOOL_VERSION }}
+          path: ./evmos/work_dir/fhevm-tfhe-cli
+          ref: ${{ env.FHEVM_TFHE_CLI_VERSION }}
 
       - name: Checkout go-ethereum
         uses: actions/checkout@v3
@@ -106,11 +97,11 @@ jobs:
           ls 
 
       - name: Prepare files for node setup
-        working-directory: evmos/work_dir/zbc-development
+        working-directory: evmos
         run: |
           mkdir -p node/evmos
-          cp ../../private.ed25519 node/evmos 
-          cp ../../public.ed25519 node/evmos 
+          cp private.ed25519 node/evmos 
+          cp public.ed25519 node/evmos 
           touch vm.log
           ls node/evmos
 
@@ -132,7 +123,7 @@ jobs:
           docker images
 
       - name: Install @openzeppelin/contracts
-        working-directory: evmos/work_dir/zbc-solidity
+        working-directory: evmos/work_dir/fhevm-solidity
         run: |
           npm install @openzeppelin/contracts
 
@@ -141,6 +132,5 @@ jobs:
         run: |
           ls ${{ github.workspace }}
           ls work_dir
-          ls work_dir/zbc-fhe-tool
-          ls work_dir/zbc-fhe-tool/.git
+          ls work_dir/fhevm-tfhe-cli
           make e2e-test
