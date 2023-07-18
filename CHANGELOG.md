@@ -35,6 +35,34 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.6]
+
+**This version includes several repositories renaming!**
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.6
+
+**Major updates**: 
+* Reduce gas block limit from 100M to 10M by in [evmos/pull/161](https://github.com/zama-ai/evmos/pull/161)
+* feat(tfhe): add support for `ebool` type in [fhevm-solidity](https://github.com/zama-ai/fhevm-solidity/pull/86)
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.7                  |
+|  ethermint  | repository |                  v0.1.2                  |
+|   tfhe-rs   | repository |               0.3.0-beta.0               |
+
+
+For e2e test:
+
+|       Name        |    Type    |     version     |
+| :---------------: | :--------: | :-------------: |
+|  fhevm-solidity   | repository |     v0.1.5      |
+|  fhevm-tfhe-cli   | repository | v0.1.1-renaming |
+| fhevm-requires-db | repository |     v0.1.0      |
+
+
 ## [v0.1.5]
 
 **This version should be stable, from now on we do not think to add important changes for the short-term period.**
