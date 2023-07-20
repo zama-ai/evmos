@@ -39,6 +39,10 @@ parent:
   </a>
 </div>
 
+# Evmos
+This repository is a fork of Evmos [v9.1.0](https://github.com/evmos/evmos/tree/v9.1.0).
+We expand on version v9.1.0 by adding functionalities that allow smart contracts to compute on encrypted data.
+
 Evmos is a scalable, high-throughput Proof-of-Stake blockchain that is fully compatible and
 interoperable with Ethereum. It's built using the [Cosmos SDK](https://github.com/cosmos/cosmos-sdk/) which runs on top of [Tendermint Core](https://github.com/tendermint/tendermint) consensus engine.
 
