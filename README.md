@@ -56,6 +56,7 @@ The quick start is to follow this [section](#from-github-package-registry)
 
 Note: on arm64 we still have some issues, fixes are coming soon
 
+
 # Local build
 
 To build evmosd binary directly in your system. 
