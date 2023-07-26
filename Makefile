@@ -38,9 +38,10 @@ TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "f
 TFHE_RS_VERSION ?= 0.3.0-beta.0 
 
 
+# If defined, the local version will be used, docker image otherwise
 FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
-FHEVM_TFHE_CLI_VERSION ?= v0.1.1-renaming
+FHEVM_TFHE_CLI_VERSION ?= v0.1.2
 
 FHEVM_REQUIRES_DB_PATH ?= $(WORKDIR)/fhevm-requires-db
 FHEVM_REQUIRES_DB_PATH_EXISTS := $(shell test -d $(FHEVM_REQUIRES_DB_PATH)/.git && echo "true" || echo "false")
@@ -48,7 +49,7 @@ FHEVM_REQUIRES_DB_VERSION ?= v0.1.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-FHEVM_SOLIDITY_VERSION ?= ci/use-fhevm-tfhe-cli-multiarch
+FHEVM_SOLIDITY_VERSION ?= main
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
@@ -321,7 +322,7 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-fhevm-tfhe-cli check-fhevm-solidity
+check-all-test-repo: check-fhevm-solidity
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
@@ -339,15 +340,6 @@ build-base-image:
 	
 
 build-local-docker:
-ifeq ($(GITHUB_ACTIONS),true)
-	$(info Running in a GitHub Actions workflow)
-else
-	$(info Not running in a GitHub Actions workflow)
-	@$(MAKE) build-base-image
-	@$(MAKE) clone_go_ethereum
-	@$(MAKE) clone_ethermint
-endif
-	$(MAKE) update-go-mod
 	$(MAKE) check-tfhe-rs
 	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 
@@ -370,7 +362,7 @@ build-from-registry:
 generate_fhe_keys:
 	@echo 'generate_fhe_keys'
 	# Generate fhe global keys and copy into volumes
-	@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(FHEVM_TFHE_CLI_PATH)/target/release
+	@bash ./scripts/prepare_volumes_from_fhe_tool_docker.sh $(FHEVM_TFHE_CLI_VERSION)
 
 
 run_evmos:

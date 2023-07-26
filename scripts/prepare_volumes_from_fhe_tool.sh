@@ -74,9 +74,4 @@ echo "Copying $key to $NETWORK_KEYS_PRIVATE_PATH, please wait ..."
 cp $KEYS_FULL_PATH/$key $NETWORK_KEYS_PRIVATE_PATH/cks
 
 
-echo "###########################################################"
-echo "If you want to execute a local test using the same keys,"
-echo "please run the following command in zbc-solidity:"
-echo "prepare_fhe_keys_from_fhe_tool.sh $KEYS_FULL_PATH"
-echo "###########################################################"
 

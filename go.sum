@@ -862,10 +862,10 @@ github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9de
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-github.com/zama-ai/ethermint v1.0.0-test h1:x00Rxncw8qhzvV75S9lPbcmYBumGZ8ZZ8lGWgDawjHY=
-github.com/zama-ai/ethermint v1.0.0-test/go.mod h1:JEqkvu6ZC6GV0nq7txpzmaRQdfDzwFay1SRumKsEkg8=
-github.com/zama-ai/go-ethereum v1.0.1-test h1:WpTU7WP2W9fyZZYD+n0t26S1Njk6lzb3szKVgvVZ/SE=
-github.com/zama-ai/go-ethereum v1.0.1-test/go.mod h1:IJBNMtzKcNHPtllYihy6BL2IgK1u+32JriaTbdt4v+w=
+github.com/zama-ai/ethermint v0.1.2 h1:Zs7X5o6cb2hiZmWIrZICPqv5sK8QtackTaA2tK0djI0=
+github.com/zama-ai/ethermint v0.1.2/go.mod h1:JEqkvu6ZC6GV0nq7txpzmaRQdfDzwFay1SRumKsEkg8=
+github.com/zama-ai/go-ethereum v0.1.7 h1:krnwfFJajqn7lROjkt8wbCcthl2XTpGQCzkANjEnUig=
+github.com/zama-ai/go-ethereum v0.1.7/go.mod h1:IJBNMtzKcNHPtllYihy6BL2IgK1u+32JriaTbdt4v+w=
 github.com/zondax/hid v0.9.0 h1:eiT3P6vNxAEVxXMw66eZUAAnU2zD33JBkfG/EnfAKl8=
 github.com/zondax/hid v0.9.0/go.mod h1:l5wttcP0jwtdLjqjMMWFVEE7d1zO0jvSPA9OPZxWpEM=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
