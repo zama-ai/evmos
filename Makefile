@@ -322,7 +322,7 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-fhevm-tfhe-cli check-fhevm-solidity
+check-all-test-repo: check-fhevm-solidity
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
@@ -340,16 +340,19 @@ build-base-image:
 	
 
 build-local-docker:
+	$(MAKE) update-go-mod
+	$(MAKE) check-tfhe-rs
 ifeq ($(GITHUB_ACTIONS),true)
 	$(info Running in a GitHub Actions workflow)
+	
 else
 	$(info Not running in a GitHub Actions workflow)
 	@$(MAKE) clone_go_ethereum
 	@$(MAKE) clone_ethermint
-endif
-	$(MAKE) update-go-mod
-	$(MAKE) check-tfhe-rs
 	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
+endif
+	
+	
 
 
 build-docker:
