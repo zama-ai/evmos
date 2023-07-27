@@ -7,6 +7,9 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.evmos-node.local
+      platforms:
+      - "linux/amd64"
+      - "linux/arm64"
     ports:
       - "26656-26657:26656-26657"
       - "8545:8545"
