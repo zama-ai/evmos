@@ -99,6 +99,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
       
       - name: Build and push Docker image
+        working-directory: ./evmos
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
@@ -107,7 +108,7 @@ jobs:
           pull: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.DOCKER_IMAGE }}:${{ inputs.evmos_node_tag }},${{ env.DOCKER_IMAGE }}:latest
-          labels: zbc-build
+          labels: zbc-evmos-node
 
       - name: Check docker images
         working-directory: ./evmos
