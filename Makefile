@@ -37,10 +37,7 @@ TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
 TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
 TFHE_RS_VERSION ?= 0.3.0-beta.0 
 
-
-# If defined here or in .env, the FHEVM_TFHE_CLI_VERSION version will be cloned, 
-# built and used, docker image otherwise
-# FHEVM_TFHE_CLI_PATH
+FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
 FHEVM_TFHE_CLI_VERSION ?= v0.1.2
 
@@ -352,7 +349,6 @@ ifeq ($(LOCAL_BUILD),true)
 else
 	$(info LOCAL_BUILD is not set, use docker registry for docker images)
 	@$(MAKE) build-from-registry
-	
 endif
 
 	
@@ -362,16 +358,14 @@ build-from-registry:
 	
 
 generate_fhe_keys:
-	@echo 'generate_fhe_keys'
-	# Generate fhe global keys and copy into volumes
-	ifeq ($(FHEVM_TFHE_CLI_PATH),)
-		@echo 'use of docker image to generate fhe keys '
-		@bash ./scripts/prepare_volumes_from_fhe_tool_docker.sh $(FHEVM_TFHE_CLI_VERSION)
-	else
-		@$(MAKE) check-fhevm-tfhe-cli
-		@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(FHEVM_TFHE_CLI_PATH)/target/release
-	endif
-	
+ifeq ($(USE_DOCKER_FOR_FHE_KEYS),true)
+	$(info USE_DOCKER_FOR_FHE_KEYS is set, use docker)
+	@bash ./scripts/prepare_volumes_from_fhe_tool_docker.sh $(FHEVM_TFHE_CLI_VERSION)
+else
+	$(info USE_DOCKER_FOR_FHE_KEYS is not set, build from sources)
+	@$(MAKE) check-fhevm-tfhe-cli
+	@bash ./scripts/prepare_volumes_from_fhe_tool.sh $(FHEVM_TFHE_CLI_PATH)/target/release
+endif
 
 
 run_evmos:
