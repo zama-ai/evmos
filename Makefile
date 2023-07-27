@@ -37,6 +37,7 @@ TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
 TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
 TFHE_RS_VERSION ?= 0.3.0-beta.0 
 
+USE_DOCKER_FOR_FHE_KEYS ?= true
 FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
 FHEVM_TFHE_CLI_VERSION ?= v0.1.2
