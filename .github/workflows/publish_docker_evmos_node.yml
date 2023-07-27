@@ -17,6 +17,10 @@ on:
 env:
   DOCKER_IMAGE: ghcr.io/zama-ai/evmos-node
 
+defaults:
+  run:
+    working-directory: ./evmos
+
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -29,10 +33,7 @@ jobs:
       - name: Get version for all needed repositories
         working-directory: ./evmos
         run: |
-          echo "ZBC_DEVELOPMENT_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_DEVELOPMENT_VERSION)" >> $GITHUB_ENV
           echo "TFHE_RS_VERSION=$(./scripts/get_version_from_makefile.sh TFHE_RS_VERSION)" >> $GITHUB_ENV
-          echo "ZBC_FHE_TOOL_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_FHE_TOOL_VERSION)" >> $GITHUB_ENV
-          echo "ZBC_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh ZBC_SOLIDITY_VERSION)" >> $GITHUB_ENV
           echo "ETHERMINT_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/ethermint)" >> $GITHUB_ENV
           echo "GO_ETHEREUM_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)" >> $GITHUB_ENV
           
@@ -101,7 +102,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: ./evmos
+          context: ./
           file: docker/Dockerfile.evmos-node.local
           push: true
           pull: true
