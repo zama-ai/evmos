@@ -322,7 +322,7 @@ $(WORKDIR)/:
 	$(info WORKDIR)
 	mkdir -p $(WORKDIR)
 
-check-all-test-repo: check-fhevm-tfhe-cli check-fhevm-solidity
+check-all-test-repo: check-fhevm-solidity
 
 update-go-mod:
 	@cp go.mod $(UPDATE_GO_MOD)
@@ -337,7 +337,7 @@ $(BUILDDIR)/:
 build-base-image:
 	@echo 'Build base image with go and rust tools'
 	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build:latest
-	
+
 
 build-local-docker:
 ifeq ($(GITHUB_ACTIONS),true)
@@ -350,7 +350,11 @@ endif
 	$(MAKE) update-go-mod
 	$(MAKE) check-tfhe-rs
 	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
-
+	
+# Specific build for publish_evmos_node workflow	
+prepare-docker-publish:
+	$(MAKE) update-go-mod
+	$(MAKE) check-tfhe-rs
 
 build-docker:
 ifeq ($(LOCAL_BUILD),true)
