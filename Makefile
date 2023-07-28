@@ -337,23 +337,24 @@ $(BUILDDIR)/:
 build-base-image:
 	@echo 'Build base image with go and rust tools'
 	@docker build . -f docker/Dockerfile.zbc.build -t zama-zbc-build:latest
-	
+
 
 build-local-docker:
-	$(MAKE) update-go-mod
-	$(MAKE) check-tfhe-rs
 ifeq ($(GITHUB_ACTIONS),true)
 	$(info Running in a GitHub Actions workflow)
-	
 else
 	$(info Not running in a GitHub Actions workflow)
 	@$(MAKE) clone_go_ethereum
 	@$(MAKE) clone_ethermint
-	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 endif
+	$(MAKE) update-go-mod
+	$(MAKE) check-tfhe-rs
+	@docker compose  -f docker-compose/docker-compose.local.yml build evmosnodelocal
 	
-	
-
+# Specific build for publish_evmos_node workflow	
+prepare-docker-publish:
+	$(MAKE) update-go-mod
+	$(MAKE) check-tfhe-rs
 
 build-docker:
 ifeq ($(LOCAL_BUILD),true)
