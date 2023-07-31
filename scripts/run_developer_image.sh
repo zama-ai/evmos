@@ -17,7 +17,7 @@ EVMOS_NETWORK_KEYS_PATH=/root/.evmosd/zama/keys/network-fhe-keys ./prepare_valid
 TRACE=""
 LOGLEVEL="info"
 
-./fhevm-requires-db &
+./fhevm-decryptions-db &
 
 # Start the node (remove the --pruning=nothing flag if historical queries are not needed)
 evmosd start --home /root/.evmosd --pruning=nothing $TRACE --log_level $LOGLEVEL \
