@@ -2,9 +2,13 @@
 
 set -Eeuo pipefail
 
+# Set the default value for EVMOS_NETWORK_KEYS_PATH
+EVMOS_NETWORK_KEYS_PATH=${EVMOS_NETWORK_KEYS_PATH:-./running_node/node2/.evmosd/zama/keys/network-fhe-keys}
 VOLUME_NETWORK_PUBLIC_KEYS_PATH=./volumes/network-public-fhe-keys
 VOLUME_NETWORK_PRIVATE_KEYS_PATH=./volumes/network-private-fhe-keys
-EVMOS_NETWORK_KEYS_PATH=./running_node/node2/.evmosd/zama/keys/network-fhe-keys
+
+echo "EVMOS_NETWORK_KEYS_PATH is set to $EVMOS_NETWORK_KEYS_PATH"
+
 
 mkdir -p $EVMOS_NETWORK_KEYS_PATH
 
