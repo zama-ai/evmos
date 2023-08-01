@@ -1,20 +1,20 @@
 
 
-FROM ghcr.io/zama-ai/fhevm-requires-db:v0.1.4 as oracle-env
+FROM ghcr.io/zama-ai/fhevm-decryptions-db:v0.1.5 as oracle-env
 FROM ghcr.io/zama-ai/fhevm-tfhe-cli:v0.1.2 as tfhe-cli
 
 FROM ghcr.io/zama-ai/evmos-node:v0.1.7-beta
 
 WORKDIR /config
 
-ADD ./node/evmos/private.ed25519 .
-ADD ./node/evmos/public.ed25519 .
+ADD ./private.ed25519 .
+ADD ./public.ed25519 .
 ADD ./scripts/prepare_volumes_from_fhe_tool.sh .
 ADD ./scripts/prepare_validator_ci.sh .
 ADD ./scripts/run_developer_image.sh .
 
 
-COPY --from=oracle-env /usr/local/app/fhevm-requires-db .
+COPY --from=oracle-env /usr/local/app/fhevm-decryptions-db .
 COPY --from=oracle-env /usr/local/app/Rocket.toml .
 COPY --from=tfhe-cli /usr/local/bin/fhevm-tfhe-cli /usr/local/bin
 
