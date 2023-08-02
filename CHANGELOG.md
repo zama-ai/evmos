@@ -35,6 +35,30 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.7]
+
+**This version includes several repositories renaming!**
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.7
+Evmos-node developer docker image: ghcr.io/zama-ai/evmos-dev-node:v0.1.7
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.7                  |
+|  ethermint  | repository |                  v0.1.2                  |
+|   tfhe-rs   | repository |               0.3.0-beta.0               |
+
+
+For e2e test:
+
+|       Name           |    Type    |     version     |
+| :------------------: | :--------: | :-------------: |
+|    fhevm-solidity    | repository |     v0.1.7      |
+|    fhevm-tfhe-cli    | repository |     v0.1.2      |
+| fhevm-decryptions-db | repository |     v0.1.0      |
+
 ## [v0.1.6]
 
 **This version includes several repositories renaming!**

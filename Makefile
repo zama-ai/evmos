@@ -43,9 +43,9 @@ FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
 FHEVM_TFHE_CLI_VERSION ?= v0.1.2
 
-FHEVM_REQUIRES_DB_PATH ?= $(WORKDIR)/fhevm-requires-db
-FHEVM_REQUIRES_DB_PATH_EXISTS := $(shell test -d $(FHEVM_REQUIRES_DB_PATH)/.git && echo "true" || echo "false")
-FHEVM_REQUIRES_DB_VERSION ?= v0.1.0
+FHEVM_DECRYPTIONS_DB_PATH ?= $(WORKDIR)/fhevm-decryptions-db
+FHEVM_DECRYPTIONS_DB_PATH_EXISTS := $(shell test -d $(FHEVM_DECRYPTIONS_DB_PATH)/.git && echo "true" || echo "false")
+FHEVM_DECRYPTIONS_DB_VERSION ?= v0.1.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
@@ -153,7 +153,7 @@ print-info:
 	@echo 'ETHERMINT_TAG: $(ETHERMINT_VERSION) ---extracted from go.mod'
 	@echo 'TFHE_RS_VERSION: $(TFHE_RS_VERSION) ---extracted from Makefile'
 	@echo 'FHEVM_TFHE_CLI_VERSION: $(FHEVM_TFHE_CLI_VERSION) ---extracted from Makefile'
-	@echo 'FHEVM_REQUIRES_DB_VERSION: $(FHEVM_REQUIRES_DB_VERSION) ---extracted from Makefile'
+	@echo 'FHEVM_DECRYPTIONS_DB_VERSION: $(FHEVM_DECRYPTIONS_DB_VERSION) ---extracted from Makefile'
 	@echo 'FHEVM_SOLIDITY_VERSION: $(FHEVM_SOLIDITY_VERSION) ---extracted from Makefile'
 	@bash scripts/get_repository_info.sh evmos ${CURDIR}
 	@bash scripts/get_repository_info.sh tfhe-rs $(TFHE_RS_PATH)
@@ -228,21 +228,21 @@ else
 	$(MAKE) clone_fhevm_solidity
 endif
 
-check-fhevm-requires-db: $(WORKDIR)/
-	$(info check-fhevm-requires-db)
-ifeq ($(FHEVM_REQUIRES_DB_PATH_EXISTS), true)
-	@echo "fhevm-requires-db exists in $(FHEVM_REQUIRES_DB_PATH)"
-	@if [ ! -d $(WORKDIR)/fhevm-requires-db ]; then \
-        echo 'fhevm-requires-db is not available in $(WORKDIR)'; \
-        echo "FHEVM_REQUIRES_DB_PATH is set to a custom value"; \
+check-fhevm-decryptions-db: $(WORKDIR)/
+	$(info check-fhevm-decryptions-db)
+ifeq ($(FHEVM_DECRYPTIONS_DB_PATH_EXISTS), true)
+	@echo "fhevm-decryptions-db exists in $(FHEVM_DECRYPTIONS_DB_PATH)"
+	@if [ ! -d $(WORKDIR)/fhevm-decryptions-db ]; then \
+        echo 'fhevm-decryptions-db is not available in $(WORKDIR)'; \
+        echo "FHEVM_DECRYPTIONS_DB_PATH is set to a custom value"; \
     else \
-        echo 'fhevm-requires-db is already available in $(WORKDIR)'; \
+        echo 'fhevm-decryptions-db is already available in $(WORKDIR)'; \
     fi
 else
-	@echo "fhevm-requires-db does not exist"
+	@echo "fhevm-decryptions-db does not exist"
 	echo "We clone it for you!"
-	echo "If you want your own version please update FHEVM_REQUIRES_DB_PATH pointing to your fhevm-requires-db folder!"
-	$(MAKE) clone_fhevm_requires_db
+	echo "If you want your own version please update FHEVM_DECRYPTIONS_DB_PATH pointing to your fhevm-decryptions-db folder!"
+	$(MAKE) clone_fhevm_decryptions_db
 endif
 
 
@@ -294,10 +294,10 @@ clone_tfhe_rs: $(WORKDIR)/
 	cd $(WORKDIR) && git clone git@github.com:zama-ai/tfhe-rs.git
 	cd $(WORKDIR)/tfhe-rs && git checkout $(TFHE_RS_VERSION)
 
-clone_fhevm_requires_db: $(WORKDIR)/
-	$(info Cloning fhevm-requires-db version $(FHEVM_REQUIRES_DB_VERSION))
-	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-requires-db.git
-	cd $(WORKDIR)/fhevm-requires-db && git checkout $(FHEVM_REQUIRES_DB_VERSION)
+clone_fhevm_decryptions_db: $(WORKDIR)/
+	$(info Cloning fhevm-decryptions-db version $(FHEVM_DECRYPTIONS_DB_VERSION))
+	cd $(WORKDIR) && git clone git@github.com:zama-ai/fhevm-decryptions-db.git
+	cd $(WORKDIR)/fhevm-decryptions-db && git checkout $(FHEVM_DECRYPTIONS_DB_VERSION)
 
 clone_go_ethereum: $(WORKDIR)/
 	$(info Cloning Go-ethereum version $(GO_ETHEREUM_VERSION))
