@@ -37,9 +37,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v0.1.7]
 
-**This version includes several repositories renaming!**
+**This version includes a repository renaming!**
 
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.7
+
 Evmos-node developer docker image: ghcr.io/zama-ai/evmos-dev-node:v0.1.7
 
 For build:
