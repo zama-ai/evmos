@@ -23,4 +23,5 @@ LOGLEVEL="info"
 evmosd start --home /root/.evmosd --pruning=nothing $TRACE --log_level $LOGLEVEL \
         --minimum-gas-prices=0.0001aevmos \
         --json-rpc.gas-cap=50000000 \
-        --json-rpc.api eth,txpool,net,web3
+        --json-rpc.api eth,txpool,net,web3 \
+	"$@"
