@@ -35,21 +35,21 @@ GOPRIVATE = github.com/zama-ai/*
 
 TFHE_RS_PATH ?= $(WORKDIR)/tfhe-rs
 TFHE_RS_EXISTS := $(shell test -d $(TFHE_RS_PATH)/.git && echo "true" || echo "false")
-TFHE_RS_VERSION ?= 0.3.0-beta.0 
+TFHE_RS_VERSION ?= 0.3.1
 
 # If false, fhevm-tfhe-cli is cloned, built (version is FHEVM_TFHE_CLI_VERSION)
 USE_DOCKER_FOR_FHE_KEYS ?= true
 FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
-FHEVM_TFHE_CLI_VERSION ?= v0.1.2
+FHEVM_TFHE_CLI_VERSION ?= v0.2.0
 
 FHEVM_DECRYPTIONS_DB_PATH ?= $(WORKDIR)/fhevm-decryptions-db
 FHEVM_DECRYPTIONS_DB_PATH_EXISTS := $(shell test -d $(FHEVM_DECRYPTIONS_DB_PATH)/.git && echo "true" || echo "false")
-FHEVM_DECRYPTIONS_DB_VERSION ?= v0.1.0
+FHEVM_DECRYPTIONS_DB_VERSION ?= v0.2.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-FHEVM_SOLIDITY_VERSION ?= v0.1.8
+FHEVM_SOLIDITY_VERSION ?= v0.1.9
 
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
