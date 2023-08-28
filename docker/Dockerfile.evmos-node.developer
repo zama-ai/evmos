@@ -1,9 +1,9 @@
 
 
-FROM ghcr.io/zama-ai/fhevm-decryptions-db:v0.1.5 as oracle-env
-FROM ghcr.io/zama-ai/fhevm-tfhe-cli:v0.1.2 as tfhe-cli
+FROM ghcr.io/zama-ai/fhevm-decryptions-db:v0.2.0 as oracle-env
+FROM ghcr.io/zama-ai/fhevm-tfhe-cli:v0.2.0 as tfhe-cli
 
-FROM ghcr.io/zama-ai/evmos-node:v0.1.7
+FROM ghcr.io/zama-ai/evmos-node:v0.1.8
 
 WORKDIR /config
 
