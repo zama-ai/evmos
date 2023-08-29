@@ -2,7 +2,7 @@ version: '3'
 
 services:
   validator:
-    image: ghcr.io/zama-ai/evmos-node:v0.1.6
+    image: ghcr.io/zama-ai/evmos-node:v0.1.8
     container_name: evmosnode0
     ports:
       - "26656-26657:26656-26657"
@@ -21,7 +21,7 @@ services:
         ipv4_address: 192.167.10.2
 
   oracledb:
-    image: ghcr.io/zama-ai/oracle-db-service:latest
+    image: ghcr.io/zama-ai/fhevm-decryptions-db:v0.1.5
     container_name: zbcoracledb
     security_opt:
       - no-new-privileges:true

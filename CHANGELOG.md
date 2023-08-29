@@ -35,6 +35,35 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.8]
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.8
+
+Evmos-node developer docker image: ghcr.io/zama-ai/evmos-dev-node:v0.1.8
+
+**Major updates**: 
+
+* Add TFHE scalar division operation by @david-zama in [go-ethereum/pull/151](https://github.com/zama-ai/go-ethereum/pull/151)
+* Add precompile to all releases by @tremblaythibaultl in [go-ethereum/pull/154](https://github.com/zama-ai/go-ethereum/pull/154)
+* Fix gas estimation for explicit decryption by @dartdart26 in [go-ethereum/pull/155](https://github.com/zama-ai/go-ethereum/pull/155)
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.9                  |
+|  ethermint  | repository |                  v0.1.2                  |
+|   tfhe-rs   | repository |                   0.3.1                  |
+
+
+For e2e test:
+
+|       Name           |    Type    |     version     |
+| :------------------: | :--------: | :-------------: |
+|    fhevm-solidity    | repository |     v0.1.9      |
+|    fhevm-tfhe-cli    | repository |     v0.2.0      |
+| fhevm-decryptions-db | repository |     v0.2.0      |
+
 ## [v0.1.7]
 
 **This version includes a repository renaming!**
