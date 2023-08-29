@@ -54,8 +54,6 @@ Please check the [CHANGELOG](./CHANGELOG.md) to get the last version of the publ
 
 The quick start is to follow this [section](#from-github-package-registry)
 
-Note: on arm64 we still have some issues, fixes are coming soon
-
 
 # Local build
 
@@ -84,13 +82,13 @@ Dependencies:
 
 ## From sources
 
-If the developer wants to build everything locally from sources, and run the e2e test this build is the more adapted.
+If the developer wants to build everything locally from sources, and run the e2e test, this build is the more adapted.
 
 Dependencies:
 
 | Name        | Type       | Variable name   | where it is defined |
 | ----------- | ---------- | --------------- | ------------------- |
-| evmos       | repository | LOCAL_BUILD     | .env                |
+| evmos       | repository | LOCAL_BUILD     | .env (set to true)  |
 | go-ethereum | repository | -               | directly in go.mod  |
 | ethermint   | repository | -               | directly in go.mod  |
 | tfhe-rs     | repository | TFHE_RS_VERSION | Makefile/.env       |
@@ -138,12 +136,13 @@ CONTAINER ID   IMAGE                     NAMES
 
 To execute the e2e test, here are the dependencies:
 
-| Name          | Type       | Variable name         | where it is defined |
-| ------------- | ---------- | --------------------- | ------------------- |
-| evmos         | repository | LOCAL_BUILD           | .env                |
-| zbc-solidity  | repository | ZBC_SOLIDITY_VERSION  | Makefile/.env       |
-| zbc-fhe-tool  | repository | ZBC_FHE_TOOL_VERSION  | Makefile/.env       |
-| zbc-oracle-db | repository | ZBC_ORACLE_DB_VERSION | Makefile/.env       |
+| Name                 | Type       | Variable name                | where it is defined |
+| -------------------- | ---------- | ---------------------------- | ------------------- |
+| evmos                | repository | LOCAL_BUILD                  | .env (set to true)  |
+| fhevm-solidity       | repository | FHEVM_SOLIDITY_VERSION       | Makefile/.env       |
+| fhevm-tfhe-cli       | repository | FHEVM_TFHE_CLI_VERSION       | Makefile/.env       |
+| fhevm-decryptions-db | repository | FHEVM_DECRYPTIONS_DB_VERSION | Makefile/.env       |
+
 
 
 
@@ -164,11 +163,11 @@ make stop_evmos
 
 
 - check you have all the needed repositories
-  - zbc-fhe-tool
-  - zbc-solidity
-  - zbc-oracledb
+  - fhevm-tfhe-cli
+  - fhevm-solidity
+  - fhevm-decryptions-db
 - init evmos node by calling /config/setup.sh file
-- generate fhe keys using zbc-fhe-tool based on scripts/prepare_volumes_from_fhe_tool.sh script
+- generate fhe keys using fhevm-tfhe-cli based on scripts/prepare_volumes_from_fhe_tool.sh script
 - copy them at the right folder using scripts/prepare_demo_local.sh script
 - start evmosnodelocal0 and oracledb (local build) using docker-compose/docker-compose.local.yml file
 - run the e2e test 
@@ -188,10 +187,8 @@ Dependencies:
 
 | Name                       | Type              | Variable name | where it is defined          |
 | -------------------------- | ----------------- | ------------- | ---------------------------- |
-| evmos                      | repository        | LOCAL_BUILD   | .env                         |
+| evmos                      | repository        | LOCAL_BUILD   | .env   (set to false)        |
 | ghcr.io/zama-ai/evmos-node | docker image name | hard-coded    | docker-compose.validator.yml |
-
-
 
 
 Init evmos and run it:
@@ -205,7 +202,7 @@ make run_evmos
 Docker ps output:
 ```
 CONTAINER ID   IMAGE                                      NAMES
-02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.0     evmosnode0
+02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.8          evmosnode0
 ac2073c0d6fc   ghcr.io/zama-ai/oracle-db-service:latest   zbcoracledb
 ```
 
@@ -218,28 +215,24 @@ make run_evmos
 make run_e2e_test
 make stop_evmos
 ```
-|            Name            |       Type        |     Variable name     |     where it is defined      |
-| :------------------------: | :---------------: | :-------------------: | :--------------------------: |
-|           evmos            |       evmos       |      LOCAL_BUILD      |             .env             |
-| ghcr.io/zama-ai/evmos-node | docker image name |      hard-coded       | docker-compose.validator.yml |
-|     oracle-db-service      | docker image name |      hard-coded       | docker-compose.validator.yml |
-|        zbc-solidity        |    repository     | ZBC_SOLIDITY_VERSION  |        Makefile/.env         |
-|        zbc-fhe-tool        |    repository     | ZBC_FHE_TOOL_VERSION  |        Makefile/.env         |
-|       zbc-oracle-db        |    repository     | ZBC_ORACLE_DB_VERSION |        Makefile/.env         |
+|            Name            |       Type        |        Variable name         |     where it is defined      |
+| :------------------------: | :---------------: | :--------------------------: | :--------------------------: |
+|           evmos            |       evmos       |         LOCAL_BUILD          |             .env             |
+| ghcr.io/zama-ai/evmos-node | docker image name |          hard-coded          | docker-compose.validator.yml |
+|     oracle-db-service      | docker image name |          hard-coded          | docker-compose.validator.yml |
+|       fhevm-solidity       |    repository     |    FHEVM_SOLIDITY_VERSION    |        Makefile/.env         |
+|       fhevm-tfhe-cli       |    repository     |    FHEVM_TFHE_CLI_VERSION    |        Makefile/.env         |
+|    fhevm-decryptions-db    |    repository     | FHEVM_DECRYPTIONS_DB_VERSION |        Makefile/.env         |
 
 
-
-
-Note:
-- for the zbc-oracle-db docker image it could not work on arm64 because the arm64 version is not yet pushed in ghcr.io
 
 <br />
 <details>
   <summary>Troubleshoot ghcr.io</summary>
 
-Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/zbc-fhe-tool#using-the-published-image-easiest-way).
+Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/fhevm-tfhe-cli#using-the-published-image-easiest-way).
 
-  If you get trouble to pull image from ghcri.io, one can build it locally with
+  If you get trouble to pull image from ghcr.io, one can build it locally with
   ```bash
   docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
   ```
