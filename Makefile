@@ -404,6 +404,8 @@ endif
 run_e2e_test:
 	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
 	@cd $(FHEVM_SOLIDITY_PATH) && npm ci
+## Copy the run_tests.sh script directly in fhevm-solidity for the nxt version
+	@cp ./scripts/run_tests.sh $(FHEVM_SOLIDITY_PATH)/ci/scripts/
 	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_tests.sh
 	@sleep 5
 
