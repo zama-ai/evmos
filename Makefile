@@ -404,17 +404,10 @@ endif
 
 run_e2e_test:
 	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
-	@cd $(FHEVM_SOLIDITY_PATH) && npm install
-ifeq ($(LOCAL_BUILD),true)
-	$(info LOCAL_BUILD is set)
-	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
-else
-	$(info LOCAL_BUILD is not set)
-	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_ERC20_ci_test.sh mykey1 $(CURDIR)
-endif
+	@cd $(FHEVM_SOLIDITY_PATH) && npm ci
+	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_tests.sh
 	@sleep 5
-	
-	
+
 
 change_running_node_owner:
 ifeq ($(GITHUB_ACTIONS),true)
