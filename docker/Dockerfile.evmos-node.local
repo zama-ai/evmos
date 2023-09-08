@@ -31,6 +31,7 @@ WORKDIR /config
 ADD setup.sh .
 RUN chmod +x /config/setup.sh
 ADD zama_config.toml .
+ADD --chmod=755 faucet.py /usr/local/bin/faucet
 RUN mkdir -p /root/.evmosd/zama
 RUN touch /root/.evmosd/zama/vm.log
 

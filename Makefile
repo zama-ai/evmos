@@ -49,8 +49,7 @@ FHEVM_DECRYPTIONS_DB_VERSION ?= v0.2.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-FHEVM_SOLIDITY_VERSION ?= v0.1.9
-
+FHEVM_SOLIDITY_VERSION ?= v0.1.11
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
 UPDATE_GO_MOD = go.mod.updated
@@ -404,17 +403,12 @@ endif
 
 run_e2e_test:
 	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/prepare_fhe_keys_for_e2e_test.sh $(CURDIR)/volumes/network-public-fhe-keys
-	@cd $(FHEVM_SOLIDITY_PATH) && npm install
-ifeq ($(LOCAL_BUILD),true)
-	$(info LOCAL_BUILD is set)
-	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_ERC20_e2e_test.sh mykey1 $(CURDIR)
-else
-	$(info LOCAL_BUILD is not set)
-	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_ERC20_ci_test.sh mykey1 $(CURDIR)
-endif
+	@cd $(FHEVM_SOLIDITY_PATH) && npm ci
+## Copy the run_tests.sh script directly in fhevm-solidity for the nxt version
+	@cp ./scripts/run_tests.sh $(FHEVM_SOLIDITY_PATH)/ci/scripts/
+	@cd $(FHEVM_SOLIDITY_PATH) && ci/scripts/run_tests.sh
 	@sleep 5
-	
-	
+
 
 change_running_node_owner:
 ifeq ($(GITHUB_ACTIONS),true)
