@@ -71,13 +71,13 @@ jobs:
         uses: AutoModality/action-clean@v1.1.0
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: evmos
           ref: ${{ inputs.ref_to_evmos }}
       
       - name: Checkout zbc-dev
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/zbc-development
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
@@ -85,7 +85,7 @@ jobs:
           ref: ${{ inputs.ref_for_zbc_development }}
 
       - name: Checkout zbc-solidity
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/zbc-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}

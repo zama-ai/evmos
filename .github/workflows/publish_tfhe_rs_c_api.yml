@@ -31,14 +31,14 @@ jobs:
 
 
       - name: Check out tfhe-rs
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/tfhe-rs
           ref: ${{ inputs.refToBuild }}
           path: tfhe-rs
 
       - name: Check out evmos
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.refToEvmos }}
           path: evmos

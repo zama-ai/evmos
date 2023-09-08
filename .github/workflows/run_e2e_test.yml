@@ -37,7 +37,7 @@ jobs:
           sudo apt install npm
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: evmos
 
@@ -49,7 +49,7 @@ jobs:
 
 
       - name: Checkout zbc-solidity
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/zbc-solidity
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}

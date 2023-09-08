@@ -60,7 +60,7 @@ jobs:
         uses: AutoModality/action-clean@v1.1.0
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: evmos      
 
@@ -75,7 +75,7 @@ jobs:
           echo "FHEVM_TFHE_CLI_VERSION: $FHEVM_TFHE_CLI_VERSION"
 
       - name: Checkout fhevm-tfhe-cli
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/fhevm-tfhe-cli
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}

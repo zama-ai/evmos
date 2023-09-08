@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: evmos
 
@@ -44,7 +44,7 @@ jobs:
           echo "GO_ETHEREUM_VERSION: $GO_ETHEREUM_VERSION"
 
       - name: Checkout tfhe-rs
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/tfhe-rs
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
           ref: ${{ env.TFHE_RS_VERSION }}
 
       - name: Checkout go-ethereum
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/go-ethereum
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
@@ -60,7 +60,7 @@ jobs:
           ref: ${{ env.GO_ETHEREUM_VERSION }}
 
       - name: Checkout ethermint
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zama-ai/ethermint
           token: ${{ secrets.CONCRETE_ACTIONS_TOKEN }}
