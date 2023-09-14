@@ -57,14 +57,150 @@ The quick start is to follow this [section](#from-github-package-registry)
 
 # Local build
 
+## Prepare tfhe-rs C API
+
+### Build
+
+To build automatically the C library one can use the following commands:
+
+```bash
+make build_c_api_tfhe
+```
+
+This will clone **tfhe-rs** repository in work_dir folder and build the C api in __work_dir/tfhe-rs/target/release__. 
+
+If the developer has its own **tfhe-rs** repository the TFHE_RS_PATH env variable could be set in .env file. 
+
+### Copy tfhe header file and C library
+
+**Go-ethereum** needs the tfhe.h header file located in __go-ethereum/core/vm__ and the libtfhe.so (linux) or libtfhe.dylib for (Mac) in __go-ethereum/core/vm/lib__.
+
+```bash
+cp work_dir/tfhe-rs/target/release/tfhe.h ../go-ethereum/core/vm
+mkdir -p ../go-ethereum/core/vm/lib
+# Mac
+cp work_dir/tfhe-rs/target/release/libtfhe.dylib ../go-ethereum/core/vm/lib
+# Linux
+cp work_dir/tfhe-rs/target/release/libtfhe.so ../go-ethereum/core/vm/lib
+# For linux set LD_LIBRARY_PATH to libtfhe.so also
+```
+
+<details>
+  <summary>Why do we need to copy the header file and libtfhe?</summary>
+<br />
+
+In order to extend geth, we give access to all tfhe operations gathered in the lib c through pre-compiled smart contracts. One can check the file called **tfhe.go** in  __go-ethereum/core/vm__ to go deeper.
+
+</details>
+<br />
+
+
+## Prepare custom go-ethereum and ethermint repositories
+
+To use custom **go-ethereum** and **ethermint** repositories, clone them at the same level as evmos, make your changes and update the go.mod file accordingly:
+
+```bash
+-replace github.com/ethereum/go-ethereum v1.10.19 => github.com/zama-ai/go-ethereum v0.1.10
++replace github.com/ethereum/go-ethereum v1.10.19 => ../go-ethereum
+ 
+-replace github.com/evmos/ethermint v0.19.3 => github.com/zama-ai/ethermint v0.1.2
++replace github.com/evmos/ethermint v0.19.3 => ../ethermint
+```
+
+Here is the hierarchy of folders:
+
+```bash
+.
+├── evmos
+│   └── work_dir
+│       └── tfhe-rs
+├── go-ethereum
+├── ethermint
+```
+
+## Build evmosd binary
+
 To build evmosd binary directly in your system. 
 
 ```bash
-export GOPRIVATE=github.com/zama-ai/*
-make build-local
+make install
 ```
 
-The binary is built in build folder.
+The binary is installed in your system go binary path (e.g. $HOME/go/bin).
+If needed update your **PATH** env variable to be able to run evmosd binary from anywhere. 
+
+## Run the node
+
+### Prepare FHE keys
+
+```bash
+LOCAL_BUILD_KEY_PATH="$HOME/.evmosd/zama/keys/network-fhe-keys" ./scripts/prepare_volumes_from_fhe_tool_docker.sh v0.2.0
+```
+
+This script generates fhe keys and copy them to evmos HOME folder in __$HOME/.evmosd/zama/keys/network-fhe-keys__.
+
+
+### Setup the node
+
+```bash
+# jq is required
+./setup.sh
+```
+
+### Start the node
+
+```bash
+./start.sh
+# in a new terminal run the fhevm-decryption-db
+docker run -p 8001:8001 ghcr.io/zama-ai/fhevm-decryptions-db:v0.1.5
+```
+
+### Reset state
+
+```bash
+make clean-local-evmos
+# must run ./setup.sh after
+```
+
+
+IMPORTANT NOTES:
+
+
+<details>
+  <summary>Use the faucet</summary>
+<br />
+
+```bash
+# In evmos root folder
+# Replace with your ethereum address
+python3 faucet.py 0xa5e1defb98EFe38EBb2D958CEe052410247F4c80
+```
+
+</details>
+
+<details>
+  <summary>Check if evmosd is linked with the right tfhe-rs C libray - Linux</summary>
+<br />
+
+```bash
+ldd $HOME/go/bin/evmosd
+	linux-vdso.so.1 (0x00007ffdb6d73000)
+	libtfhe.so => /PATH_TO/tfhe-rs/target/release/libtfhe.so (0x00007fa87c3a7000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007fa87c185000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007fa87c165000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007fa87c087000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fa87c9e5000)
+```
+
+If the user get:
+```bash
+evmosd: error while loading shared libraries: libtfhe.so: cannot open shared object file: No such file or directory
+```
+
+For linux one solution is to update the LD_LIBRARY_PATH to the libtfhe.so compiled in tfhe-rs
+
+</details>
+<br />
 
 Dependencies:
 
@@ -109,8 +245,8 @@ make build-docker
 - Build a base image (or retrieve it from ghcr.io) called __zama-zbc-build__.
 - Check tfhe-rs is available in TFHE_RS_PATH (default is work_dir/tfhe-rs)
 - In any case the custom version or the cloned (TFHE_RS_VERSION) one is copied into work_dir/tfhe-rs
-- Clone go-ethereum and ethermint to work_dir (version are parsed from go.mod to avoid handling ssh keys inside docker because those repositories are private)
-- Update go.mod to make it use local repositories (related to the just above changes)
+- Clone go-ethereum and ethermint to work_dir (version are parsed from go.mod)
+- Update go.mod to force use local repositories (related to the just above changes)
 - Build a container called __evmosnodelocal__.
 
 </details>
@@ -171,10 +307,7 @@ make stop_evmos
 - copy them at the right folder using scripts/prepare_demo_local.sh script
 - start evmosnodelocal0 and oracledb (local build) using docker-compose/docker-compose.local.yml file
 - run the e2e test 
-  - copy pks to encrypt user input using $(ZBC_SOLIDITY_PATH)/prepare_fhe_keys_for_e2e_test script
-  - start the test using $(ZBC_SOLIDITY_PATH)/run_ERC20_e2e_test.sh
-    - Get the private key of main account 
-    - Give it to the python test script $(ZBC_SOLIDITY_PATH)/ci/tests/ERC20.py
+  - start the test from fhevm-solidity
 
 </details>
 <br />
@@ -236,20 +369,6 @@ Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/
   ```bash
   docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
   ```
-</details>
-
-<details>
-  <summary>Troubleshoot go modules for local-build</summary>
-
-Because evmos depends on private [go-ethereum](https://github.com/zama-ai/go-ethereum) and [ethermint](https://github.com/zama-ai/ethermint) repositories, one need to pay attention to two points to allow go modules manager to work correctly.
-
-1. Check that GOPRIVATE is set to __github.com/zama-ai/*__ (normally this env variable is set by default in Makefile)
-2. Check you have the following lines in your gitconfig files:
-
-```bash
-[url "ssh://git@github.com/"]
-        insteadOf = https://github.com/
-```
 </details>
 <br />
 

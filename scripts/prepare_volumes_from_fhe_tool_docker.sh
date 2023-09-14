@@ -28,9 +28,11 @@ echo "###########################################################"
 echo "Keys creation is done, they are stored in $KEYS_FULL_PATH"
 echo "###########################################################"
 
+NETWORK_KEYS_PUBLIC_PATH="${LOCAL_BUILD_KEY_PATH:-./volumes/network-public-fhe-keys}"
+NETWORK_KEYS_PRIVATE_PATH="${LOCAL_BUILD_KEY_PATH:-./volumes/network-private-fhe-keys}"
 
-NETWORK_KEYS_PUBLIC_PATH=./volumes/network-public-fhe-keys
-NETWORK_KEYS_PRIVATE_PATH=./volumes/network-private-fhe-keys
+echo "$NETWORK_KEYS_PUBLIC_PATH"
+echo "$NETWORK_KEYS_PRIVATE_PATH"
 
 MANDATORY_KEYS_LIST=('sks' 'cks' 'pks')
 
