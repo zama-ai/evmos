@@ -25,7 +25,7 @@ RUN cp /src/tfhe-rs/target/release/libtfhe.* /src/go-ethereum/core/vm/lib/
 # RUN cp /src/tfhe-rs/target/release/libtfhe.* /usr/lib/
 
 
-RUN make build
+RUN make build-local
 
 ARG ZBC_BUILD_IMAGE_TAG
 FROM ghcr.io/zama-ai/zama-zbc-build:$ZBC_BUILD_IMAGE_TAG

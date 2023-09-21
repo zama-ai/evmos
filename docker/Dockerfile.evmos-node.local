@@ -11,7 +11,7 @@ RUN cp go.mod.updated /src/evmos/go.mod
 
 RUN tail /src/evmos/go.mod
 
-RUN make build
+RUN make build-local
 RUN ls /src/evmos
 RUN ls /src/evmos/build
 RUN mkdir -p /src/evmos/build

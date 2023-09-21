@@ -41,7 +41,7 @@ TFHE_RS_VERSION ?= 0.3.1
 USE_DOCKER_FOR_FHE_KEYS ?= true
 FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
-FHEVM_TFHE_CLI_VERSION ?= v0.2.0
+FHEVM_TFHE_CLI_VERSION ?= v0.2.1
 
 FHEVM_DECRYPTIONS_DB_PATH ?= $(WORKDIR)/fhevm-decryptions-db
 FHEVM_DECRYPTIONS_DB_PATH_EXISTS := $(shell test -d $(FHEVM_DECRYPTIONS_DB_PATH)/.git && echo "true" || echo "false")
@@ -49,7 +49,7 @@ FHEVM_DECRYPTIONS_DB_VERSION ?= v0.2.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-FHEVM_SOLIDITY_VERSION ?= v0.1.11
+FHEVM_SOLIDITY_VERSION ?= v0.1.12
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
 UPDATE_GO_MOD = go.mod.updated
@@ -159,37 +159,35 @@ print-info:
 	@bash scripts/get_repository_info.sh fhevm-tfhe-cli $(FHEVM_TFHE_CLI_PATH)
 	@bash scripts/get_repository_info.sh fhevm-solidity $(FHEVM_SOLIDITY_PATH)
 
+copy_c_api_to_system_path:
+# In tfhe.go the library path is specified as following : #cgo LDFLAGS: -L/usr/lib/ -ltfhe
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/tfhe.h /usr/include/
+	$(SUDO) cp $(TFHE_RS_PATH)/target/release/libtfhe.* /usr/lib/
 
-
-build_c_api_tfhe:
+build_c_api_tfhe: check-tfhe-rs
 	$(info build tfhe-rs C API)
 	mkdir -p $(WORKDIR)/
 	$(info tfhe-rs path $(TFHE_RS_PATH))
 	$(info sudo_bin $(SUDO_BIN))
 	cd $(TFHE_RS_PATH) && RUSTFLAGS="" make build_c_api_experimental_deterministic_fft
 	ls $(TFHE_RS_PATH)/target/release
-# In tfhe.go the library path is specified as following : #cgo LDFLAGS: -L/usr/lib/tfhe -ltfhe
-	$(SUDO) cp $(TFHE_RS_PATH)/target/release/tfhe.h /usr/include/
-	$(SUDO) cp $(TFHE_RS_PATH)/target/release/libtfhe.* /usr/lib/
 
-build: 
-	BUILD_ARGS=-o $(BUILDDIR)
-	$(info build)
-	
+
 build-linux:
 	$(info build-linux)
 	GOOS=linux GOARCH=amd64 LEDGER_ENABLED=false $(MAKE) build
 
-build-local: check-tfhe-rs  go.sum build_c_api_tfhe $(BUILDDIR)/
-	$(info build-local)
+$(BUILD_TARGETS): go.sum $(BUILDDIR)/
+	$(info build)
+	go install $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+	@echo 'evmosd binary is ready in $(HOME)/go/bin'
+
+build-local:   go.sum build_c_api_tfhe copy_c_api_to_system_path $(BUILDDIR)/
+	$(info build-local for docker build)
 	go build $(BUILD_FLAGS) -o build $(BUILD_ARGS) ./...
 	@echo 'evmosd binary is ready in build folder'
 
 
-# $(BUILD_TARGETS): go.sum $(BUILDDIR)/
-$(BUILD_TARGETS): go.sum build_c_api_tfhe $(BUILDDIR)/
-	$(info BUILD_TARGETS)
-	go $@ $(BUILD_FLAGS) -o build $(BUILD_ARGS) ./...
 
 check-tfhe-rs: $(WORKDIR)/
 	$(info check-tfhe-rs)
@@ -483,6 +481,10 @@ clean: clean-node-storage
 	build
 	rm -f $(UPDATE_GO_MOD)
 	
+clean-local-evmos:
+	rm -r $(HOME)/.evmosd/config
+	rm -r $(HOME)/.evmosd/keyring-test/
+	rm -r $(HOME)/.evmosd/data/
 
 all: build
 
