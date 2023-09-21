@@ -356,7 +356,7 @@ Docker ps output:
 ```
 CONTAINER ID   IMAGE                                       NAMES
 02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.9           evmosnode0
-ac2073c0d6fc   ghcr.io/zama-ai/without building anything   zbcoracledb
+ac2073c0d6fc   ghcr.io/zama-ai/fhevm-decryptions-db:v0.2.0 zbcoracledb
 ```
 
 
