@@ -35,6 +35,33 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.9]
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.9
+
+Evmos-node developer docker image: ghcr.io/zama-ai/evmos-dev-node:v0.1.9
+
+**Major updates**: 
+* Use new parameters for FHE keys by @leventdem in https://github.com/zama-ai/fhevm-tfhe-cli/pull/17
+* feature: add fhe rand() by @dartdart26 in https://github.com/zama-ai/evmos/pull/191
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.11                 |
+|  ethermint  | repository |                  v0.1.2                  |
+|   tfhe-rs   | repository |                   0.3.1                  |
+
+
+For e2e test:
+
+|       Name           |    Type    |     version     |
+| :------------------: | :--------: | :-------------: |
+|    fhevm-solidity    | repository |     v0.1.12     |
+|    fhevm-tfhe-cli    | repository |     v0.2.1      |
+| fhevm-decryptions-db | repository |     v0.2.0      |
+
 ## [v0.1.8]
 
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.8
