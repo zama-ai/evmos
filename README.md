@@ -52,7 +52,27 @@ interoperable with Ethereum. It's built using the [Cosmos SDK](https://github.co
 
 Please check the [CHANGELOG](./CHANGELOG.md) to get the last version of the published (ready-to-use)  docker image and check all the related dependencies.
 
-The quick start is to follow this [section](#from-github-package-registry)
+# Where to start as a developer
+
+Based on your objectives here are some helpers.
+
+__I just want to run fhEVM and see the node's logs.__
+
+So check this [section please](https://github.com/zama-ai/fhevm-hardhat-template#start-fhevm) with a self-sufficient docker image.
+
+__I want to run without building anything and see the node's configuration, how the FHE keys are generated and a few more details.__
+
+In this case, this [section](#from-github-package-registry) will help you to run the node, see the setup phase.
+
+
+__I want to build the FhEVM from source using docker.__
+
+In this case, this [section](#local-build-through-docker-and-e2e-test) will help you to build the node and run it. This build take a few time to complete.
+
+__I am a core developer :sunglasses:, I need to add some prints :grin: in the code__
+
+In this case, this following [section](#local-build) is for you, good luck!
+
 
 
 # Local build
@@ -334,9 +354,9 @@ make run_evmos
 
 Docker ps output:
 ```
-CONTAINER ID   IMAGE                                      NAMES
-02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.8          evmosnode0
-ac2073c0d6fc   ghcr.io/zama-ai/oracle-db-service:latest   zbcoracledb
+CONTAINER ID   IMAGE                                       NAMES
+02b40fb0bdf7   ghcr.io/zama-ai/evmos-node:v0.1.9           evmosnode0
+ac2073c0d6fc   ghcr.io/zama-ai/without building anything   zbcoracledb
 ```
 
 
@@ -357,20 +377,6 @@ make stop_evmos
 |       fhevm-tfhe-cli       |    repository     |    FHEVM_TFHE_CLI_VERSION    |        Makefile/.env         |
 |    fhevm-decryptions-db    |    repository     | FHEVM_DECRYPTIONS_DB_VERSION |        Makefile/.env         |
 
-
-
-<br />
-<details>
-  <summary>Troubleshoot ghcr.io</summary>
-
-Here is a tutorial on [how to manage ghcr.io access](https://github.com/zama-ai/fhevm-tfhe-cli#using-the-published-image-easiest-way).
-
-  If you get trouble to pull image from ghcr.io, one can build it locally with
-  ```bash
-  docker build . -t zama-zbc-build -f docker/Dockerfile.zbc.build
-  ```
-</details>
-<br />
 
 
 
