@@ -41,7 +41,7 @@ TFHE_RS_VERSION ?= 0.3.1
 USE_DOCKER_FOR_FHE_KEYS ?= true
 FHEVM_TFHE_CLI_PATH ?= $(WORKDIR)/fhevm-tfhe-cli
 FHEVM_TFHE_CLI_PATH_EXISTS := $(shell test -d $(FHEVM_TFHE_CLI_PATH)/.git && echo "true" || echo "false")
-FHEVM_TFHE_CLI_VERSION ?= v0.2.0
+FHEVM_TFHE_CLI_VERSION ?= v0.2.1
 
 FHEVM_DECRYPTIONS_DB_PATH ?= $(WORKDIR)/fhevm-decryptions-db
 FHEVM_DECRYPTIONS_DB_PATH_EXISTS := $(shell test -d $(FHEVM_DECRYPTIONS_DB_PATH)/.git && echo "true" || echo "false")
@@ -49,7 +49,7 @@ FHEVM_DECRYPTIONS_DB_VERSION ?= v0.2.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-FHEVM_SOLIDITY_VERSION ?= 35ec2d71d3994d8ebacfe9facfc28e49a016e6fd
+FHEVM_SOLIDITY_VERSION ?= v0.1.12
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
 UPDATE_GO_MOD = go.mod.updated
