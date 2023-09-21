@@ -54,7 +54,7 @@ Please check the [CHANGELOG](./CHANGELOG.md) to get the last version of the publ
 
 # Where to start as a developer
 
-Based on your objectives here are some helpers.
+Based on your objectives, here are some helpful suggestions.
 
 - __I just want to run fhEVM and see the node's logs.__
 
