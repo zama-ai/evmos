@@ -56,20 +56,20 @@ Please check the [CHANGELOG](./CHANGELOG.md) to get the last version of the publ
 
 Based on your objectives here are some helpers.
 
-__I just want to run fhEVM and see the node's logs.__
+- __I just want to run fhEVM and see the node's logs.__
 
 So check this [section please](https://github.com/zama-ai/fhevm-hardhat-template#start-fhevm) with a self-sufficient docker image.
 
-__I want to run without building anything and see the node's configuration, how the FHE keys are generated and a few more details.__
+- __I want to run without building anything and see the node's configuration, how the FHE keys are generated and a few more details.__
 
 In this case, this [section](#from-github-package-registry) will help you to run the node, see the setup phase.
 
 
-__I want to build the FhEVM from source using docker.__
+- __I want to build the FhEVM from source using docker.__
 
 In this case, this [section](#local-build-through-docker-and-e2e-test) will help you to build the node and run it. This build take a few time to complete.
 
-__I am a core developer :sunglasses:, I need to add some prints :grin: in the code__
+- __I am a core developer :sunglasses:, I need to add some prints :grin: in the code__
 
 In this case, this following [section](#local-build) is for you, good luck!
 
