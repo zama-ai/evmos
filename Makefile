@@ -49,7 +49,7 @@ FHEVM_DECRYPTIONS_DB_VERSION ?= v0.2.0
 
 FHEVM_SOLIDITY_PATH ?= $(WORKDIR)/fhevm-solidity
 FHEVM_SOLIDITY_PATH_EXISTS := $(shell test -d $(FHEVM_SOLIDITY_PATH)/.git && echo "true" || echo "false")
-FHEVM_SOLIDITY_VERSION ?= v0.1.12
+FHEVM_SOLIDITY_VERSION ?= feat/remainder
 ETHERMINT_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/ethermint)
 GO_ETHEREUM_VERSION := $(shell ./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)
 UPDATE_GO_MOD = go.mod.updated
