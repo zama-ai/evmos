@@ -10,6 +10,24 @@ on:
     - reopened
     - synchronize
     - ready_for_review
+  # this is useful to trigger test from PRs, or even manually with specific commits/tags
+  workflow_dispatch:
+    inputs:
+      geth_commit:
+        description: "go-ethereum commit/tag to use"
+        type: string
+        default: ''
+        required: false
+      ethermint_commit:
+        description: "ethermint commit/tag to use"
+        type: string
+        default: ''
+        required: false
+      fhevm_solidity_commit:
+        description: "fhevm_solidity commit/tag to use"
+        type: string
+        default: ''
+        required: false
 
 jobs:
   docker:
@@ -37,6 +55,21 @@ jobs:
           echo "FHEVM_SOLIDITY_VERSION=$(./scripts/get_version_from_makefile.sh FHEVM_SOLIDITY_VERSION)" >> $GITHUB_ENV
           echo "ETHERMINT_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/ethermint)" >> $GITHUB_ENV
           echo "GO_ETHEREUM_VERSION=$(./scripts/get_module_version.sh go.mod zama.ai/go-ethereum)" >> $GITHUB_ENV
+
+      # this overrides the previous geth version
+      - name: Set go-ethereum version if specified
+        if: github.event_name != 'workflow_dispatch' && github.event.inputs.geth_commit != ''
+        run: echo "GO_ETHEREUM_VERSION=${{ github.event.inputs.geth_commit }}" >> $GITHUB_ENV
+
+      # this overrides the previous ethermint version
+      - name: Set ethermint version if specified
+        if: github.event_name != 'workflow_dispatch' && github.event.inputs.ethermint_commit != ''
+        run: echo "ETHERMINT_VERSION=${{ github.event.inputs.ethermint_commit }}" >> $GITHUB_ENV
+
+      # this overrides the previous fhevm_solidity version
+      - name: Set fhevm_solidity version if specified
+        if: github.event_name != 'workflow_dispatch' && github.event.inputs.fhevm_solidity_commit != ''
+        run: echo "FHEVM_SOLIDITY_VERSION=${{ github.event.inputs.fhevm_solidity_commit }}" >> $GITHUB_ENV
           
       - name: Echo versions parsed from Makefile and go.mod
         run: |
