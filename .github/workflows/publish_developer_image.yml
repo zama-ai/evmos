@@ -8,6 +8,16 @@ on:
         default: "latest"
         type: string
         required: false
+      decryption_db_tag:
+        description: 'Decryption DB tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
+      tfhe_cli_tag:
+        description: 'TFHE CLI tag (default: latest)'
+        default: "latest"
+        type: string
+        required: false
       ref_to_evmos:
         description: 'Branch, tag or commit SHA1 to checkout Evmos'
         required: true
@@ -64,6 +74,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
+          build-arg: |
+            EVMOS_NODE_VERSION=${{ inputs.evmos_node_tag }}
+            DECRYPTION_DB_VERSION=${{ inputs.decryption_db_tag }}
+            TFHE_CLI_VERSION=${{ inputs.tfhe_cli_tag }}
           context: .
           file: docker/Dockerfile.evmos-node.developer
           push: true
