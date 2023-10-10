@@ -58,17 +58,17 @@ jobs:
 
       # this overrides the previous geth version
       - name: Set go-ethereum version if specified
-        if: github.event_name != 'workflow_dispatch' && github.event.inputs.geth_commit != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.geth_commit != ''
         run: echo "GO_ETHEREUM_VERSION=${{ github.event.inputs.geth_commit }}" >> $GITHUB_ENV
 
       # this overrides the previous ethermint version
       - name: Set ethermint version if specified
-        if: github.event_name != 'workflow_dispatch' && github.event.inputs.ethermint_commit != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.ethermint_commit != ''
         run: echo "ETHERMINT_VERSION=${{ github.event.inputs.ethermint_commit }}" >> $GITHUB_ENV
 
       # this overrides the previous fhevm_solidity version
       - name: Set fhevm_solidity version if specified
-        if: github.event_name != 'workflow_dispatch' && github.event.inputs.fhevm_solidity_commit != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.fhevm_solidity_commit != ''
         run: echo "FHEVM_SOLIDITY_VERSION=${{ github.event.inputs.fhevm_solidity_commit }}" >> $GITHUB_ENV
           
       - name: Echo versions parsed from Makefile and go.mod
