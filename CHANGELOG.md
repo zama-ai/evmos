@@ -35,6 +35,32 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## [v0.1.10]
+
+Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.10
+
+Evmos-node developer docker image: ghcr.io/zama-ai/evmos-dev-node:v0.1.10
+
+**Major updates**: 
+* Added support for remainder operation (precompile)
+
+For build:
+
+|    Name     |    Type    |                 version                  |
+| :---------: | :--------: | :--------------------------------------: |
+| go-ethereum | repository |                  v0.1.12                 |
+|  ethermint  | repository |                  v0.1.2                  |
+|   tfhe-rs   | repository |                   0.3.1                  |
+
+
+For e2e test:
+
+|       Name           |    Type    |     version     |
+| :------------------: | :--------: | :-------------: |
+|    fhevm-solidity    | repository |     v0.1.12     |
+|    fhevm-tfhe-cli    | repository |     v0.2.1      |
+| fhevm-decryptions-db | repository |     v0.2.0      |
+
 ## [v0.1.9]
 
 Evmos-node docker image: ghcr.io/zama-ai/evmos-node:v0.1.9
