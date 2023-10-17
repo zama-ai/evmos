@@ -57,7 +57,7 @@ For e2e test:
 
 |       Name           |    Type    |     version     |
 | :------------------: | :--------: | :-------------: |
-|    fhevm-solidity    | repository |     v0.1.12     |
+|    fhevm-solidity    | repository |     v0.1.14     |
 |    fhevm-tfhe-cli    | repository |     v0.2.1      |
 | fhevm-decryptions-db | repository |     v0.2.0      |
 
