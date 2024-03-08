@@ -65,7 +65,7 @@ jobs:
           ls evmos
       
       - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@af5a7ed5ba88268d5278f7203fb52cd833f66d6e
         with:
           context: tfhe-rs
           file: evmos/docker/Dockerfile.tfhe-rs.testnet
